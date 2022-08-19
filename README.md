@@ -2,27 +2,25 @@
 
 [![license](https://img.shields.io/github/license/Omikhleia/markdown.sile)](LICENSE)
 
-This package set for the [SILE](https://github.com/sile-typesetter/sile) typesetting
+_EARLY PRE-RELEASE_
+
+This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting
 system provides a complete redesign of the native Markdown support for SILE, with
 a great set of Pandoc-like extensions and plenty of extra goodies.
 
 - **markdown** inputter and package: native support of Markdown files.
 - **pandocast** inputter and package: native support of Pandoc JSON AST files.
 
-EARLY PRE-RELEASE
-
 ## Installation
 
-(ROCKSPEC NOT YET DONE)
-
-This package set requires SILE v0.14 or upper.
+This module collection requires SILE v0.14 or upper.
 
 Installation relies on the **luarocks** package manager.
 
 To install the latest development version, you may use the provided “rockspec”:
 
 ```
-luarocks --lua-version 5.4 install https://raw.githubusercontent.com/Omikhleia/markdown.sile/main/mardonw.sile-dev-1.rockspec
+luarocks --lua-version 5.4 install --server=https://luarocks.org/dev markdown.sile
 ```
 
 (Adapt to your version of Lua, if need be, and refer to the SILE manual for more
@@ -37,6 +35,7 @@ sile -u inputters.markdown somefile.md
 ```
 
 From documents (e.g. here in SILE language)
+
 ```
 \use[module=packages.markdown]
 \include[src=somefile.md]
