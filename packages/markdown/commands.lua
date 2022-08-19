@@ -80,15 +80,16 @@ function package:_init (_)
   self.class:loadPackage("color")
   self.class:loadPackage("image")
   self.class:loadPackage("lists")
-  self.class:loadPackage("ptable")
+  self.class:registerPostinit(function() -- FIXME THIS SOUNDS UGLY
+    self.class:loadPackage("ptable")
+  end)
   self.class:loadPackage("rules")
   self.class:loadPackage("svg")
-  -- class:loadPackage("textsubsuper") -- FIXME later, for now provide fallbacks below...
+  self.class:loadPackage("textsubsuper")
   self.class:loadPackage("url")
 end
 
 function package:registerCommands ()
-
   -- Commands (normally) intended to be used by this package only.
 
   self:registerCommand("markdown:internal:paragraph", function (_, content)
@@ -361,76 +362,6 @@ function package:registerCommands ()
     end
   end, "Default hook for custom style support in Markdown")
 
-  -- Temporary stuff (expectedly....)
-  -- BEGIN Quick and dirty super/subscript rip-off
-  -- Extracted from proposed textsubsuper package and trimmed down.
-  local function getItalicAngle()
-    local ot = require("core.opentype-parser")
-    local fontoptions = SILE.font.loadDefaults({})
-    local face = SILE.font.cache(fontoptions, SILE.shaper.getFace)
-    local font = ot.parseFont(face)
-    return font.post.italicAngle
-  end
-
-  local function getWeightClass()
-    return SILE.settings:get("font.weight")
-  end
-
-  self:registerCommand("textsuperscript", function (_, content)
-    SILE.require("packages/raiselower")
-    local italicAngle = getItalicAngle()
-    local weight = getWeightClass()
-
-    local ratio = 0.66
-    local ySize = ratio * SILE.settings:get("font.size")
-    local yOffset = SILE.measurement("0.70ex")
-    local xOffset = -math.sin(italicAngle * math.pi / 180) * yOffset
-    SILE.call("kern", {
-      width = xOffset:absolute() + SILE.measurement("0.1pt")
-    })
-    SILE.call("raise", {
-      height = yOffset
-    }, function ()
-      -- Some font have +onum enabled by default...
-      -- Some don't even have it (e.g. Brill), but support +lnum for enforcing lining
-      -- figures. We try to ensure we are not using oldstyle numbers...
-      SILE.call("font", {
-        size = ySize,
-        weight = weight == 400 and (weight + 200) or weight,
-        features = "+lnum -onum"
-      }, content)
-    end)
-    SILE.call("kern", {
-      width = -xOffset / 2
-    })
-  end, "Typeset a fake (raised, scaled) superscript content.")
-
-  self:registerCommand("textsubscript", function (_, content)
-    SILE.require("packages/raiselower")
-    local italicAngle = getItalicAngle()
-    local weight = getWeightClass()
-
-    local ratio = 0.66
-    local ySize = ratio * SILE.settings:get("font.size")
-    local yOffset = SILE.measurement("0.25ex")
-    local xOffset = -math.sin(italicAngle * math.pi / 180) * yOffset:absolute()
-    SILE.call("kern", {
-      width = -xOffset
-    })
-    SILE.call("lower", {
-      height = yOffset
-    }, function ()
-      SILE.call("font", {
-        size = ySize,
-        weight = weight == 400 and (weight + 200) or weight,
-        features = "+lnum +onum"
-      }, content)
-    end)
-    SILE.call("kern", {
-      width = xOffset
-    })
-  end, "Typeset a fake (lowered, scaled) subscript content.")
-  -- END Quick and dirty super/subscript rip-off
 end
 
 package.documentation = [[\begin{document}
