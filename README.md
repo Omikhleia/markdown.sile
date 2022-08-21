@@ -1,6 +1,7 @@
 # markdown.sile
 
 [![license](https://img.shields.io/github/license/Omikhleia/markdown.sile)](LICENSE)
+[![Luacheck](https://img.shields.io/github/workflow/status/Omikhleia/markdown.sile/Luacheck?label=Luacheck&logo=Lua)](https://github.com/Omikhleia/markdown.sile/actions?workflow=Luacheck)
 [![Luarocks](https://img.shields.io/luarocks/v/Omikhleia/markdown.sile?label=Luarocks&logo=Lua)](https://luarocks.org/modules/Omikhleia/markdown.sile)
 
 _EARLY PRE-RELEASE_
