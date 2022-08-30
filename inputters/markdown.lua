@@ -248,8 +248,15 @@ local inputter = pl.class(base)
 inputter._name = "markdown"
 inputter.order = 2
 
-function inputter.appropriate (_, filename, _)
-  return filename:match("md$") or filename:match("markdown$")
+function inputter.appropriate (round, filename, _)
+  if round == 1 then
+    return filename:match("md$") or filename:match("markdown$")
+  end
+  -- round 2 would be sniffing some initial file content, which is quite
+  -- impossible in the general case for markdown
+  -- round 3 would be attempt at parsing, which we don't want to even do,
+  -- as lunamark may certainly process any raw text file without complaining,
+  -- though it won't meet expectations!
 end
 
 function inputter.parse (_, doc)

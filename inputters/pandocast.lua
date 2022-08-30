@@ -510,8 +510,29 @@ local inputter = pl.class(base)
 inputter._name = "pandocast"
 inputter.order = 2
 
-function inputter.appropriate (_, filename, _)
-  return filename:match("pandoc$")
+function inputter.appropriate (round, filename, doc)
+  if round == 1 then
+    return filename:match("pandoc$")
+  elseif round == 2 then
+    -- round 2 would be sniffing some initial file content, which is quite
+    -- impossible in the general case for JSON (which may have been pretty-printed
+    -- or whatever, so apart of an initial "{" there's probably not much we can
+    -- say)
+    return false
+  elseif round == 3 then
+    -- round 3 is an attempt at parsing...
+    local has_json, json = pcall(require, "json.decode")
+    if not has_json then
+      -- we don't have json.decode, but other inputter might appropriate, so
+      -- we can't decently error here.
+      return false
+    end
+    local status, ast = pcall(function () return json.decode(doc) end)
+    -- JSON must have succeeded AND the resulting object must be a Pandoc AST,
+    -- which we just check as having the 'pandoc-api-version' key.
+    return status and type(ast) == "table" and ast['pandoc-api-version']
+  end
+  return false
 end
 
 function inputter.parse (_, doc)
