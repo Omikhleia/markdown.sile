@@ -170,9 +170,9 @@ Pandoc.Para = function (inlines)
 end
 
 -- LineBlock [[Inline]]
-Pandoc.LineBlock = function (lineblocks)
+Pandoc.LineBlock = function (lines)
   local out = {}
-  for _, inlines in ipairs(lineblocks) do
+  for _, inlines in ipairs(lines) do
     local level, currated_inlines = extractLineBlockLevel(inlines)
     -- Let's be typographically sound and use quad kerns rather than spaces for indentation
     local contents =  (level > 0) and {

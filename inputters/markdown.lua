@@ -37,6 +37,24 @@ local function tableCellAlign (align)
   end
 end
 
+local function extractLineBlockLevel (inlines)
+  -- The indentation of line blocks is not really a first-class citizen:
+  -- lunamark replaces the indentation spaces with U+00A0 (nbsp)
+  -- and stacks them in the first inline.
+  -- We remove them, and return the count.
+  local f = inlines[1]
+  local level = 0
+  if f and type(f) == "string" then
+    local line = f
+    line = line:gsub("^[ ]+", function (match) -- Warning, U+00A0 here.
+      level = utf8.len(match)
+      return ""
+    end)
+    inlines[1] = line -- replace
+  end
+  return level, inlines
+end
+
 -- Lunamark writer for SILE
 -- Yay, direct lunamark AST ("ropes") conversion to SILE AST
 
@@ -175,6 +193,20 @@ local function SileAstWriter (options)
     return utils.createStructuredCommand("markdown:internal:paragraph", {}, buffer)
   end
 
+  writer.lineblock = function (lines)
+    local out = {}
+    for _, inlines in ipairs(lines) do
+      local level, currated_inlines = extractLineBlockLevel(inlines)
+      -- Let's be typographically sound and use quad kerns rather than spaces for indentation
+      local contents =  (level > 0) and {
+       utils.createCommand("kern", { width = level.."em" }),
+        currated_inlines
+      } or currated_inlines
+      out[#out+1] = { utils.createCommand("markdown:internal:paragraph", {}, contents) }
+    end
+    return out
+  end
+
   -- Final AST conversion logic.
   --   The lunamark "AST" is made of "ropes":
   --     "A rope is an array whose elements may be ropes, strings, numbers,
@@ -287,6 +319,7 @@ function inputter.parse (_, doc)
     table_captions = true,
     pipe_tables = true,
     header_attributes = true,
+    line_blocks = true,
   })
   local tree = parse(doc)
   -- The Markdown parsing returns a string or a SILE AST table.

@@ -19,7 +19,7 @@ advanced capabilities).
 
 There is actually more than one solution to achieve great results in that direction:
 
- 1. Directly using the native converter provided with SILE itself,
+ 1. Directly using a native Markdown converter package,
  1. Using the Pandoc software to generate an ouput suitable for SILE.
 
 Each of them has its advantages, and a few limitations as well.
@@ -28,13 +28,13 @@ Each of them has its advantages, and a few limitations as well.
 
 ## The native markdown package
 
-Guess what, the very chapter you are currently reading is entirely processed with it.
+Guess what, the very documentation you are currently reading is entirely processed with it.
 Once you have loaded the `\autodoc:package{markdown}`{=sile} package,
 the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading a Markdown file[^other-ways].
 The speedy Markdown parsing relies on John MacFarlane's excellent **lunamark** Lua library.
 
-[^other-ways]: The astute reader already knows, from the previous chapters, that there are other ways (e.g. with
-command-line options) to tell SILE how to process a file in some format --- so we just stick
+[^other-ways]: The astute reader already knows, from reading the SILE manual, that there are other ways
+(e.g. with command-line options) to tell SILE how to process a file in some format --- so we just stick
 to the basics here.
 
 ```
@@ -139,8 +139,8 @@ Likewise, here is an internal link to the "[Basic typesetting](#basic-typesettin
 Here is a footnote call[^1].
 
 [^1]: And here is some footnote text. But there were already a few foonotes earlier in this
-chapter. Let's just add, as you can check in the source for this chapter, that the
-converter supports several syntaxes for footnotes.
+document. Let's just add, as you can check in the source, that the converter supports several
+syntaxes for footnotes.
 
 ### Languages
 
@@ -235,6 +235,21 @@ function fib (n)
   return fib(n - 2) + fib(n - 1)
 end
 ```
+
+### Line blocks
+
+So called "line blocks", a sequence of lines beginning with a vertical bar (`|`) and followed by a
+space, are also supported. The division into lines is preserved output. Any additional leading space
+is preserved, interpretated as an em-quad. These blocks can be useful for typesetting addresses
+or poetry.
+
+::: {custom-style=blockquote}
+| Long is one night, long is the
+  next;
+|  how can I bear three?
+| A month has often seemed less to me
+|  than this half night of longing
+:::
 
 ### Raw blocks
 
