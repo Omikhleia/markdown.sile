@@ -55,7 +55,7 @@ local HasMultipleArgs = {
   Table = true,
 }
 
--- Parser AST-waling logic.
+-- Parser AST-walking logic.
 
 local function addNodes(out, elements)
   -- Simplify outputs by collating strings
@@ -98,8 +98,6 @@ local function pandocAstParse(element)
   return out
 end
 
--- PANDOC AST UTILITIES
-
 -- type Attr = (Text, [Text], [(Text, Text)])
 --   That is: identifier, classes, key-value pairs
 --   We map it to something easier to manipulate, similar to what a Pandoc
@@ -127,15 +125,15 @@ local function extractLineBlockLevel (inlines)
   local f = inlines[1]
   local level = 0
   if f and f.t == "Str" then
+    -- N.B. f is nil if there is no content (empty line).
+    -- Otherwise, it shall can be a string, with the leading spaces.
+    -- Or any other inline content if there are not leading spaces.
     local line = f.c
     line = line:gsub("^[ ]+", function (match) -- Warning, U+00A0 here.
       level = utf8.len(match)
       return ""
     end)
     f.c = line -- replace
-  else
-    -- Oops, that's not what we expected. Warn and try to proceed anyway.
-    SU.warn("Unexpected structure in Pandoc AST LineBlock - please report the issue")
   end
   return level, inlines
 end
@@ -170,18 +168,22 @@ Pandoc.Para = function (inlines)
 end
 
 -- LineBlock [[Inline]]
-Pandoc.LineBlock = function (lineblocks)
-  local out = {}
-  for _, inlines in ipairs(lineblocks) do
+Pandoc.LineBlock = function (lines)
+  local buffer = {}
+  for _, inlines in ipairs(lines) do
     local level, currated_inlines = extractLineBlockLevel(inlines)
     -- Let's be typographically sound and use quad kerns rather than spaces for indentation
-    local contents =  (level > 0) and {
+    local contents = (level > 0) and {
       utils.createCommand("kern", { width = level.."em" }),
       pandocAstParse(currated_inlines)
     } or pandocAstParse(currated_inlines)
-    out[#out+1] = { utils.createCommand("markdown:internal:paragraph", {}, contents) }
+    if #contents == 0 then
+      buffer[#buffer+1] = utils.createCommand("stanza", {})
+    else
+      buffer[#buffer+1] = utils.createCommand("v", {}, contents)
+    end
   end
-  return out
+  return utils.createStructuredCommand("markdown:internal:lineblock", {}, buffer)
 end
 
 -- CodeBlock Attr Text

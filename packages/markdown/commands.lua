@@ -72,6 +72,16 @@ local function hasClass(options, classname)
   return false
 end
 
+-- Default color theme for syntax highlighted Lua code blocks
+-- Very loosely based on the 'earendel' vim style.
+local naiveLuaCodeTheme = {
+  comment = { color = "#558817", italic = true },
+  keyword = { color = "#2239a8", bold = true },
+  iden = { color = "#0e7c6b" },
+  number = { color = "#a8660d" },
+  string = { color = "#a8660d" },
+}
+
 function package:_init (_)
   base._init(self)
   -- Only load low-level packages (= utilities)
@@ -88,7 +98,7 @@ function package:_init (_)
 end
 
 function package:registerCommands ()
-  -- Commands (normally) intended to be used by this package only.
+  -- A. Commands (normally) intended to be used by this package only.
 
   self:registerCommand("markdown:internal:paragraph", function (_, content)
     SILE.process(content)
@@ -97,8 +107,6 @@ function package:registerCommands ()
     -- how to handle our own paragraphing.
     SILE.call("par")
   end, "Paragraphing in Markdown (internal)")
-
-  -- Mappings functions and tables
 
   self:registerCommand("markdown:internal:header", function (options, content)
     local level = SU.required(options, "level", "header")
@@ -112,7 +120,7 @@ function package:registerCommands ()
       -- a table content, so we can't use a function above...
       -- We are left with doing it after, but that's not perfect either vs.
       -- page breaks and indent/noindent...
-      -- In my omibook class, I added a marker option to sections and
+      -- In the resilient.book class, I added a marker option to sections and
       -- reimplemented that part, but here we work with what we have.
       SILE.call("pdf:destination", { name = options.id })
     end
@@ -145,6 +153,22 @@ function package:registerCommands ()
       cascade:call("markdown:custom-style:hook", { name = options["custom-style"], scope = "block" })
     else
       cascade:call("markdown:internal:paragraph")
+    end
+    if hasClass(options, "poetry") then
+      -- If the class or loaded packages provide a poetry environment and the div contains
+      -- a lineblock structure only, then use the poetry environment instead.
+      if SILE.Commands["poetry"] and #content == 1 and content[1].command == "markdown:internal:lineblock" then
+        content[1].command = "poetry"
+        content[1].options = content[1].options or {}
+        content[1].options.first = SU.boolean(options.first, false)
+        if hasClass(options, "unnumbered") then
+          content[1].options.numbering = false
+        else
+          content[1].options.numbering = SU.boolean(options.numbering, true)
+        end
+        content[1].options.step = options.step and SU.cast("integer", options.step)
+        content[1].options.start = options.start and SU.cast("integer", options.start)
+      end
     end
     cascade:process(content)
   end, "Div in Markdown (internal)")
@@ -242,16 +266,6 @@ function package:registerCommands ()
     end
   end, "Captioned table in Markdown (internal)")
 
-  -- Default color theme for syntax highlighted Lua code blocks
-  -- Very loosely based on the 'earendel' vim style.
-  local naiveLuaCodeTheme = {
-    comment = { color = "#558817", italic = true },
-    keyword = { color = "#2239a8", bold = true },
-    iden = { color = "#0e7c6b" },
-    number = { color = "#a8660d" },
-    string = { color = "#a8660d" },
-  }
-
   self:registerCommand("markdown:internal:codeblock", function (options, content)
     if hasClass(options, "lua") then
       -- Naive syntax highlighting for Lua, until we have a more general solution
@@ -291,7 +305,19 @@ function package:registerCommands ()
     SILE.call("smallskip")
   end, "(Fenced) code block in Markdown (internal)")
 
-  -- Fallback commands
+  self:registerCommand("markdown:internal:lineblock", function (_, content)
+    SILE.call("smallskip")
+    for _, v in ipairs(content) do
+      if v.command == "v" then
+        SILE.call("markdown:internal:paragraph", {}, v)
+      else -- stanza
+        SILE.call("smallskip")
+      end
+    end
+    SILE.call("smallskip")
+  end, "Default line block in Markdown (internal)")
+
+  -- B. Fallback commands
 
   self:registerCommand("markdown:fallback:blockquote", function (_, content)
     SILE.call("smallskip")
@@ -337,7 +363,7 @@ function package:registerCommands ()
     SILE.call("smallskip")
   end, "A fallback command for Markdown to insert a captioned table")
 
-  -- Customizable hooks
+  -- C. Customizable hooks
 
   self:registerCommand("markdown:custom-style:hook", function (options, content)
     -- Default implementation for the custom-style hook:
