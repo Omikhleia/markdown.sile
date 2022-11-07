@@ -50,7 +50,11 @@ local function extractLineBlockLevel (inlines)
       level = utf8.len(match)
       return ""
     end)
-    inlines[1] = line -- replace
+    if line == "" then -- and #inlines == 1 then
+      inlines = table.remove(inlines, 1)
+    else
+      inlines[1] = line -- replace
+    end
   end
   return level, inlines
 end
@@ -194,7 +198,7 @@ local function SileAstWriter (options)
   end
 
   writer.lineblock = function (lines)
-    local out = {}
+    local buffer = {}
     for _, inlines in ipairs(lines) do
       local level, currated_inlines = extractLineBlockLevel(inlines)
       -- Let's be typographically sound and use quad kerns rather than spaces for indentation
@@ -202,9 +206,13 @@ local function SileAstWriter (options)
        utils.createCommand("kern", { width = level.."em" }),
         currated_inlines
       } or currated_inlines
-      out[#out+1] = { utils.createCommand("markdown:internal:paragraph", {}, contents) }
+      if #contents == 0 then
+        buffer[#buffer+1] = utils.createCommand("stanza", {})
+      else
+        buffer[#buffer+1] = utils.createCommand("v", {}, contents)
+      end
     end
-    return out
+    return utils.createStructuredCommand("markdown:internal:lineblock", {}, buffer)
   end
 
   -- Final AST conversion logic.

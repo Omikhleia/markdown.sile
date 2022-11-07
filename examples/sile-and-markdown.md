@@ -1,4 +1,4 @@
-# Appendix on SILE and Markdown
+# SILE and Markdown
 
 ::: {custom-style=raggedleft}
 "Markdown is intended to be as easy-to-read and easy-to-write as is feasible."^[From the
@@ -236,20 +236,69 @@ function fib (n)
 end
 ```
 
+As show above, code blocks marked as being in Lua (either with the `lua` information string or the `.lua` class
+specifier) are syntax-highlighted. This is a naive approach, until the converter possibly supports a more general
+solution.
+
 ### Line blocks
 
 So called "line blocks", a sequence of lines beginning with a vertical bar (`|`) and followed by a
-space, are also supported. The division into lines is preserved output. Any additional leading space
-is preserved, interpretated as an em-quad. These blocks can be useful for typesetting addresses
+space, are also supported. The division into lines is preserved in the output. Any additional leading space
+is preserved too, interpretated as an em-quad. These blocks can be useful for typesetting addresses
 or poetry.
 
-::: {custom-style=blockquote}
+::: { custom-style=em }
 | Long is one night, long is the
   next;
 |  how can I bear three?
 | A month has often seemed less to me
-|  than this half night of longing
+|  than this half night of longing.
 :::
+
+This implementation goes a bit beyond the standard Pandoc-inspired support for line blocks.
+In particular, empty lines (i.e. starting with a vertical bar and a single space, but no other content
+afterwards) are interpretated as stanza separators, which should be smaller than an empty line
+(i.e. a small skip, by default).
+
+::: { .poetry lang=fr step=4 }
+| En hiver la terre pleure ;
+| Le soleil froid, pâle et doux,
+| Vient tard, et part de bonne heure,
+| Ennuyé du rendez-vous.
+| 
+| Leurs idylles sont moroses.
+| — Soleil ! aimons ! — Essayons.
+| Ô terre, où donc sont tes roses ?
+| — Astre, où donc sont tes rayons ?
+| 
+| Il prend un prétexte, grêle,
+| Vent, nuage noir ou blanc,
+| Et dit : — C’est la nuit, ma belle ! —
+| Et la fait en s’en allant ;
+| 
+| Comme un amant qui retire
+| Chaque jour son cœur du nœud,
+| Et, ne sachant plus que dire,
+| S’en va le plus tôt qu’il peut.
+:::
+
+Moreover, there's once again a nice catch. If your class or previously loaded packages
+provide a `poetry` environment, and you set the `.poetry` class specifier on a "div"
+element just around the line blocks, then this environment will be used instead of
+the default one provided by the converter. It is assumed to support the same
+features and options ---namely, `numbering` (boolean, true by default)^[For consistency
+with headers, the `.unnumbered` class specifier is also supported.], `start` and `step`
+(integers) and `first` (boolean, false by default)--- as the `\autodoc:package{resilient.poetry}`{=sile}
+3rd-party package. For instance:
+
+~~~
+:::{ .poetry step=4 first=true }
+| Some verses...
+| Other verses...
+```
+
+:::
+~~~
 
 ### Raw blocks
 
@@ -277,9 +326,9 @@ Likewise, this is available on inline code elements: `\em{idem.}`{=sile}
 ~~~
 
 
-It also supports `{=sile-lua}` to pass Lua code, as in a SILE `\script`. This is just
-a convenience compared to the preceding one, but it allows you to exactly type
-the content as if it was in a code block (i.e. without having to bother wrapping
+It also supports `{=sile-lua}` to pass Lua code.
+This is just a convenience compared to the preceding one, but it allows you to exactly
+type the content as if it was in a code block (i.e. without having to bother wrapping
 it in a script).
 
 ```{=sile-lua}
