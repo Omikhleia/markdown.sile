@@ -79,6 +79,7 @@ local function SileAstWriter (options)
   writer.blockquote = simpleCommandWrapper("markdown:internal:blockquote")
   writer.verbatim = simpleCommandWrapper("verbatim")
   writer.listitem = simpleCommandWrapper("item")
+  writer.linebreak = simpleCommandWrapper("cr")
 
   -- Special case for hrule (simple too, but arguments from lunamark has to be ignored)
   writer.hrule = function () return utils.createCommand("fullrule") end
@@ -328,6 +329,7 @@ function inputter.parse (_, doc)
     pipe_tables = true,
     header_attributes = true,
     line_blocks = true,
+    escaped_line_breaks = true,
   })
   local tree = parse(doc)
   -- The Markdown parsing returns a string or a SILE AST table.

@@ -42,6 +42,14 @@ to the basics here.
 \include[src=somefile.md]
 ```
 
+Including raw Markdown content from within a SILE document is also possible:
+
+```
+\begin[type=markdown]{raw}
+Some Markdown content
+\end{raw}
+```
+
 ### Basic typesetting {#basic-typesetting}
 
 As it can be seen here, sectioning obviously works^[With a small caveat. The package maps heading
@@ -56,7 +64,12 @@ produce an horizontal rule.
 
 ***
 
-Several Pandoc-like extensions to Markdown are supported.
+Hard line breaks...\
+...are supported too, either using the standard "invisible" method from Markdown (i.e. two trailing
+spaces at the end of a line) or a backslash-escaped newline (i.e. a backslash occurring at the
+end of a line, as in the corresponding default Pandoc extension).
+
+Several Pandoc-like extensions to Markdown are also supported.
 Notably, the converter comes by default with smart typography enabled: three dashes (`---`) in an
 inline text sequence are converted to an em-dash (---), two dashes (`--`)
 to an en-dash useful for ranges (ex., "it's at pages 12--14"), and three dots
@@ -174,7 +187,7 @@ attribute.
 This is, as a matter of fact, the same syntax as proposed by Pandoc, for instance, in
 its **docx** writer, to specify a specific, possibly user-defined, custom style name (in that
 case, a Word style, obviously). So yes, if you had a Pandoc-Markdown document styled for Word,
-you might consider switching to SILE is an option!
+you might consider that switching to SILE is a viable option!
 
 If such a named style exists, it is applied. Erm. What does it mean? Well, in the default
 implementation, if there is a corresponding SILE command by that name, the converter invokes
@@ -187,7 +200,7 @@ This is SILE at its best.
 :::
 
 And some inline [message]{custom-style="strong"}, marked as "strong". That's a fairly
-contrived way to obtain a bold text, but you get the underlying idea.
+contrived way to obtain a bold text, but you get the underlying general idea.
 
 This logic is implemented in the `\autodoc:command{\markdown:custom-style:hook}`{=sile}
 command. Package or class designers may override this hook to support any
@@ -223,22 +236,6 @@ Regarding captioned tables, there's again a catch. If your class or previously l
 provide a `captioned-table` environment, it will be wrapped around the table (and it is then assumed to
 take care of a `\caption` content, i.e. to extract and display it appropriately).  Otherwise,
 the converter uses its own fallback method.
-
-### Code blocks
-
-Verbatim code and "fenced code blocks" work:
-
-```lua
-function fib (n)
-  -- Fibonacci numbers
-  if n < 2 then return 1 end
-  return fib(n - 2) + fib(n - 1)
-end
-```
-
-As show above, code blocks marked as being in Lua (either with the `lua` information string or the `.lua` class
-specifier) are syntax-highlighted. This is a naive approach, until the converter possibly supports a more general
-solution.
 
 ### Line blocks
 
@@ -299,6 +296,22 @@ with headers, the `.unnumbered` class specifier is also supported.], `start` and
 
 :::
 ~~~
+
+### Code blocks
+
+Verbatim code and "fenced code blocks" work:
+
+```lua
+function fib (n)
+  -- Fibonacci numbers
+  if n < 2 then return 1 end
+  return fib(n - 2) + fib(n - 1)
+end
+```
+
+As show above, code blocks marked as being in Lua (either with the `lua` information string or the `.lua` class
+specifier) are syntax-highlighted. This is a naive approach, until the converter possibly supports a more general
+solution.
 
 ### Raw blocks
 
@@ -389,7 +402,9 @@ There is a small _caveat_, though: one must use a version of Pandoc which genera
 an AST compatible with our parser ("inputter"). While the Pandoc AST is somewhat stable,
 it may change when new features are introduced in the software.
 
-### Using a Pandoc SILE writer and the pandoc package
+### Other Pandoc-based solutions
+
+#### Using a Pandoc SILE writer and the pandoc package {-}
 
 There is no official SILE writer for Pandoc yet, but some efforts have been done in that direction.
 It therefore requires installing a Pandoc fork^[<https://github.com/alerque/pandoc/commits/sile4>],
@@ -398,7 +413,7 @@ which is not merged upstream at this date.
 You then need to use the SILE `\autodoc:package{pandoc}`{=sile} package, which provides the
 required command mappings between the Pandoc-to-SILE writer and the rest of the software.
 
-### Using a Pandoc "custom writer" in Lua
+#### Using a Pandoc "custom writer" in Lua {-}
 
 Pandoc also supports "custom writers" developed in Lua^[<https://pandoc.org/custom-writers.html>].
 

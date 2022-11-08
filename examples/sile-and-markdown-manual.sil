@@ -1,0 +1,40 @@
+\begin[class=resilient.book]{document}
+\use[module=packages.autodoc]
+\use[module=packages.font-fallback]
+\use[module=packages.framebox]
+\use[module=packages.markdown]
+\use[module=packages.resilient.poetry]
+\font[family=Libertinus Serif]
+\font:add-fallback[family=Symbola, size=8pt]
+\language[main=en]
+\footnote:rule
+%
+% Standard documentation/showcase in Markdown
+\include[src=sile-and-markdown.md]
+%
+% Now let's try something very cool...
+% - Quick and dirty definition of a new custom style...
+%   (using out still experimental "resilient" styling feature)
+\lua{
+SILE.scratch.styles.alignments["framed"] = "customframe"
+}
+\define[command=customframe]{\center{\roughbox[bordercolor=#59b24c,
+  fillcolor=220,padding=15pt, enlarge=true]{\parbox[width=90%lw, minimize=true]{\process}}}}
+\style:define[name=FramedPara]{
+  \paragraph[skipbefore=bigskip, skipafter=bigskip, align=framed]
+}
+\define[command=FramedPara]{\style:apply:paragraph[name=FramedPara]{\process}}
+% - And let's process some inline Markdown using it...
+
+\begin[type=markdown]{raw}
+
+::: {custom-style=FramedPara}
+Thanks, my gentle reader, for having read this document so far.
+So, what _should_ we do now? It's maybe up to **you** now, to provide feedback
+and help pushing all these components farther!
+:::
+
+Oh yay!^[Custom styles are pretty neat, aren't they?]
+
+\end{raw}
+\end{document}

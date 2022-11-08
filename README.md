@@ -4,8 +4,6 @@
 [![Luacheck](https://img.shields.io/github/workflow/status/Omikhleia/markdown.sile/Luacheck?label=Luacheck&logo=Lua)](https://github.com/Omikhleia/markdown.sile/actions?workflow=Luacheck)
 [![Luarocks](https://img.shields.io/luarocks/v/Omikhleia/markdown.sile?label=Luarocks&logo=Lua)](https://luarocks.org/modules/Omikhleia/markdown.sile)
 
-_EARLY PRE-RELEASE_
-
 This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting
 system provides a complete redesign of the native Markdown support for SILE, with
 a great set of Pandoc-like extensions and plenty of extra goodies.
@@ -28,7 +26,7 @@ luarocks --lua-version 5.4 install --server=https://luarocks.org/dev markdown.si
 (Adapt to your version of Lua, if need be, and refer to the SILE manual for more
 detailed 3rd-party package installation information.)
 
-## Usage
+## Usage (native Markdown package)
 
 From command line:
 
@@ -36,7 +34,7 @@ From command line:
 sile -u inputters.markdown somefile.md
 ```
 
-From documents (e.g. here in SILE language)
+Or from documents (e.g. here in SILE language):
 
 ```
 \use[module=packages.markdown]
@@ -47,9 +45,87 @@ Other possibilities exists (such as setting `format=markdown` on the `\include` 
 cannot be one of the supported variants, etc.). Refer to the SILE manual for more details on inputters and their
 usage.
 
-The "example" documentation/showcase in this repository additionaly requires the `autodoc` package, so you may
-generate a PDF from it with:
+Including raw Markdown content from within a SILE document is also possible:
+
+```
+\begin[type=markdown]{raw}
+Some Markdown content
+\end{raw}
+```
+
+## Usage (Pandoc AST alternative package)
+
+_Prerequisites:_ The [LuaJSON](https://github.com/harningt/luajson) module must be
+installed and available to your SILE environment. This topic is not covered here.
+
+First, using the appropriate version of Pandoc, convert your file to a JSON AST:
+
+```
+pandoc -t json somefile.md -f markdown -o somefile.pandoc
+```
+
+Then, from command line:
+
+```
+sile -u inputters.pandocast somefile.pandoc
+```
+
+Or from documents:
+
+```
+\use[module=packages.pandocast]
+\include[src=somefile.pandoc]
+```
+
+## Generating the documentation
+
+
+The "example" documentation/showcase in this repository additionaly requires the `autodoc` package, so you
+may generate a PDF from it with as follows:
 
 ```
 sile -u inputters.markdown -u packages.autodoc examples/sile-and-markdown.md
 ```
+
+Or, for even best results (in this writer's biased opinion), provided you have installed the
+[resilient](https://github.com/Omikhleia/resilient.sile) collection of classes and packages:
+
+```
+sile examples/sile-and-markdown-manual.sil
+```
+
+## Supported features
+
+This is but an overview. For more details, please refer to the provided example Markdown document,
+which also serves as documentation, showcase and reference guide.
+
+- Standard Mardown typesetting (italic, bold, code, etc.)
+- Smart typography (quotes, apostrophes, ellipsis, dashes, etc.)
+- Headers and header attributes
+- Horizontal rules
+- Images (and image attributes, e.g. dimensions)
+- Strikeout (a.k.a. deletions)
+- Subscript and superscript
+- Footnotes (both regular and inline syntax support)
+- Fenced code blocks (with attributes)
+- Bracketed spans and fenced divs (with provisions for language change, custom styles, etc.)
+- Underlines
+- Small caps
+- Links
+- Lists
+  - Standard ordered lists and bullet lists
+  - Fancy lists
+  - Task lists (GFM-like)
+  - Definition lists
+- Pipe tables (and table captions)
+- Line blocks (with enhanced provision for poetry)
+- Hard line breaks
+- Raw attributes (escaping to inline SILE or Lua scripting)
+
+## License
+
+All SILE-related code and samples in this repository are released under the MIT License, (c) 2022 Omikhleia.
+
+A vendored (subset) of the [lunamark](https://github.com/jgm/lunamark) Lua parsing library is
+distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
+the MIT license, (c) 2009 John MacFarlane, _et al._

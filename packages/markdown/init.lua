@@ -16,6 +16,14 @@ function package:_init (_)
   local _ = SILE.inputters.markdown
 end
 
+function package:registerRawHandlers ()
+
+  self.class:registerRawHandler("markdown", function(_, content)
+    SILE.processString(content[1], "markdown", nil, {})
+  end)
+
+end
+
 package.documentation = [[\begin{document}
 The \autodoc:package{markdown} package allows you to use Markdown, with plenty of additional
 features and extensions, as your alternative format of choice for documents —without leaving
