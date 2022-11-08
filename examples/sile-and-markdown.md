@@ -56,6 +56,11 @@ produce an horizontal rule.
 
 ***
 
+Hard line breaks...\
+...are supported too, either using the standard "invisible" method from Markdown (i.e. two trailing
+spaces at the end of a line) or a backslash-escaped newline (i.e. a backslash occurring at the
+end of a line, as in the corresponding default Pandoc extension).
+
 Several Pandoc-like extensions to Markdown are supported.
 Notably, the converter comes by default with smart typography enabled: three dashes (`---`) in an
 inline text sequence are converted to an em-dash (---), two dashes (`--`)
