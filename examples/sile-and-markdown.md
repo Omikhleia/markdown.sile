@@ -6,8 +6,8 @@ original [Markdown syntax specification](https://daringfireball.net/projects/mar
 :::
 
 While the original Markdown format was indeed quite simple, it quickly became a landmark for
-technical documentation. Several variants emerged. Amongst other solutions, the Pandoc converter
-started supporting a nice set of interesting extensions for lists, footnotes, tables,
+documentation, especially technical. Several variants then emerged. Amongst other solutions, the Pandoc
+converter started supporting a nice set of interesting extensions for lists, footnotes, tables,
 etc.^[See [IETF RFC 7764, section 3.3](https://datatracker.ietf.org/doc/html/rfc7764#section-3.3).]
 ---So that nowadays, Markdown, enriched with these extensions, may be quite appealing to writers and
 authors alike.
@@ -28,7 +28,6 @@ Each of them has its advantages, and a few limitations as well.
 
 ## The native markdown package
 
-Guess what, the very documentation you are currently reading is entirely processed with it.
 Once you have loaded the `\autodoc:package{markdown}`{=sile} package,
 the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading a Markdown file[^other-ways].
 The speedy Markdown parsing relies on John MacFarlane's excellent **lunamark** Lua library.
@@ -50,6 +49,8 @@ Some Markdown content
 \end{raw}
 ```
 
+Guess what, the very chapter you are currently reading is written in Markdown!
+
 ### Basic typesetting {#basic-typesetting}
 
 As it can be seen here, sectioning obviously works^[With a small caveat. The package maps heading
@@ -65,7 +66,7 @@ produce an horizontal rule.
 ***
 
 Hard line breaks...\
-...are supported too, either using the standard "invisible" method from Markdown (i.e. two trailing
+... are supported too, either using the standard "invisible" method from Markdown (i.e. two trailing
 spaces at the end of a line) or a backslash-escaped newline (i.e. a backslash occurring at the
 end of a line, as in the corresponding default Pandoc extension).
 
@@ -211,7 +212,7 @@ another more powerful way to leverage Markdown with SILE’s full processing cap
 
 ### Images
 
-Here is an image: ![](./gutenberg.png "An exemplary image"){width=1.5cm}
+Here is an image: ![](./gutenberg.png "An exemplary image"){width=2.5cm}
 
 ![](./examples/manicule.svg){height=0.9em} SVG is supported too.
 

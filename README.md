@@ -79,20 +79,25 @@ Or from documents:
 
 ## Generating the documentation
 
-
-The "example" documentation/showcase in this repository additionaly requires the `autodoc` package, so you
+The example documentation/showcase in this repository additionaly requires the `autodoc` package, so you
 may generate a PDF from it with as follows:
 
 ```
 sile -u inputters.markdown -u packages.autodoc examples/sile-and-markdown.md
 ```
 
-Or, for even best results (in this writer's biased opinion), provided you have installed the
+It assumes a default font, so a few things might not render as expected, and uses SILE's book class.
+
+For even best results (in this writer's biased opinion), provided you have installed the
 [resilient](https://github.com/Omikhleia/resilient.sile) collection of classes and packages:
 
 ```
 sile examples/sile-and-markdown-manual.sil
 ```
+
+This SILE document also loads extra packages before switching to Markdown, and defines
+additional commands and styles. It includes an additional chapter, showcasing more
+advanced topics. Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
 
 ## Supported features
 
@@ -115,7 +120,7 @@ which also serves as documentation, showcase and reference guide.
 - Lists
   - Standard ordered lists and bullet lists
   - Fancy lists
-  - Task lists (GFM-like)
+  - Task lists (GFM-like syntax)
   - Definition lists
 - Pipe tables (and table captions)
 - Line blocks (with enhanced provision for poetry)
