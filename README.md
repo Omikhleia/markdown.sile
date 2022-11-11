@@ -88,16 +88,16 @@ sile -u inputters.markdown -u packages.autodoc examples/sile-and-markdown.md
 
 It assumes a default font, so a few things might not render as expected, and uses SILE's book class.
 
-For even best results (in this writer's biased opinion), provided you have installed the
+**Recommended:** For even best results (in this writer's biased opinion), provided you have installed the
 [resilient](https://github.com/Omikhleia/resilient.sile) collection of classes and packages:
 
 ```
 sile examples/sile-and-markdown-manual.sil
 ```
 
-This SILE document also loads extra packages before switching to Markdown, and defines
-additional commands and styles. It includes an additional chapter, showcasing more
-advanced topics. Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
+The latter SILE document also loads extra packages before switching to Markdown, and defines
+additional commands and styles. Moreover, it includes an additional chapter, showcasing
+other advanced topics and cool use cases. Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
 
 ## Supported features
 
