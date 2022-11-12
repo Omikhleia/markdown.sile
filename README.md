@@ -13,14 +13,35 @@ a great set of Pandoc-like extensions and plenty of extra goodies.
 
 ## Installation
 
+### Quickstart
+
 This module collection requires SILE v0.14 or upper.
 
 Installation relies on the **luarocks** package manager.
 
+To get your Lua version for SILE:
+
+```bash
+SILE=$(which sile) || >&2 echo No sile in '$PATH'? && \
+  [ $(head -c2 "$SILE") = '#!' ] && \
+  LUA=$(head -n1 "$SILE" | cut -c 3-) && \
+  [ -x $LUA ] && LUAV=$($LUA -v) && echo $LUAV && \
+  export ___LUA_VERSION=$((awk '{print $2}' | cut -c 1-3) <<< $LUAV) && \
+  [[ $___LUA_VERSION =~ ^5\.[1-4]$ ]] || \
+  (>&2 printf 'Cannot autodetect Lua version!? ' && \
+    unset ___LUA_VERSION)
+>&2 printf 'Lua binary: %s\n' $(which lua$___LUA_VERSION)
+```
+
 To install the latest development version, you may use the provided “rockspec”:
 
+```bash
+luarocks --lua-version $___LUA_VERSION install --server=https://luarocks.org/dev markdown.sile --local
 ```
-luarocks --lua-version 5.4 install --server=https://luarocks.org/dev markdown.sile
+
+You will need to then run this or will get errors involving missing modules:
+```bash
+$(luarocks --lua-version $___LUA_VERSION path)
 ```
 
 (Adapt to your version of Lua, if need be, and refer to the SILE manual for more
