@@ -10,6 +10,7 @@ package._name = "markdown"
 function package:_init (_)
   base._init(self)
   self.class:loadPackage("markdown.commands")
+  self.class:loadPackage("markdown.html")
 
   -- Extend inputters if needed.
   -- Chicken and eggs... This just forces the inputter to be loaded!

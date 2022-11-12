@@ -79,9 +79,17 @@ local function SileAstWriter (options)
   writer.blockquote = simpleCommandWrapper("markdown:internal:blockquote")
   writer.verbatim = simpleCommandWrapper("verbatim")
   writer.listitem = simpleCommandWrapper("item")
-  writer.linebreak = simpleCommandWrapper("cr")
   writer.singlequoted = simpleCommandWrapper("singlequoted")
   writer.doublequoted = simpleCommandWrapper("doublequoted")
+
+  writer.inline_html = function(args)
+    local htmlroot = htmlparser.parse(args)
+    if #htmlroot.nodes > 0 then
+      local rootname = htmlroot.nodes[1].name
+      SU.debug("markdown", "Got raw HTML w/root tag: " .. rootname)
+      return utils.createCommand("markdown:html:" .. rootname)
+    end
+  end
 
   -- Special case for hrule (simple too, but arguments from lunamark has to be ignored)
   writer.hrule = function () return utils.createCommand("fullrule") end
@@ -305,6 +313,7 @@ end
 function inputter.parse (_, doc)
   local lunamark = require("lunamark")
   local reader = lunamark.reader.markdown
+  htmlparser = require("htmlparser")
   local writer = SileAstWriter({
     layout = "minimize" -- The default layout is to output \n\n as inter-block separator
                         -- Let's cancel it completely, and insert our own \par where needed.

@@ -7,6 +7,7 @@
 --
 local utils = require("packages.markdown.utils")
 local base = require("packages.base")
+local html = require("packages.markdown.html")
 
 local package = pl.class(base)
 package._name = "markdown.commands"
@@ -364,7 +365,10 @@ function package:registerCommands ()
     SILE.call("smallskip")
   end, "A fallback command for Markdown to insert a captioned table")
 
-  -- C. Customizable hooks
+  -- C. HTML commands
+  html.registerHTMLcommands(self)
+
+  -- D. Customizable hooks
 
   self:registerCommand("markdown:custom-style:hook", function (options, content)
     -- Default implementation for the custom-style hook:
@@ -386,7 +390,6 @@ function package:registerCommands ()
       end
     end
   end, "Default hook for custom style support in Markdown")
-
 end
 
 package.documentation = [[\begin{document}
