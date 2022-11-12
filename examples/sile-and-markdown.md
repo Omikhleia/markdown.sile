@@ -181,6 +181,14 @@ This was obtained with:
 Or inline in text: [«Encore du français!»]{lang=fr}
 ```
 
+Smart typography takes the current language into account when converting straight double and single
+quotation marks to the appropriate typographic variant:
+["English"]{lang=en} / ["Deutsch"]{lang=de} / ["français"]{lang=fr} / ["dansk"]{lang=da} / ["русский"]{lang=ru};
+['English']{lang=en} / ['Deutsch']{lang=de} / ['français']{lang=fr} / ['dansk']{lang=da} / ['русский']{lang=ru}.^[For
+most languages, `"` and `'` correspond to the primary and secondary quotations marks, respectively.
+In some languages, they are used the other way round, but obviously the user's input is respected in those cases
+(e.g. respectively ["Ghàidhlig"]{lang=cy} and ['Ghàidhlig']{lang=cy}).]
+
 ### Custom styles
 
 On the "div" and "span" extended elements, the converter also supports the `{custom-style="..."}`
