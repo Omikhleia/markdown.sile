@@ -426,10 +426,11 @@ end
 -- Quoted QuoteType [Inline]
 --   Where QuoteType is a tag DoubleQuote or SingleQuote
 Pandoc.Quoted = function (quotetype, inlines)
+  local content = pandocAstParse(inlines)
   if quotetype.t == "DoubleQuote" then
-    return pandocAstParse({ "“", inlines, "”" })
+    return utils.createCommand("doublequoted", {}, content)
   end
-  return pandocAstParse({ "‘", inlines, "’" })
+  return utils.createCommand("singlequoted", content)
 end
 
 -- Cite [Citation] [Inline]

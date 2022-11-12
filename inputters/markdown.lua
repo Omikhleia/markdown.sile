@@ -80,6 +80,8 @@ local function SileAstWriter (options)
   writer.verbatim = simpleCommandWrapper("verbatim")
   writer.listitem = simpleCommandWrapper("item")
   writer.linebreak = simpleCommandWrapper("cr")
+  writer.singlequoted = simpleCommandWrapper("singlequoted")
+  writer.doublequoted = simpleCommandWrapper("doublequoted")
 
   -- Special case for hrule (simple too, but arguments from lunamark has to be ignored)
   writer.hrule = function () return utils.createCommand("fullrule") end
