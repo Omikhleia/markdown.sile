@@ -18,8 +18,8 @@ end
 
 function package:registerRawHandlers ()
 
-  self.class:registerRawHandler("markdown", function(_, content)
-    SILE.processString(content[1], "markdown", nil, {})
+  self.class:registerRawHandler("markdown", function(options, content)
+    SILE.processString(content[1], "markdown", nil, options)
   end)
 
 end

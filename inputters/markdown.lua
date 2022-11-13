@@ -302,17 +302,11 @@ function inputter.appropriate (round, filename, _)
   -- though it won't meet expectations!
 end
 
-function inputter.parse (_, doc)
-  local lunamark = require("lunamark")
-  local reader = lunamark.reader.markdown
-  local writer = SileAstWriter({
-    layout = "minimize" -- The default layout is to output \n\n as inter-block separator
-                        -- Let's cancel it completely, and insert our own \par where needed.
-  })
-  local parse = reader.new(writer, {
+function inputter:parse (doc)
+  local extensions = {
     smart = true,
     strikeout = true,
-    subscript=true,
+    subscript = true,
     superscript = true,
     definition_lists = true,
     notes = true,
@@ -332,7 +326,23 @@ function inputter.parse (_, doc)
     header_attributes = true,
     line_blocks = true,
     escaped_line_breaks = true,
+  }
+  for k, v in pairs(self.options) do
+    -- Allow overriding known options
+    -- (Lunamark has more options than that, but I haven't test disabling anything else,
+    -- so let's be safer by not having them here for now.)
+    if extensions[k] then
+      extensions[k] = SU.boolean(v, true)
+    end
+  end
+
+  local lunamark = require("lunamark")
+  local reader = lunamark.reader.markdown
+  local writer = SileAstWriter({
+    layout = "minimize" -- The default layout is to output \n\n as inter-block separator
+                        -- Let's cancel it completely, and insert our own \par where needed.
   })
+  local parse = reader.new(writer, extensions)
   local tree = parse(doc)
   -- The Markdown parsing returns a string or a SILE AST table.
   -- Wrap it in some document structure so we can just process it, and if at
