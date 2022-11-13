@@ -15,7 +15,7 @@ authors alike.
 Within SILE’s aim to produce beautiful printed documents, it's a pretty reasonable assumption that
 such writers and authors may want to use this fine typesetter with their Markdown content, without
 having to learn the SILE language and its specifics (but not, either, fully excluding it for some
-advanced capabilities).
+advanced capabilities). Guess what, the very chapter you are currently reading is written in Markdown!
 
 There is actually more than one solution to achieve great results in that direction:
 
@@ -49,7 +49,7 @@ Some Markdown content
 \end{raw}
 ```
 
-Guess what, the very chapter you are currently reading is written in Markdown!
+See also "[Configuration](#configuration)" further below.
 
 ### Basic typesetting {#basic-typesetting}
 
@@ -68,7 +68,7 @@ produce an horizontal rule.
 Hard line breaks...\
 ... are supported too, either using the standard "invisible" method from Markdown (i.e. two trailing
 spaces at the end of a line) or a backslash-escaped newline (i.e. a backslash occurring at the
-end of a line, as in the corresponding default Pandoc extension).
+end of a line).
 
 Several Pandoc-like extensions to Markdown are also supported.
 Notably, the converter comes by default with smart typography enabled: three dashes (`---`) in an
@@ -369,6 +369,25 @@ SILE.typesetter:typeset(" is called from Lua.")
 
 You now have the best of two worlds in your hands, bridging together Markdown and SILE
 so that you can achieve wonderful things, we have no idea of. Surprise us!
+
+### Configuration {#configuration}
+
+Most Markdown syntax extensions are enabled by default. You can pass additional options to
+the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile}
+environment to tune the behavior of the Markdown parser.
+
+::: {custom-style=raggedright}
+> Available options are: `smart`, `strikeout`, `subscript`, `superscript`, `definition_lists`, `notes`, `inline_notes`,
+> `fenced_code_blocks`, `fenced_code_attributes`, `bracketed_spans`, `fenced_divs`, `raw_attribute`, `link_attributes`,
+> `startnum`, `fancy_lists`, `task_list`, `hash_enumerators`, `table_captions`, `pipe_tables`, `header_attributes`,
+> `line_blocks`, `escaped_line_breaks`.
+:::
+
+For instance, to disable the smart typography feature:
+
+```
+\include[src=somefile.pandoc, smart=false]
+```
 
 ## The Pandoc-based converters
 
