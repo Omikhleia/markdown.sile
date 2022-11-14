@@ -220,7 +220,7 @@ another more powerful way to leverage Markdown with SILE’s full processing cap
 
 ### Images
 
-Here is an image: ![](./gutenberg.png "An exemplary image"){width=2.5cm}
+Here is an image: ![Invisible caption as in inline](./gutenberg.png "An exemplary image"){width=2.5cm}
 
 ![](./examples/manicule.svg){height=0.9em} SVG is supported too.
 
@@ -228,6 +228,14 @@ You can specify the required image width and/or height, as done just above actua
 by appending the `{width=... height=...}` attributes^[And possibly other attributes,
 they are all passed through to the underlying SILE package.] after the usual Markdown
 image syntax ---Note that any unit system supported by SILE is accepted.
+
+![This man is Gutenberg](./gutenberg.png "An exemplary image"){width=2.5cm}
+
+An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph,
+will be rendered as a figure with a caption. If your class or previously loaded packages
+provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to
+take care of a `\caption` content, i.e. to extract and display it appropriately).  Otherwise,
+the converter uses its own fallback method.
 
 ### Tables
 
