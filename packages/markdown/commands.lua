@@ -64,12 +64,30 @@ local extractFromTree = function (tree, command)
   end
 end
 
-local function hasClass(options, classname)
+local function hasClass (options, classname)
   -- N.B. we want a true boolean here
   if options.class and string.match(' ' .. options.class .. ' ',' '..classname..' ') then
     return true
   end
   return false
+end
+
+-- AST helper for the "implicit figure"
+-- (tricky) This assumes a lot of knowledge about the AST...
+local function implicitFigure (paracontent)
+  local image, caption
+
+  -- Does the paragraph content contain a single image element
+  local command = type(paracontent) == "table" and #paracontent == 1 and paracontent[1].command
+  if command == "markdown:internal:image" then
+    image = paracontent[1]
+    -- Does it have a non-empty caption...
+    if (type(image[1]) == "string")
+       or (type(image[1]) == "table" and #image[1] >= 1) then
+      caption = image[1]
+    end
+  end
+  return image, caption
 end
 
 -- Default color theme for syntax highlighted Lua code blocks
@@ -102,11 +120,26 @@ function package:registerCommands ()
   -- A. Commands (normally) intended to be used by this package only.
 
   self:registerCommand("markdown:internal:paragraph", function (_, content)
-    SILE.process(content)
-    -- See comment on the lunamark writer layout option. With the default layout,
-    -- this \par was not necessary... We switched to "compact" layout, to decide
-    -- how to handle our own paragraphing.
-    SILE.call("par")
+    -- Implicit figure: "An image with nonempty alt text, occurring by itself in a paragraph,
+    -- will be rendered as a figure with a caption. The image’s alt text will be used as the
+    -- caption."
+    local image, caption = implicitFigure(content)
+    if image and caption then
+      -- (tricky) This assumes a lot of knowledge about the AST...
+      -- We cannot make a functional call here, because captioned elements later
+      -- work by "extracting" the caption from the AST... So we rebuild the
+      -- expected AST.
+      SILE.call("markdown:internal:captioned-figure", {}, {
+        image,
+        utils.createCommand("caption", {}, caption),
+      } )
+    else
+      SILE.process(content)
+      -- See comment on the lunamark writer layout option. With the default layout,
+      -- this \par was not necessary... We switched to "compact" layout, to decide
+      -- how to handle our own paragraphing.
+      SILE.call("par")
+    end
   end, "Paragraphing in Markdown (internal)")
 
   self:registerCommand("markdown:internal:header", function (options, content)
@@ -267,6 +300,18 @@ function package:registerCommands ()
     end
   end, "Captioned table in Markdown (internal)")
 
+  self:registerCommand("markdown:internal:captioned-figure", function (_, content)
+    -- Makes it easier for class/packages to provided their own captioned-figure
+    -- environment if they want to do so (possibly with more features,
+    -- e.g. managing list of tables, numbering and cross-references etc.),
+    -- while minimally providing a default fallback solution.
+    if not SILE.Commands["captioned-figure"] then
+      SILE.call("markdown:fallback:captioned-figure", {}, content)
+    else
+      SILE.call("captioned-figure", {}, content)
+    end
+  end, "Captioned table in Markdown (internal)")
+
   self:registerCommand("markdown:internal:codeblock", function (options, content)
     if hasClass(options, "lua") then
       -- Naive syntax highlighting for Lua, until we have a more general solution
@@ -349,7 +394,7 @@ function package:registerCommands ()
 
   self:registerCommand("markdown:fallback:captioned-table", function (_, content)
     if type(content) ~= "table" then
-      SU.error("Expected a table content in table environment")
+      SU.error("Expected a table AST content in captioned table environment")
     end
     local caption = extractFromTree(content, "caption")
 
@@ -361,6 +406,25 @@ function package:registerCommands ()
         SILE.call("center", {}, caption)
       end)
     end
+    SILE.call("smallskip")
+  end, "A fallback command for Markdown to insert a captioned table")
+
+  self:registerCommand("markdown:fallback:captioned-figure", function (_, content)
+    if type(content) ~= "table" then
+      SU.error("Expected a table AST content in captioned figure environment")
+    end
+    local caption = extractFromTree(content, "caption")
+
+    SILE.call("smallskip")
+    SILE.call("center", {}, function ()
+      SILE.process(content)
+      if caption then
+        SILE.call("par")
+        SILE.call("font", {
+          size = SILE.settings:get("font.size") * 0.95
+        }, caption)
+      end
+    end)
     SILE.call("smallskip")
   end, "A fallback command for Markdown to insert a captioned table")
 

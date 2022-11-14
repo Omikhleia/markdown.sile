@@ -121,10 +121,10 @@ local function SileAstWriter (options)
     return utils.createCommand("markdown:internal:link", { src = uri }, { label })
   end
 
-  writer.image = function (_, src, _, attr) -- label, src, title, attr
+  writer.image = function (label, src, _, attr) -- label, src, title, attr
     local opts = attr or {} -- passthru (class and key-value pairs)
     opts.src = src
-    return utils.createCommand("markdown:internal:image" , opts)
+    return utils.createCommand("markdown:internal:image" , opts, label)
   end
 
   writer.span = function (content, attr)
