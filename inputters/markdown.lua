@@ -228,6 +228,11 @@ local function SileAstWriter (options)
     return utils.createCommand("markdown:internal:rawinline", { format = "html" }, inlinehtml)
   end
 
+  writer.math = function (mathtype, text) -- first arg is "InlineMath" or "DisplayMath"
+    local mode = mathtype == "DisplayMath" and "display" or "text"
+    return utils.createCommand("markdown:internal:math" , { mode = mode }, { text })
+  end
+
   -- Final AST conversion logic.
   --   The lunamark "AST" is made of "ropes":
   --     "A rope is an array whose elements may be ropes, strings, numbers,
@@ -385,6 +390,7 @@ function inputter:parse (doc)
     header_attributes = true,
     line_blocks = true,
     escaped_line_breaks = true,
+    tex_math_dollars = true,
   }
   for k, v in pairs(self.options) do
     -- Allow overriding known options
