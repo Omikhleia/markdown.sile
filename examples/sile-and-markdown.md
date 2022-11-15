@@ -276,8 +276,17 @@ image syntax ---Note that any unit system supported by SILE is accepted.
 An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph,
 will be rendered as a figure with a caption. If your class or previously loaded packages
 provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to
-take care of a `\caption` content, i.e. to extract and display it appropriately). Otherwise,
-the converter uses its own fallback method.
+take care of a `\caption` content, i.e. to extract and display it appropriately).
+Otherwise, the converter uses its own fallback method.
+
+### Maths
+
+TeX-like math between `$` ("inline mode") or `$$` ("display mode") decently works.
+Note that $20,000 and $30,000 don't parse as math, while $e^{i\pi}=-1$ does.
+There is an important constraint, though: you have to restrict yourself to the syntax subset supported
+by SILE. This being said, some nice fomulas may be achieved:
+
+$$\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})$$
 
 ### Tables {#tables}
 
@@ -489,7 +498,7 @@ environment to tune the behavior of the Markdown parser.
 > `fenced_code_blocks`, `fenced_code_attributes`, `bracketed_spans`, `fenced_divs`,
 > `raw_attribute`, `link_attributes`,
 > `startnum`, `fancy_lists`, `task_list`, `hash_enumerators`, `table_captions`, `pipe_tables`, `header_attributes`,
-> `line_blocks`, `escaped_line_breaks`.
+> `line_blocks`, `escaped_line_breaks`, `tex_math_dollars`.
 :::
 
 For instance, to disable the smart typography feature:

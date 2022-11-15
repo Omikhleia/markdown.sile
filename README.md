@@ -6,7 +6,7 @@
 [![Luarocks](https://img.shields.io/luarocks/v/Omikhleia/markdown.sile?label=Luarocks&logo=Lua)](https://luarocks.org/modules/Omikhleia/markdown.sile)
 
 This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting
-system provides a complete redesign of the native Markdown support for SILE, with
+system provides a complete redesign of the native Markdown support, with
 a great set of Pandoc-like extensions and plenty of extra goodies.
 
 - **markdown** inputter and package: native support of Markdown files.
@@ -118,6 +118,7 @@ which also serves as documentation, showcase and reference guide.
 - Headers and header attributes
 - Horizontal dividers (a.k.a. horizontal rules, with provision for asterisms, dinkuses, pendants...)
 - Images (and image attributes, e.g. dimensions)
+- TeX-like math
 - Strikeout (a.k.a. deletions)
 - Subscript and superscript
 - Footnotes (both regular and inline syntax support)
