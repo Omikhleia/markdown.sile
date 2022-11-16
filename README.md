@@ -26,7 +26,13 @@ luarocks --lua-version 5.4 install --server=https://luarocks.org/dev markdown.si
 (Adapt to your version of Lua, if need be, and refer to the SILE manual for more
 detailed 3rd-party package installation information.)
 
-## Usage (native Markdown package)
+## Usage
+
+Basic usage is described just below. A more complete PDF version of the documentation (but not
+necessarily the latest, see also further below for generating it from the sources) should be
+available [here](https://drive.google.com/file/d/19VfSMmfBIZwr43U-W842IkSE349wdgZb/view?usp=sharing)
+
+### Native Markdown package
 
 From command line:
 
@@ -53,7 +59,7 @@ Some Markdown content
 \end{raw}
 ```
 
-## Usage (Pandoc AST alternative package)
+### Pandoc AST alternative package
 
 _Prerequisites:_ The [LuaJSON](https://github.com/harningt/luajson) module must be
 installed and available to your SILE environment. This topic is not covered here.
