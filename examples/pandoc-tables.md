@@ -19,7 +19,7 @@ A simple headerless table without caption:
 ### Multiline tables {-}
 
 The "multiline tables" are interesting when one needs rows
-that spans multiple lines (in the input source).
+that span multiple lines (in the input text source).
 
 -------------------------------------------------------------
  Centered   Default           Right Left

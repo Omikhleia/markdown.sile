@@ -299,7 +299,7 @@ afterwards) are interpretated as stanza separators, which should be smaller than
 Moreover, there's once again a nice catch. If your class or previously loaded packages
 provide a `poetry` environment, and you set the `.poetry` class specifier on a "div"
 element just around the line blocks, then this environment will be used instead of
-the default one provided by the converter. It is assumed to support the same
+the default one provided by the converter. It is assumed to implement the same
 features and options ---namely, `numbering` (boolean, true by default)^[For consistency
 with headers, the `.unnumbered` class specifier is also supported.], `start` and `step`
 (integers) and `first` (boolean, false by default)--- as the `\autodoc:package{resilient.poetry}`{=sile}
@@ -309,8 +309,6 @@ with headers, the `.unnumbered` class specifier is also supported.], `start` and
 :::{ .poetry step=4 first=true }
 | Some verses...
 | Other verses...
-```
-
 :::
 ~~~
 
@@ -431,7 +429,7 @@ the `format=pandocast` parameter:
 \include[src=somefile.pandoc]
 ```
 
-This package supports quite the same advanced features as the native markdown package, e.g. the
+This package supports the same advanced features as the native markdown package, e.g. the
 ability to use custom styles, to pass native content through to SILE, etc.
 
 There is a small _caveat_, though: one must use a version of Pandoc which generates

@@ -53,7 +53,7 @@ either processed from command-line or included in a very generic SILE document,
 with the conversion based on the native `\autodoc:package{markdown}`{=sile} package,
 it sticks to the bare minimum, by necessity and for the sake of simplicity.
 
-Here, under this sensationalist headline, we'll go at bit further and showcase a few
+Here in this bonus chapter, under this sensationalist headline, we'll go at bit further and showcase a few
 more things, assuming additional class and package dependencies are available to us.
 
 ## Custom-style bragging
@@ -67,11 +67,11 @@ So, what _should_ we do now? It's maybe up to **you** now, to provide feedback
 and help pushing all these components farther!
 :::
 
-Why not "style" an EAN-13 ISBN, so that it is rendered as a barcode... [978-2-9539896-6-3]{ custom-style=Ean13 }
+And why not "style" an EAN-13 ISBN, so that it is rendered as a barcode... [978-2-9539896-6-3]{ custom-style=Ean13 }
 
 ## Advanced tables
 
-While the native package currently supports "pipe tables" only, Pandoc supports the
+While the native package accepts supports "pipe tables" only, Pandoc supports the
 standard "simple tables" and also extends Markdown with several other methods for declaring tables.
 Would you have a document containing such tables, then `\autodoc:package{pandocast}`{=sile} should
 be able to render them. Above, we just described that package briefly. It's now showcase time!
