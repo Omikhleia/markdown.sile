@@ -436,18 +436,7 @@ There is a small _caveat_, though: one must use a version of Pandoc which genera
 an AST compatible with our parser ("inputter"). While the Pandoc AST is somewhat stable,
 it may change when new features are introduced in the software.
 
-### Other Pandoc-based solutions
-
-#### Using a Pandoc SILE writer and the pandoc package {-}
-
-There is no official SILE writer for Pandoc yet, but some efforts have been done in that direction.
-It therefore requires installing a Pandoc fork^[<https://github.com/alerque/pandoc/commits/sile4>],
-which is not merged upstream at this date.
-
-You then need to use the SILE `\autodoc:package{pandoc}`{=sile} package, which provides the
-required command mappings between the Pandoc-to-SILE writer and the rest of the software.
-
-#### Using a Pandoc "custom writer" in Lua {-}
+### Using a Pandoc "custom writer" in Lua
 
 Pandoc also supports "custom writers" developed in Lua^[<https://pandoc.org/custom-writers.html>].
 
