@@ -140,3 +140,11 @@ All SILE-related code and samples in this repository are released under the MIT 
 A vendored (subset) of the [lunamark](https://github.com/jgm/lunamark) Lua parsing library is
 distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
 the MIT license, (c) 2009 John MacFarlane, _et al._
+
+## Credits
+
+Additional thanks to:
+
+- Simon Cozens, _et al._ concerned, for the early attempts at using lunamark with SILE.
+- Vít Novotný, for the good work on lunamark, and the impressive [witiko/markdown](https://github.com/Witiko/markdown)
+  package for (La)TeX - a great source of inspiration and a goal of excellence.
