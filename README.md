@@ -11,6 +11,8 @@ a great set of Pandoc-like extensions and plenty of extra goodies.
 - **markdown** inputter and package: native support of Markdown files.
 - **pandocast** inputter and package: native support of Pandoc JSON AST files.
 
+For casual readers: This notably aims at converting a Markdown document to print-quality PDF.
+
 ## Installation
 
 This module collection requires SILE v0.14 or upper.
@@ -30,7 +32,7 @@ detailed 3rd-party package installation information.)
 
 Basic usage is described just below. A more complete PDF version of the documentation (but not
 necessarily the latest, see also further below for generating it from the sources) should be
-available [here](https://drive.google.com/file/d/19VfSMmfBIZwr43U-W842IkSE349wdgZb/view?usp=sharing)
+available [HERE](https://drive.google.com/file/d/19VfSMmfBIZwr43U-W842IkSE349wdgZb/view?usp=sharing).
 
 ### Native Markdown package
 
