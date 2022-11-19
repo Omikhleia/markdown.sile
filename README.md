@@ -148,3 +148,5 @@ Additional thanks to:
 - Simon Cozens, _et al._ concerned, for the early attempts at using lunamark with SILE.
 - Vít Novotný, for the good work on lunamark, and the impressive [witiko/markdown](https://github.com/Witiko/markdown)
   package for (La)TeX - a great source of inspiration and a goal of excellence.
+- Caleb Maclennan, for his early work on a Pandoc-to-SILE converter which, though on different grounds, indirectly
+  gave me the idea of the "pandocast" alternative approach.
