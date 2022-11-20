@@ -115,7 +115,7 @@ which also serves as documentation, showcase and reference guide.
 - Standard Mardown typesetting (italic, bold, code, etc.)
 - Smart typography (quotes, apostrophes, ellipsis, dashes, etc.)
 - Headers and header attributes
-- Horizontal rules
+- Horizontal dividers (a.k.a. horizontal rules, with provision for asterisms, dinkuses, pendants...)
 - Images (and image attributes, e.g. dimensions)
 - Strikeout (a.k.a. deletions)
 - Subscript and superscript

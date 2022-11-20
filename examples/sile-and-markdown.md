@@ -60,11 +60,6 @@ is that the class or other packages have to provide the relevant implementations
 are of course supported.
 As of formatting, *italic*, **bold**, and `code` all work as expected.
 
-Three dashes on a standalone line (as well as asterisks or underscores)
-produce an horizontal rule.
-
-***
-
 Hard line breaks...\
 ... are supported too, either using the standard "invisible" method from Markdown (i.e. two trailing
 spaces at the end of a line) or a backslash-escaped newline (i.e. a backslash occurring at the
@@ -90,6 +85,48 @@ Other nice features include:
 The two latter cases use the extended Pandoc-inspired "span" syntax, which is also useful for languages
 and custom styles (see futher below). They also use the CSS-like class notation that several
 Pandoc writers recognize.
+
+### Horizontal dividers
+
+In standard Markdown, a line containing a row of three or more asteriks, dashes, or underscores
+(optionally separated by spaces) are supposed to produce a horizontal rule. This converter
+however slightly deviates from that simple specification^[And also from Pandoc, therefore.
+Quite obviously, `\autodoc:package{pandocast}`{=sile} package will also only show
+horizontal rules.],
+for the mere reason that such a horizontal rule is seldom typographically sound
+in many contexts.
+
+Three asterisks produce a centered asterism.
+
+***
+
+Three space-separated asteriks produce a "dinkus".
+
+* * *
+
+Three dashes produce a centered horizontal rule, taking 20% of the line.
+
+---
+
+Four dashes produce a centered horizontal rule, taking 33% of the line.
+
+----
+
+Four space-separated dashes produce, provided your class or loaded packages
+support it^[I.e. the **couyards.sile** package module is available.], a nice curvy pendant.
+What you see just below therefore depends on that support being present or not.
+
+- - - -
+
+Otherwise, everything else produces a full rule.^[Since this feature may elvove and support
+more patterns, let's guarantee that underscores ared reserved, and will always produce a full
+horizontal rule. This author finds three or more underscores ugly and never used them in
+Markdown; as of bad typography, it renders justice to the full rule.]
+
+___
+
+With all these variants at your disposal, you should be able to typeset print-quality
+books and novels, with the appropriate dividers within chapters, or at the end of thereof.
 
 ### Lists
 
@@ -120,13 +157,13 @@ By the way,
 
     And that's all about regular lists.
 
-Task lists following the GitHub-Flavored Markdown (GFM) format are supported too:
+Task lists following the GitHub-Flavored Markdown (GFM) format are supported too.
 
  - [ ] Unchecked item
  - [x] Checked item
 
 Definition lists^[As in Pandoc, using the syntax of PHP Markdown Extra with some
-extensions.] are also decently supported:
+extensions.] are also decently supported.
 
 apples
   : Good for making applesauce.
@@ -451,10 +488,10 @@ it may change when new features are introduced in the software.
 
 Pandoc also supports "custom writers" developed in Lua^[<https://pandoc.org/custom-writers.html>].
 
-This custom writer API is fairly recent and might change. Actually, besides a "Classic style" API,
-there's now also a "New style" API...  While such custom writers may have some rough edges, the idea
-is quite appealing nevertheless. After all, SILE is mostly written in Lua, so the skills are there
-in the community.
+This custom writer API is fairly recent and might change. Actually, besides a "Classic style" API
+(pending deprecation), there's now also a "New style" API...  While such custom writers may have
+some rough edges, the idea is quite appealing nevertheless. After all, SILE is mostly written in Lua,
+so the skills are there in the community.
 
 Again, there is no official solution using this conversion path, but some pretty neat
 experimental results have been

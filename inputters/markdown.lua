@@ -85,15 +85,17 @@ local function SileAstWriter (options)
   writer.singlequoted = simpleCommandWrapper("singlequoted")
   writer.doublequoted = simpleCommandWrapper("doublequoted")
 
-  -- Special case for hrule (simple too, but arguments from lunamark has to be ignored)
-  writer.hrule = function () return utils.createCommand("fullrule") end
-
   -- More complex mapping cases
 
   writer.header = function (s, level, attr)
     local opts = attr or {} -- passthru (class and key-value pairs)
     opts.level = level
     return utils.createCommand("markdown:internal:header", opts, s)
+  end
+
+  writer.hrule = function (separator)
+    -- The argument is the (right-)trimmed hrule separator
+    return utils.createCommand("markdown:internal:hrule", { separator = separator })
   end
 
   writer.bulletlist = function (items)
@@ -291,6 +293,38 @@ local function SileAstWriter (options)
   return writer
 end
 
+-- HorizontalRule custom extension
+-- There's quite a bit of boilerplate here for such a simple change,
+-- the mere addition of a capture in lineof(), but we don't want to bother
+-- the Lunamark folks with a non-standard interpretation.
+local lpeg = require("lpeg")
+  local parsers = {}
+  parsers.asterisk       = lpeg.P("*")
+  parsers.dash           = lpeg.P("-")
+  parsers.underscore     = lpeg.P("_")
+  parsers.spacechar      = lpeg.S("\t ")
+  parsers.space          = lpeg.P(" ")
+  parsers.optionalspace  = parsers.spacechar^0
+  parsers.leader         = parsers.space^-3
+  parsers.newline        = lpeg.P("\n")
+  parsers.blankline      = parsers.optionalspace
+                         * parsers.newline / "\n"
+  parsers.lineof = function (c)
+                    return (parsers.leader * lpeg.C((lpeg.P(c) * parsers.optionalspace)^3)
+                            * parsers.newline * parsers.blankline^1) / function(s) return s:gsub("%s*$", "") end
+                  end
+local function customSyntax (writer)
+  return function (syntax)
+    syntax.HorizontalRule = (parsers.lineof(parsers.asterisk)
+                            + parsers.lineof(parsers.dash)
+                            + parsers.lineof(parsers.underscore)
+                            ) / writer.hrule
+    return syntax
+  end
+end
+
+-- Now we have everything needed to implement a SILE inputter.
+
 local base = require("inputters.base")
 
 local inputter = pl.class(base)
@@ -348,6 +382,9 @@ function inputter:parse (doc)
     layout = "minimize" -- The default layout is to output \n\n as inter-block separator
                         -- Let's cancel it completely, and insert our own \par where needed.
   })
+
+  extensions.alter_syntax = customSyntax(writer)
+
   local parse = reader.new(writer, extensions)
   local tree = parse(doc)
   -- The Markdown parsing returns a string or a SILE AST table.
