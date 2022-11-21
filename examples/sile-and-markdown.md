@@ -376,6 +376,17 @@ SILE.typesetter:typeset(" is called from Lua.")
 You now have the best of two worlds in your hands, bridging together Markdown and SILE
 so that you can achieve wonderful things, we have no idea of. Surprise us!
 
+### HTML elements
+
+For mere convenience, the `<br>` element is supported in addition to the standard ways to indicate
+a hard line break (see the "[Basic typesetting](#basic-typesetting)" section),
+therefore...<br>... it is honored.
+
+Would you have a long word, such as
+AAAAA<wbr>BBBBB<wbr>CCCCC<wbr>DDDDD<wbr>EEEEE<wbr>FFFFF<wbr>GGGGG<wbr>HHHHH<wbr>IIIII<wbr>JJJJJ<wbr>KKKKK<wbr>LLLLL<wbr>MMMM, the `<wbr>` element (introduced in HTML5) represents a word break opportunity.
+It may help when the line-breaking rules would not otherwise create a break at acceptable locations.
+In this admittedly lame example, we used it between groups of a same letter.
+
 ### Configuration {#configuration}
 
 Most Markdown syntax extensions are enabled by default. You can pass additional options to

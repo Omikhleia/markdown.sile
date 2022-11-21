@@ -134,6 +134,7 @@ which also serves as documentation, showcase and reference guide.
 - Line blocks (with enhanced provision for poetry)
 - Hard line breaks
 - Raw attributes (escaping to inline SILE or Lua scripting)
+- Raw inline HTML convenience subset
 
 ## License
 

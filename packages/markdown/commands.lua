@@ -259,10 +259,20 @@ function package:registerCommands ()
 
   self:registerCommand("markdown:internal:rawinline", function (options, content)
     local format = SU.required(options, "format", "rawcontent")
+    local rawtext = content[1]
+    if type(rawtext) ~= "string" then
+      SU.error("Raw inline content shall be a string, something bad occurred in markdown processing")
+    end
     if format == "sile" then
-      SILE.processString(content[1], "sil")
+      SILE.processString(rawtext, "sil")
     elseif format == "sile-lua" then
-      SILE.processString(content[1], "lua")
+      SILE.processString(rawtext, "lua")
+    elseif format == "html" then
+      if rawtext:match("^<br[>/%s]") then
+        SILE.call("cr")
+      elseif rawtext:match("^<wbr[>/%s]") then
+        SILE.call("penalty", { penalty = 100 })
+      end
     end
   end, "Raw native inline content in Markdown (internal)")
 
