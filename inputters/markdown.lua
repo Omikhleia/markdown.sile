@@ -218,6 +218,10 @@ local function SileAstWriter (options)
     return utils.createStructuredCommand("markdown:internal:lineblock", {}, buffer)
   end
 
+  writer.inline_html = function (inlinehtml)
+    return utils.createCommand("markdown:internal:rawinline", { format = "html" }, inlinehtml)
+  end
+
   -- Final AST conversion logic.
   --   The lunamark "AST" is made of "ropes":
   --     "A rope is an array whose elements may be ropes, strings, numbers,
