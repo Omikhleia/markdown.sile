@@ -430,7 +430,7 @@ Pandoc.Quoted = function (quotetype, inlines)
   if quotetype.t == "DoubleQuote" then
     return utils.createCommand("doublequoted", {}, content)
   end
-  return utils.createCommand("singlequoted", content)
+  return utils.createCommand("singlequoted", {}, content)
 end
 
 -- Cite [Citation] [Inline]
@@ -472,7 +472,7 @@ end
 
 -- RawInline Format Text
 Pandoc.RawInline = function (format, text)
-  return utils.createCommand("markdown:internal:rawinline", { format = format}, text)
+  return utils.createCommand("markdown:internal:rawinline", { format = format }, text)
 end
 
 -- Link Attr [Inline] Target
