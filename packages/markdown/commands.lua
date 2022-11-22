@@ -410,6 +410,7 @@ function package:registerCommands ()
 
     SILE.process(content)
     if caption then
+      SILE.call("novbreak")
       SILE.call("font", {
         size = SILE.settings:get("font.size") * 0.95
       }, function ()
@@ -429,7 +430,7 @@ function package:registerCommands ()
     SILE.call("center", {}, function ()
       SILE.process(content)
       if caption then
-        SILE.call("par")
+        SILE.call("novbreak")
         SILE.call("font", {
           size = SILE.settings:get("font.size") * 0.95
         }, caption)
