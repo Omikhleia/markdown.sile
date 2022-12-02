@@ -2,6 +2,8 @@
 -- Markdown native support for SILE
 -- Using the lunamark library.
 --
+-- License: MIT (c) 2022 Omikhleia
+--
 local base = require("packages.base")
 
 local package = pl.class(base)

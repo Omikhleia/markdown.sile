@@ -2,10 +2,12 @@
 -- Pandoc JSON AST native inputter for SILE
 -- Focussed on Markdown needs (esp. table support)
 --
+-- License: MIT (c) 2022 Omikhleia
+--
 -- AST conversion relies on the Pandoc types specification:
 -- https://hackage.haskell.org/package/pandoc-types
 --
--- Reusing the commands made for the "markdown" inputter/package.
+-- Reusing the commands initially made for the "markdown" inputter/package.
 --
 local Pandoc = {
    API_VERSION = { 1, 22, 0 } -- Supported API version (semver)
@@ -554,7 +556,10 @@ function inputter.parse (_, doc)
   -- The Markdown parsing returns a SILE AST.
   -- Wrap it in a document structure so we can just process it, and if at
   -- root level, load a default support class.
-  tree = { { tree, command = "document", options = { class = "markdown" } } }
+  tree = { { tree,
+             command = "document", options = { class = "markdown" },
+             lno = 0, col = 0, -- For SILE 0.14.5 (issue https://github.com/sile-typesetter/sile/issues/1637)
+  } }
   return tree
 end
 

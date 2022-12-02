@@ -2,6 +2,8 @@
 -- Common commands for Markdown support in SILE, when there is no
 -- direct mapping to existing commands or packages.
 --
+-- License: MIT (c) 2022 Omikhleia
+--
 -- Split in a standalone package so that it can be reused and
 -- generalized somewhat independently from the undelying parsing code.
 --
