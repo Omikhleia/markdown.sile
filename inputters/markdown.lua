@@ -121,8 +121,10 @@ local function SileAstWriter (options)
     return utils.createStructuredCommand("enumerate", { start = startnum or 1, display = display, after = after }, contents)
   end
 
-  writer.link = function (label, uri, _) -- label, uri, title
-    return utils.createCommand("markdown:internal:link", { src = uri }, { label })
+  writer.link = function (label, uri, _, attr) -- label, uri, title, attr
+    local opts = attr or {} -- passthru (class and key-value pairs)
+    opts.src = uri
+    return utils.createCommand("markdown:internal:link", opts, { label })
   end
 
   writer.image = function (label, src, _, attr) -- label, src, title, attr
