@@ -1225,13 +1225,25 @@ function M.new(writer, options)
                             return writer.link(writer.string(email),"mailto:"..email)
                           end
 
-  larsers.DirectLink    = (parsers.tag / parse_inlines_no_link)  -- no links inside links
-                        * parsers.spnl
-                        * parsers.lparent
-                        * (parsers.url + Cc(""))  -- link can be empty [foo]()
-                        * parsers.optionaltitle
-                        * parsers.rparent
-                        / writer.link
+  if options.link_attributes then
+    -- Support additional attributes
+    larsers.DirectLink    = (parsers.tag / parse_inlines_no_link)  -- no links inside links
+                          * parsers.spnl
+                          * parsers.lparent
+                          * (parsers.url + Cc(""))  -- link can be empty [foo]()
+                          * parsers.optionaltitle
+                          * parsers.rparent
+                          * (parsers.attributes + Ct(""))
+                          / writer.link
+  else
+    larsers.DirectLink    = (parsers.tag / parse_inlines_no_link)  -- no links inside links
+                          * parsers.spnl
+                          * parsers.lparent
+                          * (parsers.url + Cc(""))  -- link can be empty [foo]()
+                          * parsers.optionaltitle
+                          * parsers.rparent
+                          / writer.link
+  end
 
   larsers.IndirectLink  = parsers.tag * (C(parsers.spnl) * parsers.tag)^-1
                         / indirect_link
