@@ -125,7 +125,7 @@ which also serves as documentation, showcase and reference guide.
 - Bracketed spans and fenced divs (with provisions for language change, custom styles, etc.)
 - Underlines
 - Small caps
-- Links
+- Links (with special provisions for advanced cross-references)
 - Lists
   - Standard ordered lists and bullet lists
   - Fancy lists
