@@ -116,6 +116,13 @@ function package:_init (_)
   self.class:loadPackage("svg")
   self.class:loadPackage("textsubsuper")
   self.class:loadPackage("url")
+
+  -- Optional packages
+  pcall(function () return self.class:loadPackage("couyards") end)
+end
+
+function package:hasCouyards ()
+  return self.class.packages["couyards"]
 end
 
 function package:registerCommands ()
@@ -143,6 +150,33 @@ function package:registerCommands ()
       SILE.call("par")
     end
   end, "Paragraphing in Markdown (internal)")
+
+  self:registerCommand("markdown:internal:hrule", function (options, _)
+    if options.separator == "***" then
+      SILE.call("center", {}, { "⁂" }) -- Asterism
+    elseif options.separator == "* * *" then
+      SILE.call("center", {}, { "* * *" }) -- Dinkus (with em-spaces)
+    elseif options.separator == "---" then
+        SILE.call("center", {}, function ()
+          SILE.call("raise", { height = "0.5ex" }, function ()
+            SILE.call("hrule", { width = "20%lw" })
+        end)
+      end)
+    elseif options.separator == "----" then
+      SILE.call("center", {}, function ()
+        SILE.call("raise", { height = "0.5ex" }, function ()
+          SILE.call("hrule", { width = "33%lw" })
+        end)
+      end)
+    elseif options.separator == "- - - -" and self:hasCouyards() then
+      SILE.call("smallskip")
+      SILE.call("couyard", { type = 6, width = "default" })
+    elseif options.separator == "--------------" then -- Page break
+      SILE.call("eject")
+    else
+      SILE.call("fullrule")
+    end
+  end, "Horizontal rule in Markdown (internal)")
 
   self:registerCommand("markdown:internal:header", function (options, content)
     local level = SU.required(options, "level", "header")
