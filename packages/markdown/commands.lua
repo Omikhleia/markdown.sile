@@ -171,6 +171,8 @@ function package:registerCommands ()
     elseif options.separator == "- - - -" and self:hasCouyards() then
       SILE.call("smallskip")
       SILE.call("couyard", { type = 6, width = "default" })
+    elseif options.separator == "--------------" then -- Page break
+      SILE.call("eject")
     else
       SILE.call("fullrule")
     end

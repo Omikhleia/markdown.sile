@@ -91,7 +91,7 @@ Pandoc writers recognize.
 In standard Markdown, a line containing a row of three or more asteriks, dashes, or underscores
 (optionally separated by spaces) are supposed to produce a horizontal rule. This converter
 however slightly deviates from that simple specification^[And also from Pandoc, therefore.
-Quite obviously, `\autodoc:package{pandocast}`{=sile} package will also only show
+Quite obviously, the `\autodoc:package{pandocast}`{=sile} package will also only show
 horizontal rules.],
 for the mere reason that such a horizontal rule is seldom typographically sound
 in many contexts.
@@ -112,14 +112,20 @@ Four dashes produce a centered horizontal rule, taking 33% of the line.
 
 ----
 
-Four space-separated dashes produce, provided your class or loaded packages
-support it^[I.e. the **couyards.sile** package module is available.], a nice curvy pendant.
+Four space-separated dashes produce, provided appropriate package support is
+available^[I.e. the **couyards.sile** package module is installed.], a nice curvy pendant.
 What you see just below therefore depends on that support being present or not.
 
 - - - -
 
+Finally, without demonstrating it here, fourteen consecutive dashes enforce a page break.^[Why exactly
+fourteen?
+"The original says _fourteen_, but there is ample reason to infer that, as used by Asterion,
+this numeral stands for _infinite_." (Jorge Luis [Borges]{.smallcaps}, "The House of Asterion".
+In _Labyrinths: Selected Stories and Other Writings_, 1964.)]
+
 Otherwise, everything else produces a full rule.^[Since this feature may elvove and support
-more patterns, let's guarantee that underscores ared reserved, and will always produce a full
+more patterns, let's guarantee that underscores are reserved, and will always produce a full
 horizontal rule. This author finds three or more underscores ugly and never used them in
 Markdown; as of bad typography, it renders justice to the full rule.]
 
@@ -131,7 +137,7 @@ books and novels, with the appropriate dividers within chapters, or at the end o
 ### Lists
 
 Unordered lists (a.k.a. itemized or bullet lists) are obviously supported, or
-we would not have been able to use them in the previous section.
+we would not have been able to use them in the previous sections.
 
 Ordered lists are supported as well, and also accept some of the "fancy lists" features
 from Pandoc. The starting number is honored, and you have the flexibility to use
