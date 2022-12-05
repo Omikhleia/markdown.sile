@@ -1295,6 +1295,25 @@ function M.new(writer, options)
                            return writer.div(div, attrs)
                          end
 
+  -- inspired by MkDocs' syntax: three exclamation marks, a space and a tag,
+  -- followed by inline contents (acting as title). We do not mandate the title
+  -- to be double quoted as in MkDocs, thiss is useless and annoying when one also
+  -- want quotes in that title.
+  larsers.admonhead  = parsers.exclamation * parsers.exclamation * parsers.exclamation
+                       * parsers.space * C(parsers.letter^1)
+                       * ((parsers.space^1 * Ct((parsers.linechar^0) / parse_inlines * parsers.newline))
+                         + Cc({}) * parsers.newline)
+
+  -- strip of the leading spaces
+  larsers.admonline  = (parsers.space * parsers.space * parsers.space * parsers.space) / ""
+                       * parsers.linechar^1
+                       * parsers.newline^0
+
+  -- run throught the header, then through thr (indented) blocks possibly seperatad by blank lines
+  larsers.Admonition  = larsers.admonhead
+                        * (Cs((parsers.blankline^0 * larsers.admonline^0)) / parse_blocks)
+                        / writer.admonition
+
   -- strip off leading > and indents, and run through blocks
   larsers.Blockquote  = Cs((((parsers.leader * parsers.more * parsers.space^-1)/""
                              * parsers.linechar^0 * parsers.newline)^1
@@ -1678,6 +1697,7 @@ function M.new(writer, options)
       Blank                 = larsers.Blank,
 
       Block                 = V("Blockquote")
+                            + V("Admonition")
                             + V("PipeTable")
                             + V("Verbatim")
                             + V("FencedCodeBlock")
@@ -1693,6 +1713,7 @@ function M.new(writer, options)
                             + V("Paragraph")
                             + V("Plain"),
 
+      Admonition            = larsers.Admonition,
       Blockquote            = larsers.Blockquote,
       Verbatim              = larsers.Verbatim,
       FencedCodeBlock       = larsers.FencedCodeBlock,
@@ -1818,6 +1839,10 @@ function M.new(writer, options)
 
   if not options.line_blocks then
     syntax.LineBlock = parsers.fail
+  end
+
+  if not options.admonitions then
+    syntax.Admonition = parsers.fail
   end
 
   if options.alter_syntax and type(options.alter_syntax) == "function" then
