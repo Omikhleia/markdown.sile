@@ -108,9 +108,11 @@ function package:_init (_)
   -- The claas should be responsible for loading the appropriate higher-level
   -- constructs, see fallback commands further below for more details.
   self.class:loadPackage("color")
+  self.class:loadPackage("framebox")
   self.class:loadPackage("image")
   self.class:loadPackage("lists")
   self.class:loadPackage("ptable")
+  self.class:loadPackage("pullquote")
   self.class:loadPackage("rules")
   self.class:loadPackage("smartquotes")
   self.class:loadPackage("svg")
@@ -119,10 +121,15 @@ function package:_init (_)
 
   -- Optional packages
   pcall(function () return self.class:loadPackage("couyards") end)
+  pcall(function () return self.class:loadPackage("resilient.epigraph") end)
 end
 
 function package:hasCouyards ()
   return self.class.packages["couyards"]
+end
+
+function package:hasEpigraph ()
+  return self.class.packages["resilient.epigraph"]
 end
 
 function package:registerCommands ()
@@ -408,6 +415,47 @@ function package:registerCommands ()
     end
     SILE.call("smallskip")
   end, "Default line block in Markdown (internal)")
+
+  self:registerCommand("markdown:internal:admonition", function (options, content)
+    if type(content) ~= "table" then
+      SU.error("Expected a table AST content in admonition environment")
+    end
+    local title = extractFromTree(content, "title")
+
+    if options.type == "epigraph" and self:hasEpigraph() then
+      if title then
+        -- Trick: Put the extract title back as "\source"
+        title.command = "source"
+        content[#content+1] = title
+      end
+      SILE.call("epigraph", {}, content)
+    else
+      SILE.call("smallskip")
+      SILE.settings:temporarily(function ()
+        SILE.settings:set("document.parindent", SILE.nodefactory.glue())
+        SILE.call("roundbox", { padding="2%fw",
+                                bordercolor = "#448AFF", fillcolor = "#B3CFFF",
+                                shadowcolor = "#96A8C7",
+                                shadow = true }, function ()
+          SILE.call("parbox", { width = "96%lw "}, function ()
+            SILE.settings:temporarily(function ()
+              --SILE.settings:set("document.lskip", SILE.nodefactory.glue())
+              --SILE.settings:set("document.rskip", SILE.nodefactory.glue())
+              SILE.settings:set("document.parindent", SILE.nodefactory.glue())
+              if title then
+                SILE.call("font", { weight = 700 }, title)
+                SILE.call("novbreak")
+              end
+              SILE.process(content)
+
+              SILE.call("par")
+            end)
+          end)
+        end)
+      end)
+      SILE.call("smallskip")
+    end
+  end, "A fallback command for Markdown to insert a captioned table")
 
   -- B. Fallback commands
 

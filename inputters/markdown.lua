@@ -226,6 +226,14 @@ local function SileAstWriter (options)
     return utils.createCommand("markdown:internal:rawinline", { format = "html" }, inlinehtml)
   end
 
+  writer.admonition = function (t, head, body)
+    local admon = {
+      body or {},
+      utils.createCommand("title", {}, head)
+    }
+    return utils.createStructuredCommand("markdown:internal:admonition", { type = t }, admon)
+  end
+
   -- Final AST conversion logic.
   --   The lunamark "AST" is made of "ropes":
   --     "A rope is an array whose elements may be ropes, strings, numbers,
@@ -365,6 +373,7 @@ function inputter:parse (doc)
     pipe_tables = true,
     header_attributes = true,
     line_blocks = true,
+    admonitions = true,
     escaped_line_breaks = true,
   }
   for k, v in pairs(self.options) do

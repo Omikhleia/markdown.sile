@@ -86,4 +86,47 @@ our package might not support them well. Its main focus is on Markdown parity wi
 
 \include[src=pandoc-tables.pandoc]
 
+\begin[type=markdown]{raw}
+
+- - - -
+
+## Experimental features
+
+The syntax and elements presented in this section are _experimental_. They might change or be
+removed in later versions.
+
+### Admonitions
+
+The native `\autodoc:package{markdown}`{=sile} package also supports "admonitions", also commonly known
+as _call-outs_, which can be defined in Markdown by using a simple syntax loosely inspired by MkDocs'
+similar extension.
+
+!!! info Get ready!
+    This is an _information_ box.
+
+This was obtained with:
+
+```
+!!! info Get ready!
+    This is an _information_ box.
+```
+
+The "tag line", introduced by three exclamation marks is composed of a keyword (such as "info"),
+possibly followed by any inline elements defining the title of the admonition.
+Subsequent four-space indented lines define its body.
+As a small difference with MkDocs's syntax, note that the title doesn't have to be double-quoted.
+
+### Epigraphs
+
+The above syntax may also be used for other purposes than "admonitions".
+When the keyword is "epigraph" and the optional `\autodoc:package{resilient.epigraph}`{=sile} package
+is available, you get a rather nice epigraph.
+
+!!! epigraph Jorge Luis [Borges]{.smallcaps}, "The Library of Babel"
+
+    The Library is a sphere whose exact centre is any one of its hexagons and whose circumference
+    is inaccessible.
+
+\end{raw}
+
 \end{document}
