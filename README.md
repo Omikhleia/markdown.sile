@@ -7,6 +7,7 @@
 This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting
 system provides a complete redesign of the native Markdown support for SILE, with
 a great set of Pandoc-like extensions and plenty of extra goodies.
+<img align="right" width="40%" src="examples/markdown-sile-logo.png">
 
 - **markdown** inputter and package: native support of Markdown files.
 - **pandocast** inputter and package: native support of Pandoc JSON AST files.
