@@ -123,6 +123,8 @@ fourteen?
 "The original says _fourteen_, but there is ample reason to infer that, as used by Asterion,
 this numeral stands for _infinite_." (Jorge Luis [Borges]{.smallcaps}, "The House of Asterion".
 In _Labyrinths: Selected Stories and Other Writings_, 1964.)]
+It gives some flexibility to authors for marking a page break, and still get something visible
+in its place with other converters.
 
 Otherwise, everything else produces a full rule.^[Since this feature may elvove and support
 more patterns, let's guarantee that underscores are reserved, and will always produce a full
@@ -263,7 +265,7 @@ another more powerful way to leverage Markdown with SILE’s full processing cap
 
 ### Images
 
-Here is an image: ![Invisible caption as in inline](./gutenberg.png "An exemplary image"){width=2.5cm}
+Here is an image: ![Invisible caption as in inline](./gutenberg.jpg "An exemplary image"){width=3cm}
 
 ![](./examples/manicule.svg){height=0.9em} SVG is supported too.
 
@@ -272,7 +274,7 @@ by appending the `{width=... height=...}` attributes^[And possibly other attribu
 they are all passed through to the underlying SILE package.] after the usual Markdown
 image syntax ---Note that any unit system supported by SILE is accepted.
 
-![This man is Gutenberg](./gutenberg.png "An exemplary image"){width=2.5cm}
+![This man is Gutenberg](./gutenberg.jpg "An exemplary image"){width=3cm}
 
 An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph,
 will be rendered as a figure with a caption. If your class or previously loaded packages

@@ -6,14 +6,55 @@
 \use[module=packages.framebox]
 \use[module=packages.markdown]
 \use[module=packages.pandocast]
+\use[module=packages.fancytoc]
 \use[module=packages.resilient.poetry]
 \font[family=Libertinus Serif]
 \font:add-fallback[family=Symbola, size=8pt]
 \set[parameter=autodoc.highlighting, value=true]
 \language[main=en]
 \footnote:rule%
+\pdf:metadata[key=Title, value=Markdown to PDF with SILE]
+\pdf:metadata[key=Author, value=Didier Willis]
+%
+% Quick and dirty title page and front matter
+% One day maybe we'll do it fully in Markdown :)
+%
+\nofoliothispage
+\hbox{}
+\vfill
 
+\begin{center}
+\img[src=examples/markdown-sile-logo.png, width=85%fw]
+
+\skip[height=1cm]
+\begin[size=16pt, weight=700]{font}
+Markdown to PDF with SILE
+
+—
+
+Ultimate Guide\break
+&\break
+Showcase Document
+
+\end{font}
+\end{center}
+
+\vfill\hbox{}
+\supereject
+\hbox{}
+\vfill
+
+\noindent{}© 2022 Didier Willis.
+
+\noindent{}This material may be distributed only subject to the terms and conditions set forth in the
+Creative Commons Attribution, Share-Alike License,
+version 2.0 (http://creativecommons.org/licenses/by-sa/2.0/).
+
+\pagebreak
+\fancytableofcontents[start=2]
+%
 % Standard documentation/showcase in Markdown
+%
 \include[src=sile-and-markdown.md]
 
 % Extra bonus
