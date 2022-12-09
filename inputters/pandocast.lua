@@ -358,7 +358,7 @@ Pandoc.Table = function (_, caption, colspecs, thead, tbodies, tfoot)
 
   local cWidth = {}
   for i = 1, numberOfCols do
-    cWidth[i] = string.format("%.0f%%lw", 100 / numberOfCols)
+    cWidth[i] = string.format("%.5f%%lw", 100 / numberOfCols)
   end
   local ptable = utils.createStructuredCommand("ptable", {
     cols = table.concat(cWidth, " "),

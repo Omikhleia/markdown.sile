@@ -180,7 +180,7 @@ local function SileAstWriter (options)
 
     local cWidth = {}
     for i = 1, numberOfCols do
-      cWidth[i] = string.format("%.0f%%lw", 100 / numberOfCols)
+      cWidth[i] = string.format("%.5f%%lw", 100 / numberOfCols)
     end
     local ptable = utils.createStructuredCommand("ptable", { header = true, cols = table.concat(cWidth, " ") }, ptableRows)
 
