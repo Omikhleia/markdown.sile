@@ -1,8 +1,8 @@
 # markdown.sile
 <img align="right" width="40%" src="examples/markdown-sile-logo.png">
 
-[![license](https://img.shields.io/github/license/Omikhleia/markdown.sile)](LICENSE)
-[![Luacheck](https://img.shields.io/github/workflow/status/Omikhleia/markdown.sile/Luacheck?label=Luacheck&logo=Lua)](https://github.com/Omikhleia/markdown.sile/actions?workflow=Luacheck)
+[![license](https://img.shields.io/github/license/Omikhleia/markdown.sile?label=License)](LICENSE)
+[![Luacheck](https://img.shields.io/github/actions/workflow/status/Omikhleia/markdown.sile/luacheck.yml?branch=main&label=Luacheck&logo=Lua)](https://github.com/Omikhleia/markdown.sile/actions?workflow=Luacheck)
 [![Luarocks](https://img.shields.io/luarocks/v/Omikhleia/markdown.sile?label=Luarocks&logo=Lua)](https://luarocks.org/modules/Omikhleia/markdown.sile)
 
 This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting
