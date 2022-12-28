@@ -300,6 +300,12 @@ function package:registerCommands ()
       SU.error("Raw inline content shall be a string, something bad occurred in markdown processing")
     end
     if format == "sile" then
+      -- https://github.com/Omikhleia/markdown.sile/issues/39
+      -- SILE 0.14.0..0.14.5 did not require the raw text to be wrapped in a
+      -- document tree. But SILE 0.14.6 now does, or it errors.
+      -- I checked that a least SILE 0.14.4 is ok too with that document
+      -- wrapping, so the workaround just below seems safe and compatible...
+      rawtext = "\\document{"..rawtext.."}"
       SILE.processString(rawtext, "sil")
     elseif format == "sile-lua" then
       SILE.processString(rawtext, "lua")
@@ -335,7 +341,7 @@ function package:registerCommands ()
   end, "Block quote in Markdown (internal)")
 
   self:registerCommand("markdown:internal:captioned-table", function (_, content)
-    -- Makes it easier for class/packages to provided their own captioned-table
+    -- Makes it easier for class/packages to provide their own captioned-table
     -- environment if they want to do so (possibly with more features,
     -- e.g. managing list of tables, numbering and cross-references etc.),
     -- while minimally providing a default fallback solution.
@@ -347,7 +353,7 @@ function package:registerCommands ()
   end, "Captioned table in Markdown (internal)")
 
   self:registerCommand("markdown:internal:captioned-figure", function (_, content)
-    -- Makes it easier for class/packages to provided their own captioned-figure
+    -- Makes it easier for class/packages to provide their own captioned-figure
     -- environment if they want to do so (possibly with more features,
     -- e.g. managing list of tables, numbering and cross-references etc.),
     -- while minimally providing a default fallback solution.
