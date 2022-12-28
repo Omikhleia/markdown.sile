@@ -173,8 +173,8 @@ parsers.attributes  = P("{") * parsers.optionalspace
                       / function (hashid, classes, attr)
                           attr.id = hashid ~= "" and hashid or nil
                           attr.class = table.concat(classes or {}, " ")
-                            return attr
-                          end
+                          return attr
+                        end
 -- Raw attributes similar to Pandoc (=format key=value key2="value 2")
 parsers.raw              = parsers.equal * C((parsers.identifier)^1) * parsers.optionalspace
 parsers.rawattributes    = P("{") * parsers.optionalspace
@@ -228,17 +228,26 @@ local function captures_geq_length(_,i,a,b)
   return #a >= #b and i
 end
 
-parsers.infostring  = (parsers.linechar - (parsers.backtick
-                    + parsers.space^1 * parsers.newline))^0
+parsers.tilde_infostring
+                    = C((parsers.linechar
+                       - (parsers.spacechar^1 * parsers.newline))^0)
+                    * parsers.optionalspace
+                    * (parsers.newline + parsers.eof)
+
+parsers.backtick_infostring
+                    = C((parsers.linechar
+                       - (parsers.backtick
+                         + parsers.spacechar^1 * parsers.newline))^0)
+                    * parsers.optionalspace
+                    * (parsers.newline + parsers.eof)
 
 local fenceindent
-parsers.fencehead   = function(char)
+parsers.fencehead   = function(char, infostring)
   return              C(parsers.nonindentspace) / function(s)
                                                     fenceindent = #s
                                                   end
                     * Cg(char^3, "fencelength")
-                    * parsers.optionalspace * C(parsers.infostring)
-                    * parsers.optionalspace * parsers.newline + parsers.eof
+                    * parsers.optionalspace * infostring
 end
 
 parsers.fencetail   = function(char)
@@ -253,6 +262,29 @@ parsers.fencedline  = function(char)
                         return s:gsub("^" .. string.rep(" ?", fenceindent), "")
                        end
 end
+
+------------------------------------------------------------------------------
+-- Parsers used for fenced divs
+------------------------------------------------------------------------------
+
+parsers.fenced_div_infostring
+                         = C((parsers.linechar
+                            - ( parsers.spacechar^1
+                              * parsers.colon^1))^1)
+
+parsers.fenced_div_begin = parsers.nonindentspace
+                         * parsers.colon^3
+                         * parsers.optionalspace
+                         * parsers.fenced_div_infostring
+                         * ( parsers.spacechar^1
+                           * parsers.colon^1)^0
+                         * parsers.optionalspace
+                         * (parsers.newline + parsers.eof)
+
+parsers.fenced_div_end   = parsers.nonindentspace
+                         * parsers.colon^3
+                         * parsers.optionalspace
+                         * (parsers.newline + parsers.eof)
 
 -----------------------------------------------------------------------------
 -- Parsers used for markdown tags and links
@@ -543,19 +575,16 @@ parsers.urlchar = parsers.anyescaped - parsers.newline - parsers.more
 parsers.Block        = V("Block")
 
 parsers.TildeFencedCodeBlock
-                     = parsers.fencehead(parsers.tilde)
+                     = parsers.fencehead(parsers.tilde,
+                                         parsers.tilde_infostring)
                      * Cs(parsers.fencedline(parsers.tilde)^0)
                      * parsers.fencetail(parsers.tilde)
 
 parsers.BacktickFencedCodeBlock
-                     = parsers.fencehead(parsers.backtick)
+                     = parsers.fencehead(parsers.backtick,
+                                         parsers.backtick_infostring)
                      * Cs(parsers.fencedline(parsers.backtick)^0)
                      * parsers.fencetail(parsers.backtick)
-
-parsers.ColonFencedDivBlock
-                     = parsers.fencehead(parsers.colon)
-                     * Cs(parsers.fencedline(parsers.colon)^0)
-                     * parsers.fencetail(parsers.colon)
 
 parsers.lineof = function(c)
     return (parsers.leader * (P(c) * parsers.optionalspace)^3
@@ -877,13 +906,6 @@ function M.new(writer, options)
                       return larsers.inlines_nbsp
                     end)
 
-  local parse_attributes
-    = create_parser("parse_attributes",
-                    function()
-                      -- N.B. This one uses a global parser
-                      return parsers.attributes
-                    end)
-
   local parse_markdown
 
   ------------------------------------------------------------------------------
@@ -1100,8 +1122,28 @@ function M.new(writer, options)
   if not options.fenced_code_blocks or options.require_blank_before_fenced_code_blocks then
     larsers.fencestart = parsers.fail
   else
-    larsers.fencestart = parsers.fencehead(parsers.backtick)
-                       + parsers.fencehead(parsers.tilde)
+    larsers.fencestart = parsers.fencehead(parsers.backtick,
+                                           parsers.backtick_infostring)
+                       + parsers.fencehead(parsers.tilde,
+                                           parsers.tilde_infostring)
+  end
+
+  if options.fenced_divs then
+    local function check_div_level(s, i, current_level) -- luacheck: ignore s i
+      current_level = tonumber(current_level)
+      return current_level > 0
+    end
+
+    local is_inside_div = Cmt(Cb("div_level"), check_div_level)
+
+    larsers.fenced_div_out = is_inside_div  -- break out of a paragraph when we
+                                            -- are inside a div and see a closing tag
+                           * parsers.fenced_div_end
+
+    larsers.fencestart = larsers.fencestart
+                       + larsers.fenced_div_out
+  else
+    larsers.fenced_div_out = parsers.fail
   end
 
   larsers.Endline   = parsers.newline * -( -- newline, but not before...
@@ -1288,18 +1330,40 @@ function M.new(writer, options)
                                                      writer.string(infostring))
                          end
 
-  larsers.FencedDiv    = (parsers.ColonFencedDivBlock)
-                       / function(infostring, content)
-                           local attrs = infostring ~= "" and parse_attributes(infostring) or {}
-                           local div = parse_blocks(content)
-                           return writer.div(div, attrs)
-                         end
+  local function increment_div_level(increment)
+    local function update_div_level(s, i, current_level) -- luacheck: ignore s i
+      current_level = tonumber(current_level)
+      local next_level = tostring(current_level + increment)
+      return true, next_level
+    end
+
+    return Cg( Cmt(Cb("div_level"), update_div_level)
+             , "div_level")
+  end
+
+  larsers.FencedDiv = parsers.fenced_div_begin * increment_div_level(1)
+                    * parsers.skipblanklines
+                    * Ct( (V("Block") - parsers.fenced_div_end)^-1
+                        * (parsers.blanklines / function()
+                                              return writer.interblocksep
+                                            end
+                          * (V("Block") - parsers.fenced_div_end))^0)
+                    * parsers.skipblanklines
+                    * parsers.fenced_div_end * increment_div_level(-1)
+                    / function (infostring, div)
+                        local attr = lpeg.match(Cg(parsers.attributes), infostring)
+                        if attr == nil then
+                          attr = {class=infostring}
+                        end
+                        return div, attr
+                      end
+                    / writer.div
 
   -- strip off leading > and indents, and run through blocks
   larsers.Blockquote  = Cs((((parsers.leader * parsers.more * parsers.space^-1)/""
                              * parsers.linechar^0 * parsers.newline)^1
                             * (-(parsers.leader * parsers.more
-                                + parsers.blankline) * parsers.linechar^1
+                                + parsers.blankline + larsers.fenced_div_out) * parsers.linechar^1
                               * parsers.newline)^0 * parsers.blankline^0
                            )^1) / parse_blocks / writer.blockquote
 
@@ -1662,13 +1726,20 @@ function M.new(writer, options)
                   / writer.table
 
   ------------------------------------------------------------------------------
+  -- Parser state initialization
+  ------------------------------------------------------------------------------
+
+  larsers.InitializeState = Cg(Ct("") / "0", "div_level") -- initialize named groups
+
+  ------------------------------------------------------------------------------
   -- Syntax specification
   ------------------------------------------------------------------------------
 
   local syntax =
     { "Blocks",
 
-      Blocks                = larsers.Blank^0 * parsers.Block^-1
+      Blocks                = larsers.InitializeState
+                            * larsers.Blank^0 * parsers.Block^-1
                             * (larsers.Blank^0 / function()
                                                    return writer.interblocksep
                                                  end
@@ -1828,7 +1899,10 @@ function M.new(writer, options)
 
   local inlines_t = util.table_copy(syntax)
   inlines_t[1] = "Inlines"
-  inlines_t.Inlines = parsers.Inline^0 * (parsers.spacing^0 * parsers.eof / "")
+  inlines_t.Inlines = larsers.InitializeState
+                    * parsers.Inline^0
+                    * (parsers.spacing^0
+                      * parsers.eof / "")
   larsers.inlines = Ct(inlines_t)
 
   local inlines_no_link_t = util.table_copy(inlines_t)
