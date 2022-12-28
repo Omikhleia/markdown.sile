@@ -88,7 +88,7 @@ Pandoc writers recognize.
 
 ### Horizontal dividers
 
-In standard Markdown, a line containing a row of three or more asteriks, dashes, or underscores
+In standard Markdown, a line containing a row of three or more asterisks, dashes, or underscores
 (optionally separated by spaces) are supposed to produce a horizontal rule. This converter
 however slightly deviates from that simple specification^[And also from Pandoc, therefore.
 Quite obviously, the `\autodoc:package{pandocast}`{=sile} package will also only show
@@ -100,7 +100,7 @@ Three asterisks produce a centered asterism.
 
 ***
 
-Three space-separated asteriks produce a "dinkus".
+Three space-separated asterisks produce a "dinkus".
 
 * * *
 
