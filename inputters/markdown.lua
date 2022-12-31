@@ -293,32 +293,48 @@ local function SileAstWriter (options)
   return writer
 end
 
--- HorizontalRule custom extension
--- There's quite a bit of boilerplate here for such a simple change,
--- the mere addition of a capture in lineof(), but we don't want to bother
--- the Lunamark folks with a non-standard interpretation.
+-- Custom syntax extension:
+--   HorizontalRule extension: extracts the pattern (passes it to the writer).
+--      There's quite a bit of boilerplate here for such a simple change,
+--      the mere addition of a capture in lineof(), but we don't want to bother
+--      the Lunamark folks with a non-standard interpretation.
+--   Smart typography extension: Add prime and double prime recognition
+--      after digits.
 local lpeg = require("lpeg")
-  local parsers = {}
-  parsers.asterisk       = lpeg.P("*")
-  parsers.dash           = lpeg.P("-")
-  parsers.underscore     = lpeg.P("_")
-  parsers.spacechar      = lpeg.S("\t ")
-  parsers.space          = lpeg.P(" ")
-  parsers.optionalspace  = parsers.spacechar^0
-  parsers.leader         = parsers.space^-3
-  parsers.newline        = lpeg.P("\n")
-  parsers.blankline      = parsers.optionalspace
-                         * parsers.newline / "\n"
-  parsers.lineof = function (c)
-                    return (parsers.leader * lpeg.C((lpeg.P(c) * parsers.optionalspace)^3)
-                            * parsers.newline * parsers.blankline^1) / function(s) return s:gsub("%s*$", "") end
-                  end
-local function customSyntax (writer)
+local parsers = {}
+parsers.asterisk       = lpeg.P("*")
+parsers.dash           = lpeg.P("-")
+parsers.underscore     = lpeg.P("_")
+parsers.spacechar      = lpeg.S("\t ")
+parsers.space          = lpeg.P(" ")
+parsers.optionalspace  = parsers.spacechar^0
+parsers.leader         = parsers.space^-3
+parsers.newline        = lpeg.P("\n")
+parsers.blankline      = parsers.optionalspace
+                       * parsers.newline / "\n"
+parsers.digit          = lpeg.R("09")
+parsers.lineof = function (c)
+                   return (parsers.leader * lpeg.C((lpeg.P(c) * parsers.optionalspace)^3)
+                          * parsers.newline * parsers.blankline^1)
+                          / function(s) return s:gsub("%s*$", "") end
+                 end
+
+local function customSyntax (writer, options)
   return function (syntax)
     syntax.HorizontalRule = (parsers.lineof(parsers.asterisk)
                             + parsers.lineof(parsers.dash)
                             + parsers.lineof(parsers.underscore)
                             ) / writer.hrule
+
+    if options.smart_primes then
+      syntax.Smart = lpeg.P("\"") * lpeg.B(parsers.digit*1) / function ()
+                        return "″" -- double primes
+                      end
+                   + lpeg.P("'") * lpeg.B(parsers.digit*1) / function ()
+                        return "′" -- single prime
+                      end
+                   + syntax.Smart
+    end
     return syntax
   end
 end
@@ -345,6 +361,7 @@ end
 function inputter:parse (doc)
   local extensions = {
     smart = true,
+    smart_primes = true,
     strikeout = true,
     subscript = true,
     superscript = true,
@@ -383,7 +400,7 @@ function inputter:parse (doc)
                         -- Let's cancel it completely, and insert our own \par where needed.
   })
 
-  extensions.alter_syntax = customSyntax(writer)
+  extensions.alter_syntax = customSyntax(writer, extensions)
 
   local parse = reader.new(writer, extensions)
   local tree = parse(doc)
