@@ -432,6 +432,21 @@ AAAAA<wbr>BBBBB<wbr>CCCCC<wbr>DDDDD<wbr>EEEEE<wbr>FFFFF<wbr>GGGGG<wbr>HHHHH<wbr>
 It may help when the line-breaking rules would not otherwise create a break at acceptable locations.
 In this admittedly lame example, we used it between groups of a same letter.
 
+HTML entities are also processed, e.g. `&permil;` renders as &permil;.
+
+### Smarter typography
+
+On "span" elements, the `.decimal` pseudo-class attribute instructs the converter to consider numbers
+in the content as decimal numbers, formatted with suitable decimal mark and digit grouping according
+to the usage in the current language.
+This allows, say, 1984 to be rendered as "[1984]{ .decimal } years ago" in English,
+or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
+
+When smart typography is enabled, the native converter also supports automatically converting
+straight single and double quotes after digits to single and double primes.
+It can be useful for easily typesetting units (e.g. 6")
+or coordinates (e.g. Oxford is located at 51° 45' 7" N, 1° 15' 27" W).
+
 ### Configuration {#configuration}
 
 Most Markdown syntax extensions are enabled by default. You can pass additional options to
@@ -439,8 +454,10 @@ the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[che
 environment to tune the behavior of the Markdown parser.
 
 ::: {custom-style=raggedright}
-> Available options are: `smart`, `strikeout`, `subscript`, `superscript`, `definition_lists`, `notes`, `inline_notes`,
-> `fenced_code_blocks`, `fenced_code_attributes`, `bracketed_spans`, `fenced_divs`, `raw_attribute`, `link_attributes`,
+> Available options are: `smart`, `smart_primes`, `strikeout`, `subscript`, `superscript`,
+> `definition_lists`, `notes`, `inline_notes`,
+> `fenced_code_blocks`, `fenced_code_attributes`, `bracketed_spans`, `fenced_divs`,
+> `raw_attribute`, `link_attributes`,
 > `startnum`, `fancy_lists`, `task_list`, `hash_enumerators`, `table_captions`, `pipe_tables`, `header_attributes`,
 > `line_blocks`, `escaped_line_breaks`.
 :::

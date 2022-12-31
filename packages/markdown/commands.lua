@@ -102,6 +102,20 @@ local naiveLuaCodeTheme = {
   string = { color = "#a8660d" },
 }
 
+-- Inputfilter callback for splitting strings at numbers and formatting
+-- them as decimal numbers.
+local function decimalFilter (input, _)
+  local t = {}
+  for token in SU.gtoke(input, "%d+%.?%d*") do
+    if(token.string) then
+      t[#t+1] = token.string
+    else
+      t[#t+1] = utils.createCommand("markdown:internal:decimal", {}, token.separator)
+    end
+  end
+  return t
+end
+
 function package:_init (_)
   base._init(self)
   -- Only load low-level packages (= utilities)
@@ -109,6 +123,7 @@ function package:_init (_)
   -- constructs, see fallback commands further below for more details.
   self.class:loadPackage("color")
   self.class:loadPackage("image")
+  self.class:loadPackage("inputfilter")
   self.class:loadPackage("lists")
   self.class:loadPackage("ptable")
   self.class:loadPackage("rules")
@@ -243,7 +258,15 @@ function package:registerCommands ()
     cascade:process(content)
   end, "Div in Markdown (internal)")
 
+  self:registerCommand("markdown:internal:decimal", function (_, content)
+    SILE.typesetter:typeset(SU.formatNumber(content[1], { style = "decimal" }))
+  end, "Formats a (number) content string as decimal (internal)")
+
   self:registerCommand("markdown:internal:span", function (options, content)
+    if hasClass(options, "decimal") then
+      content = self.class.packages.inputfilter:transformContent(content, decimalFilter)
+    end
+
     local cascade = CommandCascade()
     if options.lang then
       cascade:call("language", { main = utils.normalizeLang(options.lang) })

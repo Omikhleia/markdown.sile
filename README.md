@@ -114,7 +114,7 @@ This is but an overview. For more details, please refer to the provided example 
 which also serves as documentation, showcase and reference guide.
 
 - Standard Mardown typesetting (italic, bold, code, etc.)
-- Smart typography (quotes, apostrophes, ellipsis, dashes, etc.)
+- Smart typography (quotes, apostrophes, ellipsis, dashes, etc.) with extensions (prime marks)
 - Headers and header attributes
 - Horizontal dividers (a.k.a. horizontal rules, with provision for asterisms, dinkuses, pendants...)
 - Images (and image attributes, e.g. dimensions)
