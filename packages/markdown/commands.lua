@@ -74,6 +74,16 @@ local function hasClass (options, classname)
   return false
 end
 
+local function hasLinkContent(ast)
+  if type(ast) == "table" then
+    return #ast > 1 or hasLinkContent(ast[1])
+  end
+  if type(ast) == "string" and ast ~= "" then
+    return true
+  end
+  return false
+end
+
 -- AST helper for the "implicit figure"
 -- (tricky) This assumes a lot of knowledge about the AST...
 local function implicitFigure (paracontent)
@@ -124,6 +134,7 @@ function package:_init (_)
   self.class:loadPackage("color")
   self.class:loadPackage("image")
   self.class:loadPackage("inputfilter")
+  self.class:loadPackage("labelrefs")
   self.class:loadPackage("lists")
   self.class:loadPackage("ptable")
   self.class:loadPackage("rules")
@@ -153,10 +164,24 @@ function package:registerCommands ()
       -- We cannot make a functional call here, because captioned elements later
       -- work by "extracting" the caption from the AST... So we rebuild the
       -- expected AST.
-      SILE.call("markdown:internal:captioned-figure", {}, {
-        image,
-        utils.createCommand("caption", {}, caption),
-      } )
+      if image.options.id then
+        -- We'll want the ID to apply to the captioning environment (to potentially
+        -- use the caption numbering)
+        local id = image.options.id
+        image.options.id = nil
+        SILE.call("markdown:internal:captioned-figure", {}, {
+          image,
+          utils.createCommand("caption", {}, {
+            utils.createCommand("label", { marker = id }),
+            caption,
+          }),
+        })
+      else
+        SILE.call("markdown:internal:captioned-figure", {}, {
+          image,
+          utils.createCommand("caption", {}, caption),
+        })
+      end
     else
       SILE.process(content)
       -- See comment on the lunamark writer layout option. With the default layout,
@@ -206,8 +231,8 @@ function package:registerCommands ()
       -- We are left with doing it after, but that's not perfect either vs.
       -- page breaks and indent/noindent...
       -- In the resilient.book class, I added a marker option to sections and
-      -- reimplemented that part, but here we work with what we have.
-      SILE.call("pdf:destination", { name = options.id })
+      -- reimplemented that part, but here we work with what we have...
+      SILE.call("label", { marker = options.id })
     end
   end, "Header in Markdown (internal)")
 
@@ -228,8 +253,18 @@ function package:registerCommands ()
     SILE.call("smallskip")
   end, "Definition list block in Markdown (internal)")
 
+  self:registerCommand("markdown:internal:div:id", function (options, content)
+    local id = SU.required(options, "id", "div")
+    SILE.call("label", { marker = id })
+    SILE.process(content)
+  end, "Add a cross reference marker before the div content (internal)")
+
   self:registerCommand("markdown:internal:div", function (options, content)
     local cascade = CommandCascade()
+    if options.id then
+      -- A bit tricky here in command cascading, so let's delegate.
+      cascade:call("markdown:internal:div:id", { id = options.id})
+    end
     if options.lang then
       cascade:call("language", { main = utils.normalizeLang(options.lang) })
     end
@@ -242,6 +277,7 @@ function package:registerCommands ()
     if hasClass(options, "poetry") then
       -- If the class or loaded packages provide a poetry environment and the div contains
       -- a lineblock structure only, then use the poetry environment instead.
+      -- (tricky) This assumes a lot of knowledge about the AST...
       if SILE.Commands["poetry"] and #content == 1 and content[1].command == "markdown:internal:lineblock" then
         content[1].command = "poetry"
         content[1].options = content[1].options or {}
@@ -267,6 +303,10 @@ function package:registerCommands ()
       content = self.class.packages.inputfilter:transformContent(content, decimalFilter)
     end
 
+    if options.id then
+      SILE.call("label", { marker = options.id })
+    end
+
     local cascade = CommandCascade()
     if options.lang then
       cascade:call("language", { main = utils.normalizeLang(options.lang) })
@@ -286,6 +326,9 @@ function package:registerCommands ()
 
   self:registerCommand("markdown:internal:image", function (options, _)
     local uri = SU.required(options, "src", "image")
+    if options.id then
+      SILE.call("label", { marker = options.id })
+    end
     if utils.getFileExtension(uri) == "svg" then
       SILE.call("svg", options)
     else
@@ -295,12 +338,32 @@ function package:registerCommands ()
 
   self:registerCommand("markdown:internal:link", function (options, content)
     local uri = SU.required(options, "src", "link")
+    if options.id then
+      SILE.call("label", { marker = options.id })
+    end
     if uri:sub(1,1) == "#" then
       -- local hask link
       local dest = uri:sub(2)
-      SILE.call("pdf:link", { dest = dest }, content)
+      if hasLinkContent(content) then
+        -- HACK. We use the target of a `\label`, knowing it is
+        -- internally prefixed by "ref:" in the labelrefs package.
+        -- That's not very nice to rely on internals...
+        SILE.call("pdf:link", { dest = "ref:" .. dest }, content)
+      else
+        -- link with no textual content: we use them as a cross-references.
+        local reftype
+        if hasClass(options, "page") then reftype = "page"
+        elseif hasClass(options, "section") then reftype = "section"
+        elseif hasClass(options, "title") then reftype = "title"
+        else reftype = "default" end
+        SILE.call("ref", { marker = dest, type = reftype })
+      end
     else
-      return SILE.call("href", { src = uri }, content)
+      if hasLinkContent(content) then
+        SILE.call("href", { src = uri }, content)
+      else
+        SU.warn("Ignored empty link to target "..uri)
+      end
     end
   end, "Link in Markdown (internal)")
 
@@ -391,6 +454,9 @@ function package:registerCommands ()
     if hasClass(options, "lua") then
       -- Naive syntax highlighting for Lua, until we have a more general solution
       SILE.call("verbatim", {}, function ()
+        if options.id then
+          SILE.call("label", { marker = options.id })
+        end
         local toks = pl.lexer.lua(content[1], {})
         for tag, v in toks do
           local out = tostring(v)
@@ -419,6 +485,9 @@ function package:registerCommands ()
     else
       -- Just raw unstyled verbatim
       SILE.call("verbatim", {}, function ()
+        if options.id then
+          SILE.call("label", { marker = options.id })
+        end
         SILE.process(content)
         SILE.typesetter:leaveHmode()
       end)

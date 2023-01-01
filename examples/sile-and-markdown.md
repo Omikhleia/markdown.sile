@@ -189,11 +189,8 @@ There's a small catch here. If your class or previously loaded packages provide
 a `blockquote` environment, it will be used. Otherwise, the converter uses its
 own fallback method.
 
-### Links and footnotes
+### Footnotes
 
-Here is a link to [the SILE website](https://sile-typesetter.org/).
-It might not be visible in the PDF output, but hover it and click. It just works.
-Likewise, here is an internal link to the "[Basic typesetting](#basic-typesetting)" section.
 
 Here is a footnote call[^1].
 
@@ -249,7 +246,7 @@ it. Otherwise, it just ignores the style and processes the content as-is.
 It thus allows you to use some interesting SILE features. For instance, here is some block
 of text marked as "center":
 
-::: {custom-style="center"}
+::: {#centered custom-style="center"}
 This is SILE at its best.
 :::
 
@@ -274,15 +271,15 @@ by appending the `{width=... height=...}` attributes^[And possibly other attribu
 they are all passed through to the underlying SILE package.] after the usual Markdown
 image syntax ---Note that any unit system supported by SILE is accepted.
 
-![This man is Gutenberg](./gutenberg.jpg "An exemplary image"){width=3cm}
+![This man is Gutenberg](./gutenberg.jpg "An exemplary image"){#gutenberg width=3cm}
 
 An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph,
 will be rendered as a figure with a caption. If your class or previously loaded packages
 provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to
-take care of a `\caption` content, i.e. to extract and display it appropriately).  Otherwise,
+take care of a `\caption` content, i.e. to extract and display it appropriately). Otherwise,
 the converter uses its own fallback method.
 
-### Tables
+### Tables {#tables}
 
 The converter only supports the PHP-like "pipe table" syntax at this point, with an optional
 caption.
@@ -326,7 +323,7 @@ afterwards) are interpretated as stanza separators, which should be smaller than
 | Ennuyé du rendez-vous.
 | 
 | Leurs idylles sont moroses.
-| — Soleil ! aimons ! — Essayons.
+| — [Soleil]{#sun} ! aimons ! — Essayons.
 | Ô terre, où donc sont tes roses ?
 | — Astre, où donc sont tes rayons ?
 | 
@@ -356,6 +353,39 @@ with headers, the `.unnumbered` class specifier is also supported.], `start` and
 | Other verses...
 :::
 ~~~
+
+### Basic links
+
+Here is a link to [the SILE website](https://sile-typesetter.org/).
+It might not be visible in the PDF output, but hover it and click. It just works.
+Likewise, here is an internal link to the "[Basic typesetting](#basic-typesetting)" section.
+
+### Cross-references
+
+Neither standard Markdown nor Pandoc defines a proper way to insert cross-references of the kind
+you would see in a book, as in the following example.
+
+> The section on "[](#tables){ .title }", that is [](#tables){ .section },
+> is on page [](#tables){ .page }.
+
+This converter takes a bold decision, though unlikely to break anything unexpected. Empty local links
+(that is, without inline display content) are interpreted as cross-references. By default, they are
+resolved to the closest numbering item, whatever that might be in the hierarchical structure of your
+document. A pseudo-class attribute may be used to override the default behavior and specify which type
+of reference is expected (page number, section number or title text). Thus, the above example was
+obtained from the following input:
+
+```
+The section on "[](#tables){ .title }", that is [](#tables){ .section }, is on page [](#tables){ .page }.
+```
+
+Besides heading levels, it also works for various elements where you can define an identifier,
+for instance we had some centered text in section [](#centered). With appropriate class and package
+support^[Typically, it works with the **resilient** collection of classes and packages. It won't
+work with non-supporting class and packages, using the fallback implementation for captioned elements,
+poetry, etc.],
+you may even refer to Gutenberg as "figure [](#gutenberg)", or to some poetry verse
+mentioning the Sun ("Soleil"), in [](#sun){.section}, as "verse [](#sun)".
 
 ### Code blocks
 

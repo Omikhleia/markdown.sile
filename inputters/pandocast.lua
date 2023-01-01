@@ -478,12 +478,13 @@ Pandoc.RawInline = function (format, text)
 end
 
 -- Link Attr [Inline] Target
-Pandoc.Link = function (_, inlines, target) -- attributes, inlines, target
-  -- We don't use the attributes?
+Pandoc.Link = function (attributes, inlines, target) -- attributes, inlines, target
+  local options = pandocAttributes(attributes)
   -- Target = (Url : Text, Title : Text)
   local uri, _ = table.unpack(target) -- uri, title (unused too?)
+  options.src = uri
   local content = pandocAstParse(inlines)
-  return utils.createCommand("markdown:internal:link", { src = uri }, content)
+  return utils.createCommand("markdown:internal:link", options, content)
 end
 
 -- Image Attr [Inline] Target

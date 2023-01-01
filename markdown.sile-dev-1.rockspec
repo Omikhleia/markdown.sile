@@ -17,7 +17,8 @@ dependencies = {
    "lua >= 5.1",
    "ptable.sile",
    "textsubsuper.sile",
-   "smartquotes.sile"
+   "smartquotes.sile",
+   "labelrefs.sile"
 }
 
 build = {

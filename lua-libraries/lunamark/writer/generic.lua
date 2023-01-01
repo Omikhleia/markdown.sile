@@ -152,7 +152,8 @@ function M.new(options)
   end
 
   --- A link with link text `label`, uri `uri`,
-  -- and title `title`.
+  -- and title `title`,
+  -- additional attributes `attr`
   function W.link(label)
     return label
   end
