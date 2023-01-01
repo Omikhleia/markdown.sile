@@ -136,6 +136,7 @@ function package:_init (_)
   self.class:loadPackage("inputfilter")
   self.class:loadPackage("labelrefs")
   self.class:loadPackage("lists")
+  self.class:loadPackage("math")
   self.class:loadPackage("ptable")
   self.class:loadPackage("rules")
   self.class:loadPackage("smartquotes")
@@ -506,6 +507,13 @@ function package:registerCommands ()
     end
     SILE.call("smallskip")
   end, "Default line block in Markdown (internal)")
+
+  self:registerCommand("markdown:internal:math", function (options, content)
+    local mode = options.mode or "text"
+    -- NOTE: Not sure why the following doesn't work!!!!
+    -- SILE.call("math", {}, content)
+    SILE.processString("\\math[mode="..mode.."]{"..SU.contentToString(content).."}", "sil")
+  end)
 
   -- B. Fallback commands
 

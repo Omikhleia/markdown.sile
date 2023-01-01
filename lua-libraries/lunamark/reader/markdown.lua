@@ -87,6 +87,7 @@ parsers.semicolon              = P(";")
 parsers.exclamation            = P("!")
 parsers.pipe                   = P("|")
 parsers.tilde                  = P("~")
+parsers.dollar                 = P("$")
 parsers.tab                    = P("\t")
 parsers.newline                = P("\n")
 parsers.tightblocksep          = P("\001")
@@ -912,11 +913,14 @@ function M.new(writer, options)
   -- Basic parsers (local)
   ------------------------------------------------------------------------------
 
+  local specials = "*_~`&[]<!\\-@^"
   if options.smart then
-    larsers.specialchar       = S("*_~`&[]<!\\'\"-.@^")
-  else
-    larsers.specialchar       = S("*_~`&[]<!\\-@^")
+    specials = specials .. "'\""
   end
+  if options.tex_math_dollars then
+    specials = specials .. "$"
+  end
+  larsers.specialchar         = S(specials)
 
   larsers.normalchar          = parsers.any - (larsers.specialchar
                                                 + parsers.spacing
@@ -1744,6 +1748,33 @@ function M.new(writer, options)
   larsers.InitializeState = Cg(Ct("") / "0", "div_level") -- initialize named groups
 
   ------------------------------------------------------------------------------
+  -- Math
+  ------------------------------------------------------------------------------
+
+  -- Closing $ must have a non-space character immediately to its left,
+  --       and must not be followed immediately by a digit.
+  -- NOTE: For display math, "there can be no blank lines between the opening and closing $$ delimiters",
+  -- Does this implies blank lines are acceptable in inline math? For now, assume it's not the case,
+  -- and not even a line break (which would be allowed in $$ per the above)
+  larsers.inlinemathtail = #(parsers.linechar -parsers.space) * parsers.dollar * #(-parsers.digit)
+  larsers.inlinemath = parsers.between(C((parsers.linechar - parsers.dollar)^1),
+                                       -- Opening $ mush have non space character immediately to its right
+                                       parsers.dollar * #(parsers.any -#parsers.space),
+                                       larsers.inlinemathtail)
+
+  -- The $$ delimiters may be separated from the formula by whitespace.
+  -- NOTE: It's not clear from the description whether the following digit restriction still applies,
+  -- but doesn't seem to be the case in Pandoc's source (mathDisplayWith in Text/Pandoc/Parsing/Math.hs)
+  larsers.displaymathdelim = parsers.dollar * parsers.dollar
+  larsers.displaymath     = larsers.displaymathdelim
+                            -- There can be no blank lines between the opening and closing $$ delimiters.
+                          * C((parsers.any -parsers.blankline^2 -parsers.dollar -larsers.displaymathdelim)^1)
+                          * larsers.displaymathdelim
+
+  larsers.Math  = larsers.displaymath / function(s) return writer.math("DisplayMath", s) end
+                + larsers.inlinemath / function(s) return writer.math("InlineMath", s) end
+
+  ------------------------------------------------------------------------------
   -- Syntax specification
   ------------------------------------------------------------------------------
 
@@ -1815,7 +1846,8 @@ function M.new(writer, options)
                             + V("HtmlEntity")
                             + V("EscapedChar")
                             + V("Smart")
-                            + V("Symbol"),
+                            + V("Math")
+                            + V("Symbol"), -- Must come last.
 
       Str                   = larsers.Str,
       Space                 = larsers.Space,
@@ -1840,6 +1872,7 @@ function M.new(writer, options)
       HtmlEntity            = larsers.HtmlEntity,
       EscapedChar           = larsers.EscapedChar,
       Smart                 = larsers.Smart,
+      Math                  = larsers.Math,
       Symbol                = larsers.Symbol,
     }
 
@@ -1901,6 +1934,10 @@ function M.new(writer, options)
 
   if not options.line_blocks then
     syntax.LineBlock = parsers.fail
+  end
+
+  if not options.tex_math_dollars then
+    syntax.Math     = parsers.fail
   end
 
   if options.alter_syntax and type(options.alter_syntax) == "function" then

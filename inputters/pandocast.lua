@@ -468,8 +468,9 @@ end
 
 -- Math MathType Text
 -- TeX math (literal)
-Pandoc.Math = function (_, text)
-  return text
+Pandoc.Math = function (mathtype, text)
+  local mode = (mathtype.t and mathtype.t == "DisplayMath") and "display" or "text"
+  return utils.createCommand("markdown:internal:math" , { mode = mode }, { text })
 end
 
 -- RawInline Format Text
