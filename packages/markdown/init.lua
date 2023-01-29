@@ -42,13 +42,26 @@ natively reading and processing a Markdown file:
 
 \smallskip
 
+Other possibilities exists (such as setting \autodoc:parameter{format=markdown} on the
+\autodoc:command{\include} command, if the file extension cannot be one of the supported variants, etc.).
+Refer to the SILE manual for more details on inputters and their usage.
+
+Embedding raw Markdown content from within a SILE document is also possible:
+
+\begin{verbatim}
+\\begin[type=markdown]\{raw\}
+Some **Markdown** content
+\\end\{raw\}
+\end{verbatim}
+
+\smallskip
+
 The speedy Markdown parsing relies on John MacFarlane’s excellent \strong{lunamark} Lua library,
 which empovers this package and thus allows native processing of Markdown directly within SILE,
 as a first-class language.
 
-A whole dedicated chapter is dedicated to the topic, including a discussion on alternatives,
-in an appendix to the SILE manual. Please refer to it for more details and an exhaustive
-presentation of the capabilities.
+A whole separate documentation is dedicated to the topic, including a discussion on alternatives.
+Please refer to it for more details and an exhaustive presentation of the capabilities.
 \end{document}]]
 
 return package
