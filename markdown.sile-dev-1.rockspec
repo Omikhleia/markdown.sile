@@ -15,10 +15,11 @@ description = {
 }
 dependencies = {
    "lua >= 5.1",
+   "embedders.sile",
+   "labelrefs.sile",
    "ptable.sile",
-   "textsubsuper.sile",
    "smartquotes.sile",
-   "labelrefs.sile"
+   "textsubsuper.sile",
 }
 
 build = {

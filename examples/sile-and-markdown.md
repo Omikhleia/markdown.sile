@@ -264,20 +264,26 @@ another more powerful way to leverage Markdown with SILE’s full processing cap
 
 Here is an image: ![Invisible caption as in inline](./gutenberg.jpg "An exemplary image"){width=3cm}
 
-![](./examples/manicule.svg){height=0.9em} SVG is supported too.
-
 You can specify the required image width and/or height, as done just above actually,
 by appending the `{width=... height=...}` attributes^[And possibly other attributes,
-they are all passed through to the underlying SILE package.] after the usual Markdown
+they are all passed through to the underlying SILE packages.] after the usual Markdown
 image syntax ---Note that any unit system supported by SILE is accepted.
 
-![This man is Gutenberg](./gutenberg.jpg "An exemplary image"){#gutenberg width=3cm}
+![This man is Gutenberg.](./gutenberg.jpg "An exemplary image"){#gutenberg width=3cm}
 
 An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph,
 will be rendered as a figure with a caption. If your class or previously loaded packages
 provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to
 take care of a `\caption` content, i.e. to extract and display it appropriately).
 Otherwise, the converter uses its own fallback method.
+
+Besides regular image files, a few specific file extensions are also recognized and
+processed appropriately.
+Notably ![](./examples/manicule.svg){height=0.9em} SVG is supported too (`.svg`), as demonstrated
+here with a "manicule" in the format.
+Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images too.
+
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width=12cm}
 
 ### Maths
 
@@ -408,9 +414,33 @@ function fib (n)
 end
 ```
 
-As show above, code blocks marked as being in Lua (either with the `lua` information string or the `.lua` class
-specifier) are syntax-highlighted. This is a naive approach, until the converter possibly supports a more general
-solution.
+As shown above, code blocks marked as being in Lua (either with the `lua` information string or the `.lua` class specifier) are syntax-highlighted. This is a naive approach, until the converter possibly supports a more general solution.
+
+Code blocks marked as being in the Graphviz DOT language (either with the `dot` information string or the `.dot` class specifier) are rendered as images. When the attribute syntax is used, options are passed to the underlying processor. For instance, the image below is produced with
+`{.dot width=5cm layout=neato}`.
+
+``` {.dot width=5cm layout=neato}
+graph {
+  node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
+  a -- { b d };
+  b -- { c e };
+  c -- { f g h i };
+  e -- { j k l m n o };
+}
+```
+
+If you want the actual code to be displayed, rather than the converted image,
+you can set the `render` attribute to false.
+
+``` {.dot render=false width=5cm layout=neato}
+graph {
+  node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
+  a -- { b d };
+  b -- { c e };
+  c -- { f g h i };
+  e -- { j k l m n o };
+}
+```
 
 ### Raw blocks
 
