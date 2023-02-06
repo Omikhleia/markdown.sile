@@ -132,6 +132,7 @@ function package:_init (_)
   -- The claas should be responsible for loading the appropriate higher-level
   -- constructs, see fallback commands further below for more details.
   self.class:loadPackage("color")
+  self.class:loadPackage("embedders")
   self.class:loadPackage("image")
   self.class:loadPackage("inputfilter")
   self.class:loadPackage("labelrefs")
@@ -330,8 +331,12 @@ function package:registerCommands ()
     if options.id then
       SILE.call("label", { marker = options.id })
     end
-    if utils.getFileExtension(uri) == "svg" then
+    local ext = utils.getFileExtension(uri)
+    if ext == "svg" then
       SILE.call("svg", options)
+    elseif ext == "dot" then
+      options.format = "dot"
+      SILE.call("embed", options)
     else
       SILE.call("img", options)
     end
@@ -452,7 +457,15 @@ function package:registerCommands ()
   end, "Captioned table in Markdown (internal)")
 
   self:registerCommand("markdown:internal:codeblock", function (options, content)
-    if hasClass(options, "lua") then
+    if hasClass(options, "dot") and SU.boolean(options.render, true) then
+      local handler = SILE.rawHandlers["embed"]
+      if not handler then
+        -- Shouldn't occur since we loaded the embedders package
+        SU.error("No inline handler for image embedding")
+      end
+      options.format = options.class
+      handler(options, content)
+    elseif hasClass(options, "lua") then
       -- Naive syntax highlighting for Lua, until we have a more general solution
       SILE.call("verbatim", {}, function ()
         if options.id then
