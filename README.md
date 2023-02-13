@@ -181,7 +181,7 @@ the MIT license, (c) 2009 John MacFarlane, _et al._
 
 A vendored (subset) of the [djot.lua](https://github.com/jgm/djot.lua) Lua parsing library is
 distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
-the MIT license, (c) 2022 John MacFarlane’s [djot.lua](https://github.com/jgm/djot.lua) Lua.
+the MIT license, (c) 2022 John MacFarlane.
 
 Before you ask, it is expected the vendored code will be replaced by proper dependencies,
 when the packages all reach a stable state.
