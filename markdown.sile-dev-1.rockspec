@@ -46,7 +46,7 @@ build = {
       ["sile.lunamark.writer.html"]     = "lua-libraries/lunamark/writer/html.lua",
       ["sile.lunamark.writer.html5"]    = "lua-libraries/lunamark/writer/html5.lua",
 
-      ["sile.djot"]                     = "lua-libraries/djot",
+      ["sile.djot"]                     = "lua-libraries/djot.lua",
       ["sile.djot.attributes"]          = "lua-libraries/djot/attributes.lua",
       ["sile.djot.json"]                = "lua-libraries/djot/json.lua",
       ["sile.djot.block"]               = "lua-libraries/djot/block.lua",
