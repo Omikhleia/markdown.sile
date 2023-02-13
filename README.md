@@ -11,8 +11,9 @@ a great set of Pandoc-like extensions and plenty of extra goodies.
 
 - **markdown** inputter and package: native support of Markdown files.
 - **pandocast** inputter and package: native support of Pandoc JSON AST files.
+- **djot** inputter and package: native support of Djot files.
 
-For casual readers: This notably aims at converting a Markdown document to print-quality PDF.
+For casual readers: This notably aims at converting Markdown or Djot documents to print-quality PDFs.
 
 ## Installation
 
@@ -23,7 +24,7 @@ Installation relies on the **luarocks** package manager.
 To install the latest development version, you may use the provided “rockspec”:
 
 ```
-luarocks --lua-version 5.4 install --server=https://luarocks.org/dev markdown.sile
+luarocks --lua-version 5.4 install --dev markdown.sile
 ```
 
 (Adapt to your version of Lua, if need be, and refer to the SILE manual for more
@@ -50,7 +51,7 @@ Or from documents (e.g. here in SILE language):
 \include[src=somefile.md]
 ```
 
-Other possibilities exists (such as setting `format=markdown` on the `\include` command, if the file extension
+Other possibilities exist (such as setting `format=markdown` on the `\include` command, if the file extension
 cannot be one of the supported variants, etc.). Refer to the SILE manual for more details on inputters and their
 usage.
 
@@ -86,6 +87,38 @@ Or from documents:
 \include[src=somefile.pandoc]
 ```
 
+### Native Djot package
+
+[Djot](https://djot.net/) is a fairly recent “light markup syntax” derived from Markdown,
+fixing most of its complex syntax pitfalls, and also extending it on various aspects.
+Since many concepts are similar, it felt rather natural to include it too in this collection,
+so that authors interested in Markdown can give a try.
+
+From command line:
+
+```
+sile -u inputters.djot somefile.dj
+```
+
+Or from documents (e.g. here in SILE language):
+
+```
+\use[module=packages.djot]
+\include[src=somefile.dj]
+```
+
+Other possibilities exist (such as setting `format=djot` on the `\include` command, if the file extension
+cannot be one of the supported variants, etc.). Refer to the SILE manual for more details on inputters and their
+usage.
+
+Including raw Djot content from within a SILE document is also possible:
+
+```
+\begin[type=djot]{raw}
+Some Markdown content
+\end{raw}
+```
+
 ## Generating the documentation
 
 The example documentation/showcase in this repository additionaly requires the `autodoc` package, so you
@@ -95,7 +128,7 @@ may generate a PDF from it with as follows:
 sile -u inputters.markdown -u packages.autodoc examples/sile-and-markdown.md
 ```
 
-It assumes a default font, so a few things might not render as expected, and uses SILE's book class.
+It assumes a default font, so a few things might not render as expected, and uses SILE's standard book class.
 
 **Recommended:** For even best results (in this writer's biased opinion), provided you have installed the
 [resilient](https://github.com/Omikhleia/resilient.sile) collection of classes and packages:
@@ -105,7 +138,7 @@ sile examples/sile-and-markdown-manual.sil
 ```
 
 The latter SILE document also loads extra packages before switching to Markdown, and defines
-additional commands and styles. Moreover, it includes an additional chapter, showcasing
+additional commands and styles. Moreover, it includes additional chapters, showcasing
 other advanced topics and cool use cases. Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
 
 ## Supported features
@@ -128,7 +161,7 @@ which also serves as documentation, showcase and reference guide.
 - Small caps
 - Links (with special provisions for advanced cross-references)
 - Lists
-  - Standard ordered lists and bullet lists
+  - Standard ordered lists and bulleted lists
   - Fancy lists
   - Task lists (GFM-like syntax)
   - Definition lists
@@ -145,6 +178,13 @@ All SILE-related code and samples in this repository are released under the MIT 
 A vendored (subset) of the [lunamark](https://github.com/jgm/lunamark) Lua parsing library is
 distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
 the MIT license, (c) 2009 John MacFarlane, _et al._
+
+A vendored (subset) of the [djot.lua](https://github.com/jgm/djot.lua) Lua parsing library is
+distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
+the MIT license, (c) 2022 John MacFarlane’s [djot.lua](https://github.com/jgm/djot.lua) Lua.
+
+Before you ask, it is expected the vendored code will be replaced by proper dependencies,
+when the packages all reach a stable state.
 
 ## Credits
 

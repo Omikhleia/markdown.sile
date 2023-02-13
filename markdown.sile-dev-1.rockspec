@@ -28,10 +28,12 @@ build = {
       ["sile.classes.markdown"]           = "classes/markdown.lua",
       ["sile.inputters.markdown"]         = "inputters/markdown.lua",
       ["sile.inputters.pandocast"]        = "inputters/pandocast.lua",
+      ["sile.inputters.djot"]             = "inputters/djot.lua",
       ["sile.packages.markdown"]          = "packages/markdown/init.lua",
       ["sile.packages.markdown.commands"] = "packages/markdown/commands.lua",
       ["sile.packages.markdown.utils"]    = "packages/markdown/utils.lua",
       ["sile.packages.pandocast"]         = "packages/pandocast/init.lua",
+      ["sile.packages.djot"]              = "packages/djot/init.lua",
       ["sile.core.ast"]                   = "core/ast.lua",
 
       ["sile.lunamark"]                 = "lua-libraries/lunamark.lua",
@@ -43,5 +45,14 @@ build = {
       ["sile.lunamark.writer.generic"]  = "lua-libraries/lunamark/writer/generic.lua",
       ["sile.lunamark.writer.html"]     = "lua-libraries/lunamark/writer/html.lua",
       ["sile.lunamark.writer.html5"]    = "lua-libraries/lunamark/writer/html5.lua",
+
+      ["sile.djot"]                     = "lua-libraries/djot",
+      ["sile.djot.attributes"]          = "lua-libraries/djot/attributes.lua",
+      ["sile.djot.json"]                = "lua-libraries/djot/json.lua",
+      ["sile.djot.block"]               = "lua-libraries/djot/block.lua",
+      ["sile.djot.inline"]              = "lua-libraries/djot/inline.lua",
+      ["sile.djot.html"]                = "lua-libraries/djot/html.lua",
+      ["sile.djot.ast"]                 = "lua-libraries/djot/ast.lua",
+      ["sile.djot.filter"]              = "lua-libraries/djot/filter.lua",
    }
 }

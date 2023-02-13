@@ -42,7 +42,7 @@ natively reading and processing a Markdown file:
 
 \smallskip
 
-Other possibilities exists (such as setting \autodoc:parameter{format=markdown} on the
+Other possibilities exist (such as setting \autodoc:parameter{format=markdown} on the
 \autodoc:command{\include} command, if the file extension cannot be one of the supported variants, etc.).
 Refer to the SILE manual for more details on inputters and their usage.
 

@@ -129,7 +129,7 @@ end
 function package:_init (_)
   base._init(self)
   -- Only load low-level packages (= utilities)
-  -- The claas should be responsible for loading the appropriate higher-level
+  -- The class should be responsible for loading the appropriate higher-level
   -- constructs, see fallback commands further below for more details.
   self.class:loadPackage("color")
   self.class:loadPackage("embedders")
@@ -192,6 +192,35 @@ function package:registerCommands ()
       SILE.call("par")
     end
   end, "Paragraphing in Markdown (internal)")
+
+  self:registerCommand("markdown:internal:thematicbreak", function (options, _)
+    if hasClass(options, "asterism") then
+      SILE.call("center", {}, { "⁂" }) -- Asterism
+    elseif hasClass(options, "dinkus") then
+      SILE.call("center", {}, { "* * *" }) -- Dinkus (with em-spaces)
+    elseif hasClass(options, "rule") then
+        SILE.call("center", {}, function ()
+          SILE.call("raise", { height = "0.5ex" }, function ()
+            SILE.call("hrule", { width = "20%lw" })
+        end)
+      end)
+    elseif hasClass(options, "bigrule") then
+      SILE.call("center", {}, function ()
+        SILE.call("raise", { height = "0.5ex" }, function ()
+          SILE.call("hrule", { width = "33%lw" })
+        end)
+      end)
+    elseif hasClass(options, "pendant") and self:hasCouyards() then
+      SILE.call("smallskip")
+      SILE.call("couyard", { type = 6, width = "default" })
+    elseif not hasClass(options, "none") then
+      SILE.call("fullrule")
+    end
+
+    if hasClass(options, "pagebreak") then
+      SILE.call("eject")
+    end
+  end, "Thematic break in Djot (internal)")
 
   self:registerCommand("markdown:internal:hrule", function (options, _)
     if options.separator == "***" then
@@ -315,6 +344,9 @@ function package:registerCommands ()
     end
     if hasClass(options, "smallcaps") then
       cascade:call("font", { features = "+smcp" })
+    end
+    if hasClass(options, "strike") then
+      cascade:call("strikethrough")
     end
     if hasClass(options, "underline") then
       cascade:call("underline")

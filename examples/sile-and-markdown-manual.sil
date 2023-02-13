@@ -6,6 +6,7 @@
 \use[module=packages.framebox]
 \use[module=packages.markdown]
 \use[module=packages.pandocast]
+\use[module=packages.djot]
 \use[module=packages.fancytoc]
 \use[module=packages.resilient.poetry]
 \font[family=Libertinus Serif]
@@ -110,7 +111,7 @@ and help pushing all these components farther!
 
 And why not "style" an EAN-13 ISBN, so that it is rendered as a barcode... [978-2-9539896-6-3]{ custom-style=Ean13 }
 
-## Advanced tables
+## Advanced tables with pandocast
 
 While the native package accepts supports "pipe tables" only, Pandoc supports the
 standard "simple tables" and also extends Markdown with several other methods for declaring tables.
@@ -127,4 +128,5 @@ our package might not support them well. Its main focus is on Markdown parity wi
 
 \include[src=pandoc-tables.pandoc]
 
+\include[src=sile-and-djot.dj]
 \end{document}

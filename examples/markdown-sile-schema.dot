@@ -53,10 +53,13 @@ digraph omikhleia {
 
     markdown [shape=component,style=filled,fillcolor=lightyellow]
     pandocast [shape=component,style=filled,fillcolor=lightyellow]
+    djot [shape=component,style=filled,fillcolor=lightyellow]
+
     mrkcmd [shape=component,label="markdown.commands",style=filled,fillcolor=linen]
 
     markdown -> mrkcmd
     pandocast -> mrkcmd
+    djot -> mrkcmd
 
     mrkcmd -> embedders
     mrkcmd -> labelrefs
@@ -71,4 +74,5 @@ digraph omikhleia {
   mybook [shape = circle, label="Markdown\nfor\nSILE", fontsize="25"]
   mybook -> markdown
   mybook -> pandocast
+  mybook -> djot
 }
