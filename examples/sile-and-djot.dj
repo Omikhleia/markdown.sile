@@ -1,0 +1,301 @@
+# Beyond Markdown: SILE and Djot
+
+{custom-style=raggedleft}
+"Djot (/dʒɑt/) is a light markup syntax."[^djot-desc]
+
+[^djot-desc]: From the [Djot website](https://djot.net/).
+
+Djot is a fairly recent markup syntax, proposed by John MacFarlane in 2022.
+It derives from (Common) Markdown, solving a lot of its complex syntax pitfalls,
+and also extending it on various aspects.
+Since mosts concepts are similar, it felt rather natural to include it too in this collection,
+so that authors interested in Markdown can give a try.
+
+The very chapter you are currently reading is written in Djot. As the syntax of the
+language is fairly well described in its design document, we are not going to repeat it
+here. The chapter is therefore a bit dull, mainly reproducing the same things we
+achieved for Markdown earlier. At places, however, it focuses of the specifics of the rendering
+engine.
+
+{% THIS TEXT SHOULD NOT APPEAR IN THE OUTPUT, IT IS A DJOT COMMENT %}
+
+{custom-style=FramedPara}
+Please note that this is an early implementation and that things may change in
+future versions.
+
+## The native djot package
+
+Once you have loaded the `\autodoc:package{djot}`{=sile} package,
+the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading a Djot file.
+The native parsing relies on John MacFarlane's *djot* Lua library.
+
+
+```
+\use[module=packages.djot]
+\include[src=somefile.dj]
+```
+
+Including raw Djot content from within a SILE document is also possible:
+
+```
+\begin[type=djot]{raw}
+Some Djot content
+\end{raw}
+```
+
+{#basic-djot-typesetting}
+### Basic typesetting 
+
+As of formatting, _italic_, *bold*, and `code` all work as expected.
+
+Hard line breaks...\
+... are supported.
+
+Smart typography is a standard feature. Three dashes (`---`) in an
+inline text sequence are converted to an em-dash (---), two dashes (`--`)
+to an en-dash useful for ranges (ex., "it's at pages 12--14"), and three dots
+(`...`) to an ellipsis (...). Smart quotes and apostrophes are also automatically
+handled.
+
+Superscripts and subscripts are available : H~2~O is a liquid, 2^10^ is 1024.
+As Djot allows attaching arbitrary attributes to the elements, it's worth noting that
+we notably support a `fake` boolean attribute here.[^djot-textsubsuper]
+
+[^djot-textsubsuper]: Controlling whether fake or native superscripts or subscripts are used.
+Refer to the `\autodoc:package{textsubsuper}`{=sile} package for details.
+
+Other nice features include:
+
+ - {-deletions-} with `{~deletions~}`
+ - {+insertions+} with `{+insertions+}`
+ - {=highlight=} with `{=highlight=}`
+ - [underlines]{.underline} with `[underlines]{.underline}`
+ - [struck out]{.strike} with `[struck out]{.strike}`
+ - [Small Caps]{.smallcaps}, as `[Small Caps]{.smallcaps}`
+
+### Standard features
+
+Let's go quickly over these features, just to ensure the package does what it says,
+with a good parity with what we ealier described for Markdown.
+
+#### Lists
+
+Unordered lists (a.k.a. itemized or bulleted lists) are obviously supported, or
+we would not have been able to use them in the previous sections.
+
+Ordered lists are supported as well.
+The starting number is honored, and you have the flexibility to use
+digits, roman numbers or letters (in upper or lower case).
+Djot also recognizes several delimiter styles.
+
+ b. This list uses lowercase letters and starts at 2. Er... at "b", that is.
+
+     i) Roman number...
+     ii) ... followed by a right parenthesis rather than a period.
+
+By the way,
+
+ 1. Nesting...
+
+    ... works as intended.
+
+     - Fruits
+
+        - Apple
+
+Task lists following the GitHub-Flavored Markdown (GFM) format are supported too.
+
+ - [ ] Unchecked item
+ - [x] Checked item
+
+Definition lists are also decently supported. Note the syntax differs from Pandoc-style Markdown.
+
+ : apples
+
+   Good for making applesauce.
+
+ : citrus
+
+   Like oranges but yellow.
+
+#### Block quotes
+
+Block quotes work.
+
+> This is block quote.
+>
+> > They can be nested.
+
+#### Footnotes
+
+Footnotes work.[^djot-fnt]
+
+[^djot-fnt]: This is yet another footnote.
+
+#### Languages
+
+Language changes within the text are supported, on either blocks or inline
+elements.
+
+{lang=fr}
+> Cette citation est en français!
+
+Or inline in text: ["Encore du français!"]{lang=fr}
+
+As can be seen, the current language is taken into account when converting
+straight double and single quotation marks to the appropriate typographic variant.
+
+#### Custom styles
+
+The converter also supports the `{custom-style="..."}` attribute.
+
+{#centered-djot custom-style="center"}
+This is SILE and Djot at their best{custom-style="strong"}, really!
+
+#### Images
+
+![This man is still Gutenberg.](./gutenberg.jpg){#djot-gutenberg width=3cm}
+
+![xxx](./manicule.svg){height="0.6bs"} Everything seen for Markdown also applies here.
+
+#### Maths
+
+Inline TeX-like math works, as in $`e^{i\pi}=-1`.
+Display math also works:
+$$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})`
+
+{#djot-tables}
+#### Tables
+
+Djot supports the "pipe table" syntax, with its own way for marking an (optional) caption.
+
+| Right | Left | Default | Center |
+|------:|:-----|---------|:------:|
+|  12   |  12  |    12   |    12  |
+|  123  |  123 |   123   |   123  |
+
+^ Demonstration of a pipe table.
+
+#### Basic links
+
+Here is a link to [the SILE website](https://sile-typesetter.org/), and
+here is an internal link to the "[Basic typesetting](#basic-djot-typesetting)" section.
+
+#### Cross-references
+
+The converter uses the same "tricks" as with Markdown, interpretating links without display
+content as cross-references, and specific pseudo-class attributes to indicate which type of
+reference is requested.
+
+The section on "[](#djot-tables){ .title }", that is [](#djot-tables){ .section },
+is on page [](#djot-tables){ .page }. Figure\ [](#djot-gutenberg) shows Gutenberg;the Sun ("Soleil")
+is mentioned in §[](#sun){.section}, verse [](#sun).
+
+#### Code blocks
+
+Code blocks work:
+
+```lua
+function fib (n)
+  -- Fibonacci numbers
+  if n < 2 then return 1 end
+  return fib(n - 2) + fib(n - 1)
+end
+```
+
+Code blocks marked as being in the Graphviz DOT language are rendered as images.
+
+{width=2cm layout=twopi}
+```dot
+graph {
+  node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
+  a -- { b d };
+  b -- { c e };
+  c -- { f g h i };
+  e -- { j k l m n o };
+}
+```
+
+{render=false width=5cm layout=twopi}
+```dot
+graph {
+  node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
+  a -- { b d };
+  b -- { c e };
+  c -- { f g h i };
+  e -- { j k l m n o };
+}
+```
+
+#### Raw blocks
+
+```=sile
+This \em{entire} sentence is typeset in a \em{raw block}, in SILE language.
+```
+
+```=sile-lua
+SILE.call("em", {}, { 'This' })
+SILE.typesetter:typeset(" is called from Lua.")
+```
+
+Likewise, on inline code elements: `\em{idem.}`{=sile}
+
+#### Horizontal dividers
+
+Since Djot allows attaching arbitrary attributes to any element, we do not need here
+to rely on an _ad hoc_ workaround, as we previously did with the native Markdown package,
+to support several types of "thematic breaks". We just have to "style" the
+divider appropriately.
+
+The `.asterism` pseudo-class produces a centered asterism.
+
+  {.asterism}
+  ***
+
+The `.dinkus` pseudo-class produces a "dinkus".
+
+  {.dinkus}
+  ***
+
+The `.rule` pseudo-class produces a centered horizontal rule, taking 20% of the line.
+
+  {.rule}
+  ***
+
+The `.bigrule` pseudo-class produces a centered horizontal rule, taking 33% of the line.
+
+  {.bigrule}
+  ***
+
+The `.pendant` pseudo-class produces a nice curvy pendant.[^djot-couyards]
+
+  {.pendant}
+  ***
+
+The `.none` pseudo-class produces nothing...
+
+  {.none}
+  ***
+
+Otherwise, everything else produces a full rule.
+
+  ***
+
+All the above classes are exclusise---if more than one are provided, only one is applied.[^djot-hrules]
+Additionally, without demonstrating it here, the `.pagebreak` pseudo-class enforces a page break,
+just after the thematic break. Note that this differs from our approach in the native Markdown
+solution, allowing you to both specify a divider style _and_ introduce a page break after it. It's much
+cleaner, and Djot just shines here! Would you want only a page break, you now know the aim of the `.node`
+pseudo-class.
+
+[^djot-couyards]: As before, provided the optional *couyards.sile* package module is installed.
+[^djot-hrules]: The order in which they are listed above corresponds to their priority.
+
+
+#### Smarter typography
+
+The `.decimal` pseudo-class attribute instructs the converter to consider numbers
+in the content as decimal numbers, formatted with suitable decimal mark and digit grouping according
+to the usage in the current language.
+This allows, say, 1984 to be rendered as "[1984]{ .decimal } years ago" in English,
+or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.

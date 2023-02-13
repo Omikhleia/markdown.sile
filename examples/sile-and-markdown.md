@@ -138,7 +138,7 @@ books and novels, with the appropriate dividers within chapters, or at the end o
 
 ### Lists
 
-Unordered lists (a.k.a. itemized or bullet lists) are obviously supported, or
+Unordered lists (a.k.a. itemized or bulleted lists) are obviously supported, or
 we would not have been able to use them in the previous sections.
 
 Ordered lists are supported as well, and also accept some of the "fancy lists" features

@@ -279,7 +279,7 @@ end
 -- HorizontalRule
 -- Horizontal rule
 Pandoc.HorizontalRule = function ()
-  return utils.createCommand("fullrule")
+  return utils.createCommand("fullrule") -- No way to customize it.
 end
 
 -- Div Attr [Block]
