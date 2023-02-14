@@ -39,7 +39,7 @@ Including raw Djot content from within a SILE document is also possible:
 
 ```
 \begin[type=djot]{raw}
-Some Djot content
+Some *Djot* content
 \end{raw}
 ```
 
@@ -66,7 +66,7 @@ Refer to the `\autodoc:package{textsubsuper}`{=sile} package for details.
 
 Other nice features include:
 
- - {-deletions-} with `{~deletions~}`
+ - {-deletions-} with `{-deletions-}`
  - {+insertions+} with `{+insertions+}`
  - {=highlight=} with `{=highlight=}`
  - [underlines]{.underline} with `[underlines]{.underline}`
@@ -76,7 +76,7 @@ Other nice features include:
 ### Standard features
 
 Let's go quickly over these features, just to ensure the package does what it says,
-with a good parity with what we ealier described for Markdown.
+with a good parity with what we earlier described for Markdown.
 
 #### Lists
 
@@ -167,7 +167,7 @@ $$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \fr
 {#djot-tables}
 #### Tables
 
-Djot supports the "pipe table" syntax, with its own way for marking an (optional) caption.
+Djot supports the "pipe table" syntax, with its own way for marking the (optional) caption.
 
 | Right | Left | Default | Center |
 |------:|:-----|---------|:------:|
@@ -188,7 +188,7 @@ content as cross-references, and specific pseudo-class attributes to indicate wh
 reference is requested.
 
 The section on "[](#djot-tables){ .title }", that is [](#djot-tables){ .section },
-is on page [](#djot-tables){ .page }. Figure\ [](#djot-gutenberg) shows Gutenberg;the Sun ("Soleil")
+is on page [](#djot-tables){ .page }. Figure\ [](#djot-gutenberg) shows Gutenberg; the Sun ("Soleil")
 is mentioned in §[](#sun){.section}, verse [](#sun).
 
 #### Code blocks
@@ -285,7 +285,7 @@ All the above classes are exclusise---if more than one are provided, only one is
 Additionally, without demonstrating it here, the `.pagebreak` pseudo-class enforces a page break,
 just after the thematic break. Note that this differs from our approach in the native Markdown
 solution, allowing you to both specify a divider style _and_ introduce a page break after it. It's much
-cleaner, and Djot just shines here! Would you want only a page break, you now know the aim of the `.node`
+cleaner, and Djot just shines here! Would you want only a page break, you now know the aim of the `.none`
 pseudo-class.
 
 [^djot-couyards]: As before, provided the optional *couyards.sile* package module is installed.
