@@ -59,7 +59,7 @@ Including raw Markdown content from within a SILE document is also possible:
 
 ```
 \begin[type=markdown]{raw}
-Some Markdown content
+Some **Markdown** content
 \end{raw}
 ```
 
@@ -115,7 +115,7 @@ Including raw Djot content from within a SILE document is also possible:
 
 ```
 \begin[type=djot]{raw}
-Some Markdown content
+Some *Djot* content
 \end{raw}
 ```
 
