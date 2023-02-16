@@ -2,7 +2,7 @@
 -- Common commands for Markdown support in SILE, when there is no
 -- direct mapping to existing commands or packages.
 --
--- License: MIT (c) 2022 Omikhleia
+-- License: MIT (c) 2022-2023 Omikhleia
 --
 -- Split in a standalone package so that it can be reused and
 -- generalized somewhat independently from the undelying parsing code.
@@ -151,6 +151,15 @@ end
 
 function package:hasCouyards ()
   return self.class.packages["couyards"]
+end
+
+function package.declareSettings (_)
+  SILE.settings:declare({
+    parameter = "markdown.fixednbsp",
+    type = "boolean",
+    default = false,
+    help = "Fixed-width non-breakable space."
+  })
 end
 
 function package:registerCommands ()
@@ -559,6 +568,21 @@ function package:registerCommands ()
     -- SILE.call("math", {}, content)
     SILE.processString("\\math[mode="..mode.."]{"..SU.contentToString(content).."}", "sil")
   end)
+
+  self:registerCommand("markdown:internal:nbsp", function (options, _)
+    -- Normally an inter-word non-breakable space is stretchable/shrinkable, with
+    -- the same rules as a regular space. That's good typography, but some people
+    -- may complain about it, so let's have a setting for overrinding it.
+    -- (And with Djot, we can attach attributes to any content, so why not have a
+    -- pseudo-class attribute there too.)
+    local fixed = hasClass(options, "fixed") or SILE.settings:get("markdown.fixednbsp")
+    local widthsp = SILE.shaper:measureSpace(SILE.font.loadDefaults({}))
+    if fixed then
+      SILE.call("kern", { width = widthsp.length })
+    else
+      SILE.call("kern", { width = widthsp })
+    end
+  end, "Inserts a non-breakable inter-word space (internal)")
 
   -- B. Fallback commands
 

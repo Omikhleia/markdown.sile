@@ -2,10 +2,7 @@
 -- Pandoc JSON AST native support for SILE
 -- Focussed on Markdown needs (esp. table support)
 --
--- AST conversion relies on the Pandoc types specification:
--- https://hackage.haskell.org/package/pandoc-types
---
--- Reusing the commands made for the "markdown" package.
+-- License: MIT (c) 2022-2023 Omikhleia
 --
 local base = require("packages.base")
 

@@ -2,7 +2,7 @@
 -- Pandoc JSON AST native inputter for SILE
 -- Focussed on Markdown needs (esp. table support)
 --
--- License: MIT (c) 2022 Omikhleia
+-- License: MIT (c) 2022-2023 Omikhleia
 --
 -- AST conversion relies on the Pandoc types specification:
 -- https://hackage.haskell.org/package/pandoc-types
@@ -381,7 +381,7 @@ end
 
 -- Str Text
 Pandoc.Str = function (text)
-  return text
+  return utils.nbspFilter(text)
 end
 
 -- Emph [Inline]
