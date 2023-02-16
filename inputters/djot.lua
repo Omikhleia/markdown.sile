@@ -5,7 +5,6 @@
 --
 -- Reusing the commands initially made for the "markdown" inputter/package.
 --
-
 local utils = require("packages.markdown.utils")
 
 -- DJOT AST CONVERTER TO SILE AST
@@ -292,8 +291,9 @@ function Renderer.hardbreak (_)
   return utils.createCommand("cr")
 end
 
-function Renderer.nbsp (_)
-  return " "
+function Renderer.nbsp (_, node)
+  local options = node.attr or {}
+  return utils.createCommand("markdown:internal:nbsp", options)
 end
 
 function Renderer.verbatim (_, node)

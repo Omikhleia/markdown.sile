@@ -2,7 +2,7 @@
 -- Markdown native support for SILE
 -- Using the lunamark library.
 --
--- License: MIT (c) 2022 Omikhleia
+-- License: MIT (c) 2022-2023 Omikhleia
 --
 local utils = require("packages.markdown.utils")
 
@@ -251,7 +251,11 @@ local function SileAstWriter (options)
       local ropeType = type(node)
 
       if ropeType == "string" then
-        out = node
+        -- We call the nbsp filtering very late: we cannot do it by overriding
+        -- the writer.string() method, as some other enclosing nodes _expect_
+        -- unprocessed U+00A0 characters (e.g. line blocks); other cannot
+        -- contain structured commands (e.g. infostrings in code blocks).
+        out = utils.nbspFilter(node)
       elseif ropeType == "table" then
         local elements = {}
         -- Recursively expand and the the node list

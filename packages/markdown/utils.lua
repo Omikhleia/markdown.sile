@@ -5,7 +5,7 @@
 --    SILE internal AST.
 --  - Other small convenience functions.
 --
--- License: MIT (c) 2022 Omikhleia
+-- License: MIT (c) 2022-2023 Omikhleia
 --
 
 local function createCommand (command, options, content)
@@ -56,9 +56,26 @@ local function normalizeLang (lang)
   return split(lang, "-")[1]
 end
 
+local function nbspFilter (str)
+  -- Non-breakable space extraction from a string, replacing them with an
+  -- appropriate non-breakable inter-word space.
+  local t = {}
+  for token in SU.gtoke(str, " ") do -- Warning, U+00A0 here.
+    if(token.string) then
+      t[#t+1] = token.string
+    else
+      t[#t+1] = createCommand("markdown:internal:nbsp")
+    end
+  end
+  -- Returns a string or a (SILE AST) table
+  if #t == 0 then return "" end
+  return #t == 1 and t[1] or t
+end
+
 return {
   getFileExtension = getFileExtension,
   normalizeLang = normalizeLang,
   createCommand = createCommand,
   createStructuredCommand = createStructuredCommand,
+  nbspFilter = nbspFilter,
 }
