@@ -1,15 +1,18 @@
+--- Markdown native support for SILE
 --
--- Markdown native support for SILE
--- Using the lunamark library.
---
--- License: MIT (c) 2022 Omikhleia
+-- @copyright License: MIT (c) 2022 Omikhleia
+-- @module packages.markdown
 --
 local base = require("packages.base")
 
 local package = pl.class(base)
 package._name = "markdown"
 
-function package:_init (_)
+--- Package initialization.
+--
+-- It basically loads the required common packages,
+-- and loads the markdown inputter.
+function package:_init ()
   base._init(self)
   self.class:loadPackage("markdown.commands")
 
@@ -18,6 +21,9 @@ function package:_init (_)
   local _ = SILE.inputters.markdown
 end
 
+--- Package raw handler registrations.
+--
+-- It enables a raw handler for markdown content.
 function package:registerRawHandlers ()
 
   self.class:registerRawHandler("markdown", function(options, content)

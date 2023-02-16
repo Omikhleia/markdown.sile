@@ -1,13 +1,16 @@
+--- Pandoc JSON AST native inputter for SILE
 --
--- Pandoc JSON AST native inputter for SILE
--- Focussed on Markdown needs (esp. table support)
---
--- License: MIT (c) 2022-2023 Omikhleia
+-- Focussed on Markdown needs (things such as table support is therefore
+-- limited to that scope).
 --
 -- AST conversion relies on the Pandoc types specification:
 -- https://hackage.haskell.org/package/pandoc-types
 --
--- Reusing the commands initially made for the "markdown" inputter/package.
+-- Using the LuaJSON library for parsing.
+-- Reusing the common commands initially made for the "markdown" inputter/package.
+--
+-- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @module inputters.pandocast
 --
 local Pandoc = {
    API_VERSION = { 1, 22, 0 } -- Supported API version (semver)

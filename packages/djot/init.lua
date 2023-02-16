@@ -1,16 +1,18 @@
+--- Djot native support for SILE
 --
--- Djot native support for SILE
--- Using the djot Lua library.
---
--- License: MIT (c) 2023 Omikhleia
+-- @copyright License: License: MIT (c) 2023 Omikhleia
+-- @module packages.djot
 --
 local base = require("packages.base")
 
 local package = pl.class(base)
 package._name = "djot"
 
-
-function package:_init (_)
+--- Package initialization.
+--
+-- It basically loads the required common packages,
+-- and loads the djot inputter.
+function package:_init ()
   base._init(self)
   self.class:loadPackage("markdown.commands")
 
@@ -19,6 +21,9 @@ function package:_init (_)
   local _ = SILE.inputters.djot
 end
 
+--- Package raw handler registrations.
+--
+-- It enables a raw handler for djot content.
 function package:registerRawHandlers ()
 
   self.class:registerRawHandler("djot", function(options, content)

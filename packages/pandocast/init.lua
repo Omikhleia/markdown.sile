@@ -1,16 +1,18 @@
+--- Pandoc JSON AST native support for SILE
 --
--- Pandoc JSON AST native support for SILE
--- Focussed on Markdown needs (esp. table support)
---
--- License: MIT (c) 2022-2023 Omikhleia
+-- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @module packages.pandocast
 --
 local base = require("packages.base")
 
 local package = pl.class(base)
 package._name = "pandocast"
 
-
-function package:_init (_)
+--- Package initialization.
+--
+-- It basically loads the required common packages,
+-- and enables the pandocast inputter.
+function package:_init ()
   base._init(self)
   self.class:loadPackage("markdown.commands")
 

@@ -1,8 +1,9 @@
+--- Markdown native support for SILE
 --
--- Markdown native support for SILE
--- Using the lunamark library.
+-- Using the lunamark Lua library for parsing.
 --
--- License: MIT (c) 2022-2023 Omikhleia
+-- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @module inputters.markdown
 --
 local utils = require("packages.markdown.utils")
 

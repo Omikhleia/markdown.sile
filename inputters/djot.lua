@@ -1,9 +1,10 @@
+--- Djot native inputter for SILE
 --
--- Djot native inputter for SILE
+-- Using the djot Lua library for parsing.
+-- Reusing the common commands initially made for the "markdown" inputter/package.
 --
--- License: MIT (c) 2023 Omikhleia
---
--- Reusing the commands initially made for the "markdown" inputter/package.
+-- @copyright License: MIT (c) 2023 Omikhleia
+-- @module inputters.djot
 --
 local utils = require("packages.markdown.utils")
 

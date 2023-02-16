@@ -1,11 +1,11 @@
---
--- Common commands for Markdown support in SILE, when there is no
+--- Common commands for Markdown support in SILE, when there is no
 -- direct mapping to existing commands or packages.
---
--- License: MIT (c) 2022-2023 Omikhleia
 --
 -- Split in a standalone package so that it can be reused and
 -- generalized somewhat independently from the undelying parsing code.
+--
+-- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @module packages.markdown.commands
 --
 local utils = require("packages.markdown.utils")
 local base = require("packages.base")
