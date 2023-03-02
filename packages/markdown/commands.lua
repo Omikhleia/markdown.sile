@@ -261,9 +261,19 @@ function package:registerCommands ()
   self:registerCommand("markdown:internal:header", function (options, content)
     local level = SU.required(options, "level", "header")
     local command = getSectioningCommand(SU.cast("integer", level))
-    local numbering = not hasClass(options, "unnumbered")
-    SILE.call(command, { numbering = numbering }, content)
-    if options.id then
+    -- Pass all attributes to underlying sectioning command, and interpret
+    -- .unnumbered and .notoc pseudo-classes as alternatives to numbering=false
+    -- and toc=false.
+    local id = options.id
+    options.id = nil -- cancel attribute here.
+    if hasClass(options, "unnumbered") then
+      options.numbering = false
+    end
+    if hasClass(options, "notoc") then
+      options.toc = false
+    end
+    SILE.call(command, options, content)
+    if id then
       -- HACK.
       -- Somewhat messy. If done before the sectioning, it could end on the
       -- previous page. Within its content, it breaks as TOC entries want
@@ -272,7 +282,7 @@ function package:registerCommands ()
       -- page breaks and indent/noindent...
       -- In the resilient.book class, I added a marker option to sections and
       -- reimplemented that part, but here we work with what we have...
-      SILE.call("label", { marker = options.id })
+      SILE.call("label", { marker = id })
     end
   end, "Header in Markdown (internal)")
 

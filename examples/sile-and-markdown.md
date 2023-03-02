@@ -53,11 +53,11 @@ See also "[Configuration](#configuration)" further below.
 
 ### Basic typesetting {#basic-typesetting}
 
-As it can be seen here, sectioning obviously works^[With a small caveat. The package maps heading
+As it can be seen here, paragraphs and sectioning obviously works^[With a small caveat. The package maps heading
 levels to `\chapter`, `\section`, `\subsection`, `\subsubsection` and uses a very basic fallback
 if these are not found (or if the sectioning level gets past that point). The implication, therefore,
-is that the class or other packages have to provide the relevant implementations.] and paragraphs
-are of course supported.
+is that the class or other packages have to provide the relevant implementations.] are of course
+supported. Pseudo-classes `.unnumbered` and `.notoc` are also supported.
 As of formatting, *italic*, **bold**, and `code` all work as expected.
 
 Hard line breaks...\
