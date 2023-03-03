@@ -151,10 +151,17 @@ parsers.indented_blocks = function(bl)
 end
 
 -- Attributes list as in Pandoc {#id .class .class-other key=value key2="value 2"}
+-- N.B. For attribute values, Pandoc may possibly accept more things than us here,
+-- the details may have to be checked.
 parsers.identifier  = parsers.letter
                       * (parsers.alphanumeric + S("_-"))^0
-parsers.attrvalue   = (parsers.dquote * C((parsers.alphanumeric + S("._- "))^1) * parsers.dquote)
-                      + C((parsers.alphanumeric + S("._-"))^1)
+parsers.attrvalue   = (parsers.dquote
+                      * C((parsers.anyescaped - parsers.dquote)^0)
+                      * parsers.dquote)
+                    + (parsers.squote
+                      * C((parsers.anyescaped - parsers.squote)^0)
+                      * parsers.squote)
+                    + C((parsers.anyescaped - parsers.dquote - parsers.space - P("}"))^1)
 
 parsers.attrpair    = Cg(C((parsers.identifier)^1)
                       * parsers.optionalspace * parsers.equal * parsers.optionalspace
