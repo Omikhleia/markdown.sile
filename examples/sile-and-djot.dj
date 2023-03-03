@@ -205,7 +205,7 @@ end
 
 Code blocks marked as being in the Graphviz DOT language are rendered as images.
 
-{width=2cm layout=twopi}
+{width="3.5cm" layout=twopi}
 ```dot
 graph {
   node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
