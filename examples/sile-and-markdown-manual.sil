@@ -12,6 +12,7 @@
 \font[family=Libertinus Serif]
 \font:add-fallback[family=Symbola, size=8pt]
 \set[parameter=autodoc.highlighting, value=true]
+\set[parameter=document.parskip, value=2pt]
 \language[main=en]
 \footnote:rule%
 \pdf:metadata[key=Title, value=Markdown to PDF with SILE]
@@ -62,13 +63,18 @@ version 2.0 (http://creativecommons.org/licenses/by-sa/2.0/).
 % Now let's try something very cool...
 % - Quick and dirty definition of a new custom style...
 %   (using out still experimental "resilient" styling feature)
-\lua{
-SILE.scratch.styles.alignments["framed"] = "customframe"
-}
 \define[command=customframe]{\center{\roughbox[bordercolor=#59b24c,
   fillcolor=220,padding=15pt, enlarge=true]{\parbox[width=90%lw, minimize=true]{\process}}}}
-\style:define[name=FramedPara]{
-  \paragraph[skipbefore=medskip, skipafter=medskip, align=framed]
+\lua{
+SILE.scratch.styles.alignments["framed"] = "customframe"
+local class = SILE.documentState.documentClass
+class:registerStyle("FramedPara", {}, {
+  paragraph = {
+    before = { skip = "medskip" },
+    after = { skip = "medskip" },
+    align = "framed"
+  }
+})
 }
 \define[command=FramedPara]{\style:apply:paragraph[name=FramedPara]{\process}}
 % - Some other packages
