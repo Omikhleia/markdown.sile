@@ -171,6 +171,25 @@ which also serves as documentation, showcase and reference guide.
 - Raw attributes (escaping to inline SILE or Lua scripting)
 - Raw inline HTML convenience subset
 
+## Use with the resilient collection
+
+To unleash the full potential of this package set, we recommend that
+you also install our [resilient](https://github.com/Omikhleia/resilient.sile)
+collection of classes and packages.
+
+Then, you can automatically benefit from a few advanced features.
+Conversion from command-line just requires to load a resilient class, and optionnaly
+the poetry package. For instance:
+
+```
+sile -c resilient.book -u inputters.markdown -u packages.resilient.poetry somefile.md
+```
+
+(And likewise for the Pandoc AST or Djot processing.)
+
+A resilient style file is also generated. It can be modified to change many styling
+decisions and adapt the ouput at convenience.
+
 ## License
 
 All SILE-related code and samples in this repository are released under the MIT License, (c) 2022 Omikhleia.
@@ -193,5 +212,5 @@ Additional thanks to:
 - Simon Cozens, _et al._ concerned, for the early attempts at using lunamark with SILE.
 - Vít Novotný, for the good work on lunamark, and the impressive [witiko/markdown](https://github.com/Witiko/markdown)
   package for (La)TeX - a great source of inspiration and a goal of excellence.
-- Caleb Maclennan, for his early work on a Pandoc-to-SILE converter which, though on different grounds, indirectly
-  gave me the idea of the "pandocast" alternative approach.
+- Caleb Maclennan, for his early work on a Pandoc-to-SILE converter which, though on different grounds,
+  indirectly gave me the idea of the "pandocast" alternative approach.
