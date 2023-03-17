@@ -117,6 +117,7 @@ function Renderer.code_block (_, node)
 end
 
 function Renderer:table (node)
+  local options = node.attr or {}
   if not node.c then
     SU.error("Table without content (should not occur)")
   end
@@ -152,7 +153,7 @@ function Renderer:table (node)
     ptable,
     utils.createCommand("caption", {}, caption)
   }
-  return utils.createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
+  return utils.createStructuredCommand("markdown:internal:captioned-table", options, captioned)
 end
 
 function Renderer:row (node)

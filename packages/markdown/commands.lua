@@ -180,7 +180,8 @@ function package:registerCommands ()
         -- use the caption numbering)
         local id = image.options.id
         image.options.id = nil
-        SILE.call("markdown:internal:captioned-figure", {}, {
+        -- We also propagate image options to the englobing environment
+        SILE.call("markdown:internal:captioned-figure", image.options, {
           image,
           utils.createCommand("caption", {}, {
             utils.createCommand("label", { marker = id }),
@@ -188,7 +189,8 @@ function package:registerCommands ()
           }),
         })
       else
-        SILE.call("markdown:internal:captioned-figure", {}, {
+        -- We also propagate image options to the englobing environment
+        SILE.call("markdown:internal:captioned-figure", image.options, {
           image,
           utils.createCommand("caption", {}, caption),
         })
@@ -483,7 +485,7 @@ function package:registerCommands ()
     end
   end, "Block quote in Markdown (internal)")
 
-  self:registerCommand("markdown:internal:captioned-table", function (_, content)
+  self:registerCommand("markdown:internal:captioned-table", function (options, content)
     -- Makes it easier for class/packages to provide their own captioned-table
     -- environment if they want to do so (possibly with more features,
     -- e.g. managing list of tables, numbering and cross-references etc.),
@@ -491,11 +493,18 @@ function package:registerCommands ()
     if not SILE.Commands["captioned-table"] then
       SILE.call("markdown:fallback:captioned-table", {}, content)
     else
-      SILE.call("captioned-table", {}, content)
+      local tableopts = {}
+      if hasClass(options, "unnumbered") then
+        tableopts.numbering = false
+      end
+      if hasClass(options, "notoc") then
+        tableopts.toc = false
+      end
+      SILE.call("captioned-table", tableopts, content)
     end
   end, "Captioned table in Markdown (internal)")
 
-  self:registerCommand("markdown:internal:captioned-figure", function (_, content)
+  self:registerCommand("markdown:internal:captioned-figure", function (options, content)
     -- Makes it easier for class/packages to provide their own captioned-figure
     -- environment if they want to do so (possibly with more features,
     -- e.g. managing list of tables, numbering and cross-references etc.),
@@ -503,9 +512,16 @@ function package:registerCommands ()
     if not SILE.Commands["captioned-figure"] then
       SILE.call("markdown:fallback:captioned-figure", {}, content)
     else
-      SILE.call("captioned-figure", {}, content)
+      local figopts = {}
+      if hasClass(options, "unnumbered") then
+        figopts.numbering = false
+      end
+      if hasClass(options, "notoc") then
+        figopts.toc = false
+      end
+      SILE.call("captioned-figure", figopts, content)
     end
-  end, "Captioned table in Markdown (internal)")
+  end, "Captioned figure in Markdown (internal)")
 
   self:registerCommand("markdown:internal:codeblock", function (options, content)
     if hasClass(options, "dot") and SU.boolean(options.render, true) then
@@ -658,7 +674,7 @@ function package:registerCommands ()
       end
     end)
     SILE.call("smallskip")
-  end, "A fallback command for Markdown to insert a captioned table")
+  end, "A fallback command for Markdown to insert a captioned figure")
 
   -- C. Customizable hooks
 

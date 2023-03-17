@@ -273,8 +273,10 @@ image syntax ---Note that any unit system supported by SILE is accepted.
 
 An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph,
 will be rendered as a figure with a caption. If your class or previously loaded packages
-provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to
-take care of a `\caption` content, i.e. to extract and display it appropriately).
+provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to take care of a `\caption` content, i.e. to extract and display it
+appropriately).^[When using the **resilient** classes, the caption will be numbered by
+default, and added to the list of figures. Specify `.unnumbered`, and `.notoc` respectively,
+if you do not want it.]
 Otherwise, the converter uses its own fallback method.
 
 Besides regular image files, a few specific file extensions are also recognized and
@@ -283,7 +285,7 @@ Notably ![](./examples/manicule.svg){height=0.9em} SVG is supported too (`.svg`)
 here with a "manicule" in the format.
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images too.
 
-![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width="80%fw"}
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width="75%fw"}
 
 ### Maths
 
