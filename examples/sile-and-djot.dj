@@ -167,7 +167,8 @@ $$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \fr
 {#djot-tables}
 #### Tables
 
-Djot supports the "pipe table" syntax, with its own way for marking the (optional) caption.
+Djot supports the "pipe table" syntax, with its own way for marking the (optional)
+caption.[^djot-numbered-caption]
 
 | Right | Left | Default | Center |
 |------:|:-----|---------|:------:|
@@ -175,6 +176,10 @@ Djot supports the "pipe table" syntax, with its own way for marking the (optiona
 |  123  |  123 |   123   |   123  |
 
 ^ Demonstration of a pipe table.
+
+[^djot-numbered-caption]: When using the **resilient** classes, the caption will be numbered by
+default, and added to the list of tables. Specify `.unnumbered`, and `.notoc` respectively, as
+table attributes, if you do not want it.
 
 #### Basic links
 
