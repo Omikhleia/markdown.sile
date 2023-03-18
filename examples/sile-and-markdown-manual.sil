@@ -46,7 +46,7 @@ Showcase Document
 \hbox{}
 \vfill
 
-\noindent{}© 2022 Didier Willis.
+\noindent{}© 2022–2023 Didier Willis.
 
 \noindent{}This material may be distributed only subject to the terms and conditions set forth in the
 Creative Commons Attribution, Share-Alike License,
@@ -79,14 +79,15 @@ class:registerStyle("FramedPara", {}, {
 \define[command=FramedPara]{\style:apply:paragraph[name=FramedPara]{\process}}
 % - Some other packages
 \lua{
-SILE.registerCommand("Ean13", function (_, content)
+local class = SILE.documentState.documentClass
+class:registerCommand("Ean13", function (_, content)
   local code = content[1]
   -- Markdown parser may interpret a dash between digits as smart typography for en-dash.
   -- Let's remove those.
   code = code:gsub("–","")
   SILE.call("ean13", { code = code })
 end)
-SILE.registerCommand("Initial", function (_, content)
+class:registerCommand("Initial", function (_, content)
   local letter = content[1]
   SILE.call("dropcap", { lines = 3, family = "Zallman Caps", join = true }, { letter })
 end)

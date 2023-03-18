@@ -281,8 +281,8 @@ Otherwise, the converter uses its own fallback method.
 
 Besides regular image files, a few specific file extensions are also recognized and
 processed appropriately.
-Notably ![](./examples/manicule.svg){height=0.9em} SVG is supported too (`.svg`), as demonstrated
-here with a "manicule" in the format.
+Notably ![](./examples/manicule.svg){height=0.6bs} SVG is supported too (`.svg`), as demonstrated
+here with a "manicule" in that format.
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images too.
 
 ![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width="75%fw"}
