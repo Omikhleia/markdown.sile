@@ -139,7 +139,16 @@ function Renderer:table (node)
   local numberOfCols = #row.c
   local cWidth = {}
   for i = 1, numberOfCols do
-    cWidth[i] = string.format("%.5f%%lw", 100 / numberOfCols)
+    -- Currently we make all columns the same width, with the table taking
+    -- a full line width. Well, nearly full: 99.9% to avoid 100% which
+    -- causes issues in SILE flushed/centered environments, but this is
+    -- deemed acceptable (hardly visible, and in most case we have some
+    -- rounding anyway with the number format, so we aren't really making
+    -- things worse).
+    -- N.B. For future consideration: in Djot we could use a table attribute
+    -- for specifying the target width. This would however require some
+    -- changes to the ptable implementation, though...
+    cWidth[i] = string.format("%.5f%%lw", 99.9 / numberOfCols)
   end
   local ptable = utils.createStructuredCommand("ptable", {
      cols = table.concat(cWidth, " "),
