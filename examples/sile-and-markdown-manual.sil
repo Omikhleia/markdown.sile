@@ -30,7 +30,7 @@
 
 \skip[height=1cm]
 \begin[size=16pt, weight=700]{font}
-Markdown to PDF with SILE
+Markdown and Djot to PDF with SILE
 
 —
 
@@ -54,6 +54,10 @@ version 2.0 (http://creativecommons.org/licenses/by-sa/2.0/).
 
 \pagebreak
 \fancytableofcontents[start=2]
+%
+% Introduction chapter
+%
+\include[src=introduction.md]
 %
 % Standard documentation/showcase in Markdown
 %

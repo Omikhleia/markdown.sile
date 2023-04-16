@@ -111,6 +111,10 @@ folio-even:
   inherit: "folio-base"
   origin: "resilient.book"
   style:
+    paragraph:
+      align: "left"
+      before:
+        indent: false
 
 folio-odd:
   inherit: "folio-base"
@@ -118,6 +122,8 @@ folio-odd:
   style:
     paragraph:
       align: "right"
+      before:
+        indent: false
 
 footnote:
   origin: "resilient.footnotes"
@@ -221,7 +227,7 @@ sectioning-chapter:
       weight: 800
     paragraph:
       after:
-        skip: "bigskip"
+        skip: "30pt plus 6pt minus 6pt"
       align: "left"
     sectioning:
       counter:

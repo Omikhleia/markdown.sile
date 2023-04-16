@@ -14,7 +14,7 @@ authors alike.
 
 Within SILE’s aim to produce beautiful printed documents, it's a pretty reasonable assumption that
 such writers and authors may want to use this fine typesetter with their Markdown content, without
-having to learn the SILE language and its specifics (but not, either, fully excluding it for some
+having to learn the SIL language and its specifics (but not, either, fully excluding it for some
 advanced capabilities). Guess what, the very chapter you are currently reading is written in Markdown!
 
 There is actually more than one solution to achieve great results in that direction:
@@ -41,7 +41,7 @@ to the basics here.
 \include[src=somefile.md]
 ```
 
-Including raw Markdown content from within a SILE document is also possible:
+Embedding raw Markdown content from within a SILE document is also possible:
 
 ```
 \begin[type=markdown]{raw}
@@ -447,14 +447,14 @@ graph {
 ### Raw blocks
 
 Last but not least, the converter supports a `{=sile}` annotation on code blocks, to pass
-through their content in SILE language, as shown below.[^raw-comment]
+through their content in SIL language, as shown below.[^raw-comment]
 
 [^raw-comment]: This is also a Pandoc-inspired extension to standard Markdown. Other `{=xxx}` annotations
 than those described in this section are skipped (i.e. their whole content is ignored).
 `That's a \LaTeX{} construct, so it's skipped in the SILE output.`{=latex}
 
 ```{=sile}
-For instance, this \em{entire} sentence is typeset in a \em{raw block}, in SILE language.
+For instance, this \em{entire} sentence is typeset in a \em{raw block}, in SIL language.
 ```
 
 Likewise, this is available on inline code elements: `\em{idem.}`{=sile}
@@ -463,7 +463,7 @@ This was obtained with:
 
 ~~~
 ```{=sile}
-For instance, this \em{entire} sentence is typeset in a \em{raw block}, in SILE language.
+For instance, this \em{entire} sentence is typeset in a \em{raw block}, in SIL language.
 ```
 
 Likewise, this is available on inline code elements: `\em{idem.}`{=sile}
