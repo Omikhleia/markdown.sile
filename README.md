@@ -6,14 +6,14 @@
 [![Luarocks](https://img.shields.io/luarocks/v/Omikhleia/markdown.sile?label=Luarocks&logo=Lua)](https://luarocks.org/modules/Omikhleia/markdown.sile)
 
 This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting
-system provides a complete redesign of the native Markdown support, with
+system provides a complete redesign of its former native Markdown support, with
 a great set of Pandoc-like extensions and plenty of extra goodies.
 
 - **markdown** inputter and package: native support of Markdown files.
 - **pandocast** inputter and package: native support of Pandoc JSON AST files.
 - **djot** inputter and package: native support of Djot files.
 
-For casual readers: This notably aims at converting Markdown or Djot documents to print-quality PDFs.
+For casual readers, this collection notably aims at easily converting Markdown or Djot documents to print-quality PDFs.
 
 ## Installation
 
@@ -44,7 +44,7 @@ From command line:
 sile -u inputters.markdown somefile.md
 ```
 
-Or from documents (e.g. here in SILE language):
+Or from documents (e.g. here in SIL language):
 
 ```
 \use[module=packages.markdown]
@@ -92,7 +92,7 @@ Or from documents:
 [Djot](https://djot.net/) is a fairly recent “light markup syntax” derived from Markdown,
 fixing most of its complex syntax pitfalls, and also extending it on various aspects.
 Since many concepts are similar, it felt rather natural to include it too in this collection,
-so that authors interested in Markdown can give a try.
+so that authors interested in Markdown can give it a try.
 
 From command line:
 
@@ -100,7 +100,7 @@ From command line:
 sile -u inputters.djot somefile.dj
 ```
 
-Or from documents (e.g. here in SILE language):
+Or from documents (e.g. here in SIL language):
 
 ```
 \use[module=packages.djot]
@@ -146,13 +146,13 @@ other advanced topics and cool use cases. Needed fonts are Libertinus Serif, Sym
 This is but an overview. For more details, please refer to the provided example Markdown document,
 which also serves as documentation, showcase and reference guide.
 
-- Standard Mardown typesetting (italic, bold, code, etc.)
-- Smart typography (quotes, apostrophes, ellipsis, dashes, etc.) with extensions (prime marks)
+- Standard Mardown and Djot typesetting (italic, bold, code, etc.)
+- Smart typography (quotes, apostrophes, ellipsis, dashes, etc.) with Markdown extensions (prime marks)
 - Headers and header attributes
 - Horizontal dividers (a.k.a. horizontal rules, with provision for asterisms, dinkuses, pendants...)
 - Images (and image attributes, e.g. dimensions)
 - TeX-like math
-- Strikeout (a.k.a. deletions)
+- Strikeout (a.k.a. deletions), etc.
 - Subscript and superscript
 - Footnotes (both regular and inline syntax support)
 - Fenced code blocks (with attributes)
@@ -169,7 +169,7 @@ which also serves as documentation, showcase and reference guide.
 - Line blocks (with enhanced provision for poetry)
 - Hard line breaks
 - Raw attributes (escaping to inline SILE or Lua scripting)
-- Raw inline HTML convenience subset
+- Raw inline HTML convenience subset in Markdown
 
 ## Use with the resilient collection
 

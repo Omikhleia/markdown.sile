@@ -9,7 +9,7 @@ Djot is a fairly recent markup syntax, proposed by John MacFarlane in 2022.
 It derives from (Common) Markdown, solving a lot of its complex syntax pitfalls,
 and also extending it on various aspects.
 Since mosts concepts are similar, it felt rather natural to include it too in this collection,
-so that authors interested in Markdown can give a try.
+so that authors interested in Markdown can give it a try.
 
 The very chapter you are currently reading is written in Djot. As the syntax of the
 language is fairly well described in its design document, we are not going to repeat it
@@ -35,7 +35,7 @@ The native parsing relies on John MacFarlane's *djot* Lua library.
 \include[src=somefile.dj]
 ```
 
-Including raw Djot content from within a SILE document is also possible:
+Embedding raw Djot content from within a SILE document is also possible:
 
 ```
 \begin[type=djot]{raw}
@@ -235,7 +235,7 @@ graph {
 #### Raw blocks
 
 ```=sile
-This \em{entire} sentence is typeset in a \em{raw block}, in SILE language.
+This \em{entire} sentence is typeset in a \em{raw block}, in SIL language.
 ```
 
 ```=sile-lua
