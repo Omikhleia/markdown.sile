@@ -274,17 +274,30 @@ function package:registerCommands ()
     if hasClass(options, "notoc") then
       options.toc = false
     end
-    SILE.call(command, options, content)
-    if id then
-      -- HACK.
-      -- Somewhat messy. If done before the sectioning, it could end on the
-      -- previous page. Within its content, it breaks as TOC entries want
-      -- a table content, so we can't use a function above...
+    local isInResilient = self.class._name:match("^resilient") -- HACK very lame detection
+    if isInResilient then
+      --Sectioning commands support the marker option.
+      options.marker = id
+      SILE.call(command, options, content)
+    else
+      -- We don't know if the marker option is supported.
+      -- Presumably no, e.g. it's the SILE default book class...
+      -- Things are somewhat messy then, as of how to insert the identifier label.
+      -- If done before the sectioning, it could end on the previous page.
+      -- Within the title content, it poses other problems to ToC entries, running headers...
       -- We are left with doing it after, but that's not perfect either vs.
-      -- page breaks and indent/noindent...
-      -- In the resilient.book class, I added a marker option to sections and
-      -- reimplemented that part, but here we work with what we have...
-      SILE.call("label", { marker = id })
+      -- page breaks, paragraph indents and skips...
+      SILE.call(command, options, content)
+      if id then
+        if not self.warnResilient then
+          SU.warn([[You are not using a resilient class.
+Sectioning command (]] .. command .. [[) with an identifier (]] .. id .. [[)
+may sometimes introduce weird skips.
+Please consider using a resilient-compatible class!]])
+          self.warnResilient = true
+        end
+        SILE.call("label", { marker = id })
+      end
     end
   end, "Header in Markdown (internal)")
 
@@ -637,7 +650,7 @@ function package:registerCommands ()
     SILE.call("novbreak")
     SILE.call("par")
     SILE.call("novbreak")
-  end, "A fallback default header if none exists for the requested sectioning label")
+  end, "A fallback default header if none exists for the requested sectioning level")
 
   self:registerCommand("markdown:fallback:captioned-table", function (_, content)
     if type(content) ~= "table" then
