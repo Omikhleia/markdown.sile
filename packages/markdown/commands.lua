@@ -128,6 +128,11 @@ end
 
 function package:_init (_)
   base._init(self)
+
+  -- HACK very lame detection
+  -- Try to guess if the resilient classes are used
+  self.isResilient = self.class._name:match("^resilient")
+
   -- Only load low-level packages (= utilities)
   -- The class should be responsible for loading the appropriate higher-level
   -- constructs, see fallback commands further below for more details.
@@ -136,7 +141,16 @@ function package:_init (_)
   self.class:loadPackage("image")
   self.class:loadPackage("inputfilter")
   self.class:loadPackage("labelrefs")
-  self.class:loadPackage("lists")
+  if not self.class.packages["resilient.lists"] then
+    -- In resilient context, try enforcing the use of resilient.lists,
+    -- assuming its compatible with SILE's lists (command-wise).
+    -- So that we benefit from its extended features and its styling.
+    if self.isResilient then
+      self.class:loadPackage("resilient.lists")
+    else
+      self.class:loadPackage("lists")
+    end
+  end
   self.class:loadPackage("math")
   self.class:loadPackage("ptable")
   self.class:loadPackage("rules")
@@ -274,8 +288,7 @@ function package:registerCommands ()
     if hasClass(options, "notoc") then
       options.toc = false
     end
-    local isInResilient = self.class._name:match("^resilient") -- HACK very lame detection
-    if isInResilient then
+    if self.isResilient then
       --Sectioning commands support the marker option.
       options.marker = id
       SILE.call(command, options, content)
