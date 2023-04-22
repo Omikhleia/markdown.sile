@@ -80,7 +80,6 @@ class:registerStyle("FramedPara", {}, {
   }
 })
 }
-\define[command=FramedPara]{\style:apply:paragraph[name=FramedPara]{\process}}
 % - Some other packages
 \lua{
 local class = SILE.documentState.documentClass

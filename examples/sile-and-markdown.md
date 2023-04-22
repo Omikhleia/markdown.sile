@@ -83,7 +83,7 @@ Other nice features include:
  -  and even [Small Caps]{.smallcaps}, as `[Small Caps]{.smallcaps}`
 
 The two latter cases use the extended Pandoc-inspired "span" syntax, which is also useful for languages
-and custom styles (see futher below). They also use the CSS-like class notation that several
+and custom styles (see further below). They also use the CSS-like class notation that several
 Pandoc writers recognize.
 
 ### Horizontal dividers
@@ -240,11 +240,12 @@ its **docx** writer, to specify a specific, possibly user-defined, custom style 
 case, a Word style, obviously). So yes, if you had a Pandoc-Markdown document styled for Word,
 you might consider that switching to SILE is a viable option!
 
-If such a named style exists, it is applied. Erm. What does it mean? Well, in the default
-implementation, if there is a corresponding SILE command by that name, the converter invokes
-it. Otherwise, it just ignores the style and processes the content as-is.
-It thus allows you to use some interesting SILE features. For instance, here is some block
-of text marked as "center":
+If such a named style exists, it is applied. Erm. What does it mean?
+Well, in the default implementation, if used within in a **resilient** class and there is a corresponding style, the converter uses it.
+Otherwise, if there is a corresponding SILE command by that name, the converter invokes it.
+Otherwise, it just ignores the style and processes the content as-is.
+Even if you do not use a resilient-compatible class, it thus allows you to use some interesting SILE features.
+For instance, here is some block of text marked as "center":
 
 ::: {#centered custom-style="center"}
 This is SILE at its best.
@@ -254,15 +255,16 @@ And some inline [message]{custom-style="strong"}, marked as "strong". That's a f
 contrived way to obtain a bold text, but you get the underlying general idea.
 
 This logic is implemented in the `\autodoc:command{\markdown:custom-style:hook}`{=sile}
-command. Package or class designers may override this hook to support any
-other styling mechanism they may have or want. But basically, this is one of the
-ways to use SILE commands in Markdown. While you could invoke _any_ SILE command with
-this feature, we recommend, though, to restrict it to styling. You will see, further below,
-another more powerful way to leverage Markdown with SILE’s full processing capabilities.
+command.
+Package or class designers may override this hook to support any
+other additional styling mechanism they may have or want.
+But basically, this is one of the ways to use SILE commands in Markdown.
+While you could invoke _any_ SILE command with this feature, we recommend, though, to restrict it to styling.
+You will see, further below, another more powerful way to leverage Markdown with SILE’s full processing capabilities.
 
 ### Images
 
-Here is an image: ![Invisible caption as in inline](./gutenberg.jpg "An exemplary image"){width=3cm}
+Here is an image: ![Invisible caption as in inline](./gutenberg.jpg "An exemplary image"){width=2.5cm}
 
 You can specify the required image width and/or height, as done just above actually,
 by appending the `{width=... height=...}` attributes^[And possibly other attributes,
@@ -383,7 +385,7 @@ Neither standard Markdown nor Pandoc defines a proper way to insert cross-refere
 you would see in a book, as in the following example.
 
 > The section on "[](#tables){ .title }", that is [](#tables){ .section },
-> is on page [](#tables){ .page }.
+> is on p. [](#tables){ .page }.
 
 This converter takes a bold decision, though unlikely to break anything unexpected. Empty local links
 (that is, without inline display content) are interpreted as cross-references. By default, they are
@@ -393,7 +395,7 @@ of reference is expected (page number, section number or title text). Thus, the 
 obtained from the following input:
 
 ```
-The section on "[](#tables){ .title }", that is [](#tables){ .section }, is on page [](#tables){ .page }.
+The section on "[](#tables){ .title }", that is [](#tables){ .section }, is on p.[](#tables){ .page }.
 ```
 
 Besides heading levels, it also works for various elements where you can define an identifier,
