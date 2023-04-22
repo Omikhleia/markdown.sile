@@ -706,16 +706,32 @@ Please consider using a resilient-compatible class!]])
 
   self:registerCommand("markdown:custom-style:hook", function (options, content)
     -- Default implementation for the custom-style hook:
-    -- If there is a corresponding command, we invoke it, otherwise, we just
-    -- ignore the style and process the content. It allows us, e.g. to already
-    -- use some interesting features, such as "custom-style=raggedleft".
+    -- If we are in the context of a resilient-compatible class and there's
+    -- an existing style going by that name, use it.
+    -- Otherwise, tf there is a corresponding SILE command, we invoke it.
+    -- otherwise, we just ignore the style and process the content.
+    -- It allows us, e.g. to already
+    --  - Use resilient styles in proper context
+    --  - Use some interesting commands, such as "custom-style=raggedleft".
     -- Package or class designers MAY override this hook to support any other
     -- styling mechanism they may have or want.
     -- The available options are the custom-style "name" and a "scope" which
     -- can be "inline" (for inline character-level styling) or "block" (for
     -- block paragraph-level styling).
     local name = SU.required(options, "name", "markdown custom style hook")
-    if SILE.Commands[name] then
+    if self.isResilient
+      and self.class.packages["resilient.styles"]
+        -- HACK TODO we'd need a self.class.packages["resilient.styles"]:hasStyle(name)
+        -- to avoid tapping into internal structures.
+        -- self.class.packages["resilient.styles"]:resolveStyle(name, true) returns
+        -- {} for a (discardable) non-existing style, so is not very handy here.
+        and SILE.scratch.styles.specs[name] then
+      if options.scope == "block" then
+        SILE.call("style:apply:paragraph", { name = name }, content)
+      else
+        SILE.call("style:apply", { name = name }, content)
+      end
+    elseif SILE.Commands[name] then
       SILE.call(name, {}, content)
     else
       SILE.process(content)
