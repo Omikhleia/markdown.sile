@@ -28,9 +28,8 @@ that span multiple lines (in the input text source).
    First    row                12.0 Example of a row that
                                     spans multiple lines.
 
-  Second    row                 5.0 Here's another one. Note
-                                    it also spans multiple
-                                    lines.
+  Second    row                 5.0 This row also spans
+                                    multiple lines.
 -------------------------------------------------------------
 
 Table: Demonstration of a multiline table.
@@ -41,9 +40,7 @@ Multiline headerless table:
    First    row                12.0 Example of a row that
                                     spans multiple lines.
 
-  Second    row                 5.0 Here's another one
-                                    that also spans multiple
-                                    lines.
+  Second    row                 5.0 Here's another one.
 ----------- ------- --------------- -------------------------
 
 : Here's a multiline table without a header.

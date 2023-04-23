@@ -1,6 +1,7 @@
-\begin[class=resilient.book]{document}
+\begin[papersize=6in x 9in, class=resilient.book, layout=division:9]{document}
 \use[module=packages.autodoc]
 \use[module=packages.barcodes.ean13]
+\use[module=packages.qrcode]
 \use[module=packages.dropcaps]
 \use[module=packages.font-fallback]
 \use[module=packages.framebox]
@@ -43,8 +44,16 @@ Showcase Document
 
 \vfill\hbox{}
 \supereject
-\hbox{}
+\begin{center}
+\font[features=+smcp]{Markdown and Djot to PDF with SILE}
+
+\raise[height=0.5ex]{\hrule[height=0.4pt, width=5em]}
+
+\medskip
+\href[src=https://github.com/Omikhleia/markdown.sile]{\qrcode[code=https://github.com/Omikhleia/markdown.sile]}
+\end{center}
 \vfill
+\nofoliothispage
 
 \noindent{}© 2022–2023 Didier Willis.
 

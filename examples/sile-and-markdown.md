@@ -287,7 +287,7 @@ Notably ![](./examples/manicule.svg){height=0.6bs} SVG is supported too (`.svg`)
 here with a "manicule" in that format.
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images too.
 
-![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width="75%fw"}
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width="90%fw"}
 
 ### Maths
 

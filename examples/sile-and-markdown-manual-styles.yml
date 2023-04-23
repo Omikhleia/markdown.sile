@@ -411,7 +411,7 @@ sectioning-chapter:
       weight: 800
     paragraph:
       after:
-        skip: "30pt plus 6pt minus 6pt"
+        skip: "30pt"
       align: "left"
     sectioning:
       counter:
@@ -444,13 +444,13 @@ sectioning-chapter-main-number:
   origin: "resilient.book"
   style:
     font:
-      size: "0.9em"
+      size: "3em"
+    color: "#66a0b3"
     numbering:
       after:
-        text: "."
+        kern: "3spc"
       before:
-        text: "Chapter "
-      standalone: true
+      standalone: false
 
 sectioning-chapter-ref-number:
   inherit: "sectioning-chapter-base-number"
@@ -547,7 +547,6 @@ sectioning-section:
         level: 2
       hook: "sectioning:section:hook"
       numberstyle:
-        header: "sectioning-other-number"
         main: "sectioning-other-number"
         reference: "sectioning-other-number"
       settings:
@@ -867,4 +866,11 @@ toc-number-level9:
 toc-pageno:
   origin: "resilient.tableofcontents"
   style:
+
+url:
+  origin: "resilient.book"
+  style:
+    font:
+      family: "Hack"
+      size: "1.4ex"
 
