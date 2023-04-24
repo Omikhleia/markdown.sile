@@ -34,7 +34,7 @@ detailed 3rd-party package installation information.)
 
 Basic usage is described just below. A more complete PDF version of the documentation (but not
 necessarily the latest, see also further below for generating it from the sources) should be
-available [HERE](https://drive.google.com/file/d/19VfSMmfBIZwr43U-W842IkSE349wdgZb/view?usp=sharing).
+available [HERE](https://drive.google.com/file/d/19VfSMmfBIZwr43U-W842IkSE349wdgZb/view?usp=sharing), or in our [Calaméo bookshelf](https://www.calameo.com/accounts/7349338).
 
 ### Native Markdown package
 
