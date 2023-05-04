@@ -428,35 +428,51 @@ function Renderer:superscript (node)
 end
 
 function Renderer:emph (node)
-  if node.attr then
-    SU.warn("Ignoring attributes on Djot emph") -- TODO not sure what to expect
-  end
   local content = self:render_children(node)
+  if node.attr then
+    -- Add a span for attributes
+    -- Applied first before the font change, so that font-specific attributes
+    -- are applied in the right context (e.g. .underline)
+    content = utils.createCommand("markdown:internal:span" , node.attr, content)
+  end
   return utils.createCommand("em", {}, content)
 end
 
 function Renderer:strong (node)
-  if node.attr then
-    SU.warn("Ignoring attributes on Djot strong") -- TODO not sure what to expect
-  end
   local content = self:render_children(node)
+  if node.attr then
+    -- Add a span for attributes
+    -- Applied first before the font change, so that font-specific attributes
+    -- are applied in the right context (e.g. .underline)
+    content = utils.createCommand("markdown:internal:span" , node.attr, content)
+  end
   return utils.createCommand("strong", {}, content)
 end
 
 function Renderer:double_quoted (node)
-  if node.attr then
-    SU.warn("Ignoring attributes on Djot double quoted") -- TODO not sure what to expect
-  end
   local content = self:render_children(node)
-  return utils.createCommand("doublequoted", {}, content)
+  content = utils.createCommand("doublequoted", {}, content)
+  if node.attr then
+    -- Add a span for attributes
+    -- Applied after, so as to encompass the quotes.
+    -- That's probably the expectation, so e.g. "text"{lang=fr} will use French
+    -- primary quotations marks.
+    content = utils.createCommand("markdown:internal:span" , node.attr, content)
+  end
+  return content
 end
 
 function Renderer:single_quoted (node)
-  if node.attr then
-    SU.warn("Ignoring attributes on Djot single quoted") -- TODO not sure what to expect
-  end
   local content = self:render_children(node)
-  return utils.createCommand("singlequoted", {}, content)
+  content = utils.createCommand("singlequoted", {}, content)
+  if node.attr then
+    -- Add a span for attributes
+    -- Applied after, so as to encompass the quotes.
+    -- That's probably the expectation, so e.g. 'text'{lang=fr} will use French
+    -- secondary quotations marks.
+    content = utils.createCommand("markdown:internal:span" , node.attr, content)
+  end
+  return content
 end
 
 function Renderer.left_double_quote (_)
