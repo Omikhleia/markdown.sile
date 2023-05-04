@@ -302,7 +302,7 @@ Otherwise, everything else produces a centered horizontal rule, taking 20% of th
 
   ***
 
-All the above classes are exclusise---if more than one are provided, only one is applied.[^djot-hrules]
+All the above classes are exclusive---if more than one are provided, only one is applied.[^djot-hrules]
 Additionally, without demonstrating it here, the `.pagebreak` pseudo-class enforces a page break,
 just after the thematic break. Note that this differs from our approach in the native Markdown
 solution, allowing you to both specify a divider style _and_ introduce a page break after it. It's much
@@ -323,3 +323,44 @@ or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
 
 The `.nobreak` pseudo-class attribute on inline content ensures that line-breaking will not be applied
 there. Use it wisely around small pieces of text or you might end up with more serious justification issues! Yet, it might be useful for proper names, etc.
+
+### Templates and variable substitution
+
+[^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
+[^:disclaimer:]: _Big disclaimer:_ This interpretation of symbols is not standard.
+  We might have to reconsider it as Djot evolves.
+  It is still a specification in progress!
+
+Let's now pretend that you are writing an essay about some fictitious :pumpernickel:.
+
+From the previous sections, you know how to typeset that name in Djot syntax:
+`Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}`.
+
+So far, so good...
+But your problem is that this long name will appear a lot of times.
+Repeating it is tedious and error-prone.
+Would you appreciate defining it as a replaceable variable going by a much simpler name?
+
+Well, Djot has the notion of a "symbol", a keyword surrounded by colon signs.
+Although it was initially provisioned for "emojis", the default interpretation is now left to the rendering engine.
+
+This converter for SILE is focussed on producing print-quality books, where so-called emojis play little part.
+We are thefore going to use those symbols in a non-conventional way.
+Back to our initial question, what if you could just type `:pumpernickel:` and have it automatically expanded?
+
+Since it's possible to have unused footnote definitions, let's craft one as shown hereafter, with its reference identifier being the same as our targeted variable.
+
+```
+[^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
+```
+
+When encountering a symbol, this converter looks for such a footnote and expands its content.
+It works with inline elements as shown above, but also with full blocks, provided the symbol is the only element in a paragraph of its own.
+
+Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain symbols, which will get replaced too.
+
+{custom-style=FramedPara}
+:disclaimer:
+
+[^djot-pseudo-footnotes]: You may still use them as regular footnotes.
+Whether this is a good idea is another question...

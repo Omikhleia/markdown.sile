@@ -17,6 +17,7 @@ local Renderer = pl.class()
 function Renderer:_init()
   self.references = {}
   self.footnotes = {}
+  self.metadata = {}
   self.tight = false -- We do use it currently, though!
 end
 
@@ -67,6 +68,10 @@ function Renderer.raw_block (_, node)
 end
 
 function Renderer:para (node)
+  if #node.c == 1 and node.c[1].t == "symbol" then
+    node.c[1]._standalone_ = true
+  end
+
   local content = self:render_children(node)
   -- interpret as a div when containing attributes
   if node.attr then
@@ -503,9 +508,49 @@ function Renderer.en_dash (_)
   return("–")
 end
 
-function Renderer.symbol (_, node)
-  SU.warn("Djot emoji symbol not interpreted")
-  return ":" .. node.alias .. ":" -- TODO
+function Renderer:symbol (node)
+  -- Let's look at fake footnotes to resolve the symbol.
+  -- We just added unforeseen templating and recursive variable substitution to Djot.
+  local label = ":" .. node.alias .. ":"
+  local node_fake_metadata = self.footnotes[label]
+  if not node_fake_metadata then
+    SU.warn("Symbol '" .. node.alias .. "' was not expanded (no corresponding metadata found)")
+    -- TODO Let's not error, but what else could we do with these funny symbols?
+    -- Oh oh oh... Don't get me started... Nah you are not ready yet for more tricks...
+    local text = ":" .. node.alias .. ":"
+    if node.attr then
+      -- Add a span for attributes
+      return utils.createCommand("markdown:internal:span" , node.attr, text)
+    end
+    return text
+  end
+
+  if #node_fake_metadata.c > 1 and not node._standalone_ then
+    SU.error("Cannot use multi-paragraph metatada "..label.." as inline content")
+  end
+
+  local content
+  if self.metadata[label] then -- use memoized
+    content = self.metadata[label]
+  else
+    if #node_fake_metadata.c == 1 and node_fake_metadata.c[1].t == "para" then
+      -- Skip a single para node.
+      content = self:render_children(node_fake_metadata.c[1])
+    else
+      content = self:render_children(node_fake_metadata)
+    end
+    self.metadata[label] = content -- memoize
+  end
+  if node.attr then
+    if not node._standalone_ then
+      -- Add a span for attributes on the inline variant.
+      content = utils.createCommand("markdown:internal:span" , node.attr, content)
+    else
+      -- Those should rather come from the paragraph
+      SU.warn("Attributes ignored on block-like symbol '" .. node.alias .. "'")
+    end
+  end
+  return content
 end
 
 function Renderer.math (_, node)
