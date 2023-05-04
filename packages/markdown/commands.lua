@@ -223,23 +223,23 @@ function package:registerCommands ()
       SILE.call("center", {}, { "⁂" }) -- Asterism
     elseif hasClass(options, "dinkus") then
       SILE.call("center", {}, { "* * *" }) -- Dinkus (with em-spaces)
-    elseif hasClass(options, "rule") then
-        SILE.call("center", {}, function ()
-          SILE.call("raise", { height = "0.5ex" }, function ()
-            SILE.call("hrule", { width = "20%lw" })
-        end)
-      end)
     elseif hasClass(options, "bigrule") then
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
           SILE.call("hrule", { width = "33%lw" })
         end)
       end)
+    elseif hasClass(options, "fullrule") and self:hasCouyards() then
+      SILE.call("fullrule")
     elseif hasClass(options, "pendant") and self:hasCouyards() then
       SILE.call("smallskip")
       SILE.call("couyard", { type = 6, width = "default" })
     elseif not hasClass(options, "none") then
-      SILE.call("fullrule")
+      SILE.call("center", {}, function ()
+        SILE.call("raise", { height = "0.5ex" }, function ()
+          SILE.call("hrule", { width = "20%lw" })
+        end)
+      end)
     end
 
     if hasClass(options, "pagebreak") then
