@@ -262,9 +262,9 @@ The `.dinkus` pseudo-class produces a "dinkus".
   {.dinkus}
   ***
 
-The `.rule` pseudo-class produces a centered horizontal rule, taking 20% of the line.
+The `.fullrule` pseudo-class produces full rule, taking all the line width.
 
-  {.rule}
+  {.fullrule}
   ***
 
 The `.bigrule` pseudo-class produces a centered horizontal rule, taking 33% of the line.
@@ -282,7 +282,7 @@ The `.none` pseudo-class produces nothing...
   {.none}
   ***
 
-Otherwise, everything else produces a full rule.
+Otherwise, everything else produces a centered horizontal rule, taking 20% of the line.
 
   ***
 
