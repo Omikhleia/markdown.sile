@@ -375,9 +375,13 @@ with headers, the `.unnumbered` class specifier is also supported.], `start` and
 
 ### Basic links
 
-Here is a link to [the SILE website](https://sile-typesetter.org/).
+Here is a link to the [SILE website](https://sile-typesetter.org/).
 It might not be visible in the PDF output, but hover it and click. It just works.
 Likewise, here is an internal link to the "[Basic typesetting](#basic-typesetting)" section.
+
+You can use attributes on links:
+the [SILE website](https://sile-typesetter.org/){.underline}.^[Within a **resilient** class,
+we'd possibly recommend using a custom style to color links, etc.]
 
 ### Cross-references
 
