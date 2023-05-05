@@ -399,8 +399,10 @@ Please consider using a resilient-compatible class!]])
       cascade:call("underline")
     end
     if options["custom-style"] then
-      -- The style (or the hook) is reponsible for paragraphing
       cascade:call("markdown:custom-style:hook", { name = options["custom-style"], scope = "inline" })
+    end
+    if hasClass(options, "nobreak") then
+      cascade:call("hbox")
     end
     cascade:process(content)
   end, "Span in Markdown (internal)")

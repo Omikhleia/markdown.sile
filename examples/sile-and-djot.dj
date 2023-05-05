@@ -299,8 +299,11 @@ pseudo-class.
 
 #### Smarter typography
 
-The `.decimal` pseudo-class attribute instructs the converter to consider numbers
+On inline content, the `.decimal` pseudo-class attribute instructs the converter to consider numbers
 in the content as decimal numbers, formatted with suitable decimal mark and digit grouping according
 to the usage in the current language.
 This allows, say, 1984 to be rendered as "[1984]{ .decimal } years ago" in English,
 or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
+
+The `.nobreak` pseudo-class attribute on inline content ensures that line-breaking will not be applied
+there. Use it wisely around small pieces of text or you might end up with more serious justificatin issues! Yet, it might be useful for proper names, etc.
