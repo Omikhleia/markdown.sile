@@ -450,6 +450,11 @@ graph {
 }
 ```
 
+Code blocks marked as being in Markdown or Djot are interpretated too (again, unless
+the `render` attribute is set to false).
+This feature allows switching between those languages, would there be something one does not support yet.
+For Markdown, attributes are passed to the renderer, allowing to possibly use different compatibility options (see "[Configuration](#configuration)").
+
 ### Raw blocks
 
 Last but not least, the converter supports a `{=sile}` annotation on code blocks, to pass
@@ -519,7 +524,7 @@ to the usage in the current language.
 This allows, say, 1984 to be rendered as "[1984]{ .decimal } years ago" in English,
 or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
 
-Another pseudo-class `.nobreak` is supported on "span" elements. It ensures the content will not be line-broken. Use it wisely around small pieces of text or you might end up with more serious justificatin issues! Yet, it might be useful for proper names, etc.
+Another pseudo-class `.nobreak` is supported on "span" elements. It ensures the content will not be line-broken. Use it wisely around small pieces of text or you might end up with more serious justification issues! Yet, it might be useful for proper names, etc.
 
 When smart typography is enabled, the native converter also supports automatically converting
 straight single and double quotes after digits to single and double primes.

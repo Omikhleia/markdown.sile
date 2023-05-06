@@ -232,6 +232,22 @@ graph {
 }
 ```
 
+Code blocks marked as being in Markdown or Djot are interpretated too (again, unless
+the `render` attribute is set to false).
+For Markdown, attributes are passed to the renderer, allowing to possibly use different compatibility options (see "[Configuration](#configuration)").
+This feature allows switching between those languages, would there be something one does not support yet.
+At the time of writing, for instance, Djot does not support "line blocks".
+
+This very chapter being written in Djot, let's just switch to Markdown and type some poetry.
+
+```markdown
+::: {.poetry}
+| I took up the runes,
+|  screaming I took them,
+| then I fell back from there.
+:::
+```
+
 #### Raw blocks
 
 ```=sile
@@ -306,4 +322,4 @@ This allows, say, 1984 to be rendered as "[1984]{ .decimal } years ago" in Engli
 or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
 
 The `.nobreak` pseudo-class attribute on inline content ensures that line-breaking will not be applied
-there. Use it wisely around small pieces of text or you might end up with more serious justificatin issues! Yet, it might be useful for proper names, etc.
+there. Use it wisely around small pieces of text or you might end up with more serious justification issues! Yet, it might be useful for proper names, etc.

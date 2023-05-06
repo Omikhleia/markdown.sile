@@ -563,7 +563,8 @@ Please consider using a resilient-compatible class!]])
   end, "Captioned figure in Markdown (internal)")
 
   self:registerCommand("markdown:internal:codeblock", function (options, content)
-    if hasClass(options, "dot") and SU.boolean(options.render, true) then
+    local render = SU.boolean(options.render, true)
+    if render and hasClass(options, "dot") then
       local handler = SILE.rawHandlers["embed"]
       if not handler then
         -- Shouldn't occur since we loaded the embedders package
@@ -571,6 +572,10 @@ Please consider using a resilient-compatible class!]])
       end
       options.format = options.class
       handler(options, content)
+    elseif render and hasClass(options, "djot") then
+      SILE.processString(SU.contentToString(content), "djot", nil, options)
+    elseif render and hasClass(options, "markdown") then
+      SILE.processString(SU.contentToString(content), "markdown", nil, options)
     elseif hasClass(options, "lua") then
       -- Naive syntax highlighting for Lua, until we have a more general solution
       SILE.call("verbatim", {}, function ()
