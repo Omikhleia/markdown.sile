@@ -401,6 +401,9 @@ Please consider using a resilient-compatible class!]])
     if hasClass(options, "smallcaps") then
       cascade:call("font", { features = "+smcp" })
     end
+    if hasClass(options, "mark") then
+      cascade:call("color", { color = "red" }) -- FIXME TODO We'd need real support
+    end
     if hasClass(options, "strike") then
       cascade:call("strikethrough")
     end
