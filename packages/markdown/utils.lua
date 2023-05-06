@@ -50,6 +50,30 @@ local function createStructuredCommand (command, options, contents)
   return result
 end
 
+--- Extract the content tree of a command, assuming we already took care of it.
+-- This is SU.subContent() done right, without the id=stuff and other weirdness...
+--
+-- @tparam table  contents content tree list
+local function subTreeContent (content)
+  local out = {}
+  for _, val in ipairs(content) do
+    out[#out+1] = val
+  end
+  return out
+end
+
+--- Remove a command from the AST and return it for separate processing.
+--
+-- @tparam  table  contents content tree list
+-- @tparam  string command name of the command
+local function extractFromTree (tree, command)
+  for i = 1, #tree do
+    if type(tree[i]) == "table" and tree[i].command == command then
+      return table.remove(tree, i)
+    end
+  end
+end
+
 --- Some other utility functions.
 -- @section utils
 
@@ -101,5 +125,7 @@ return {
   normalizeLang = normalizeLang,
   createCommand = createCommand,
   createStructuredCommand = createStructuredCommand,
+  subTreeContent = subTreeContent,
+  extractFromTree = extractFromTree,
   nbspFilter = nbspFilter,
 }

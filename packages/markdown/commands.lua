@@ -58,14 +58,6 @@ local function getSectioningCommand (level)
   return "markdown:fallback:header"
 end
 
-local extractFromTree = function (tree, command)
-  for i = 1, #tree do
-    if type(tree[i]) == "table" and tree[i].command == command then
-      return table.remove(tree, i)
-    end
-  end
-end
-
 local function hasClass (options, classname)
   -- N.B. we want a true boolean here
   if options.class and string.match(' ' .. options.class .. ' ',' '..classname..' ') then
@@ -124,6 +116,23 @@ local function decimalFilter (input, _)
     end
   end
   return t
+end
+
+local function wrapLinkContent (options, content)
+  local passedOptions = pl.tablex.copy(options) -- shallow
+  -- We already took care of these.
+  passedOptions.src = nil
+  passedOptions.id = nil
+  -- We don't need an extra span if there are no other options.
+  -- N.B. we don't remove cross-reference elements from the class option
+  -- so we'll end up always wrapping a span in those cases.
+  -- I deem it's acceptable.
+  if next(passedOptions) ~= nil then
+    -- Wrap a span into the AST directly, it plays better with styles when we
+    -- do not invoke functions.
+    content = { utils.createCommand("markdown:internal:span", passedOptions, utils.subTreeContent(content)) }
+  end
+  return content
 end
 
 function package:_init (_)
@@ -432,6 +441,7 @@ Please consider using a resilient-compatible class!]])
       -- local hask link
       local dest = uri:sub(2)
       if hasLinkContent(content) then
+        content = wrapLinkContent(options, content)
         -- HACK. We use the target of a `\label`, knowing it is
         -- internally prefixed by "ref:" in the labelrefs package.
         -- That's not very nice to rely on internals...
@@ -447,6 +457,7 @@ Please consider using a resilient-compatible class!]])
       end
     else
       if hasLinkContent(content) then
+        content = wrapLinkContent(options, content)
         SILE.call("href", { src = uri }, content)
       else
         SU.warn("Ignored empty link to target "..uri)
@@ -671,7 +682,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned table environment")
     end
-    local caption = extractFromTree(content, "caption")
+    local caption = utils.extractFromTree(content, "caption")
 
     SILE.process(content)
     if caption then
@@ -689,7 +700,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned figure environment")
     end
-    local caption = extractFromTree(content, "caption")
+    local caption = utils.extractFromTree(content, "caption")
 
     SILE.call("smallskip")
     SILE.call("center", {}, function ()
