@@ -79,6 +79,7 @@ obtained with `H~2~O` and `2^10^` respectively.
 Other nice features include:
 
  - ~~deletions~~ with `~~deletions~~`
+ -  ==highlight== with `==highlight==`
  - [underlines]{.underline} with `[underlines]{.underline}`
  -  and even [Small Caps]{.smallcaps}, as `[Small Caps]{.smallcaps}`
 
@@ -538,7 +539,7 @@ the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[che
 environment to tune the behavior of the Markdown parser.
 
 ::: {custom-style=raggedright}
-> Available options are: `smart`, `smart_primes`, `strikeout`, `subscript`, `superscript`,
+> Available options are: `smart`, `smart_primes`, `strikeout`, `mark`, `subscript`, `superscript`,
 > `definition_lists`, `notes`, `inline_notes`,
 > `fenced_code_blocks`, `fenced_code_attributes`, `bracketed_spans`, `fenced_divs`,
 > `raw_attribute`, `link_attributes`,

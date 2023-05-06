@@ -392,6 +392,7 @@ function inputter:parse (doc)
     fenced_divs = true,
     raw_attribute = true,
     link_attributes = true,
+    mark = true,
     startnum = true,
     fancy_lists = true,
     task_list = true,

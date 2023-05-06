@@ -367,14 +367,10 @@ function Renderer:span (node)
 end
 
 function Renderer:mark (node)
-  SU.warn("Djot mark (highlight) is not fully implemented") -- See HACK
+  local options = node.attr or {}
   local content = self:render_children(node)
-  local out = utils.createCommand("color", { color = "red" }, content) -- HACK
-  if node.attr then
-    -- Add a div when containing attributes
-    return utils.createCommand("markdown:internal:span", node.attr, out)
-  end
-  return out
+  djotast.insert_attribute(options, "class", "mark")
+  return utils.createCommand("markdown:internal:span", options, content)
 end
 
 function Renderer:insert (node)
