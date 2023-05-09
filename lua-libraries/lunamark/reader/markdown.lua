@@ -927,7 +927,7 @@ function M.new(writer, options)
 
   local specials = "*_~`&[]<!\\-@^"
   if options.smart then
-    specials = specials .. "'\""
+    specials = specials .. "'.\""
   end
   if options.tex_math_dollars then
     specials = specials .. "$"
