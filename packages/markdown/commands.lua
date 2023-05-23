@@ -331,6 +331,7 @@ Please consider using a resilient-compatible class!]])
   self:registerCommand("markdown:internal:term", function (_, content)
     SILE.typesetter:leaveHmode()
     SILE.call("font", { weight = 600 }, content)
+    SILE.call("novbreak")
   end, "Definition list term in Markdown (internal)")
 
   self:registerCommand("markdown:internal:definition", function (_, content)
