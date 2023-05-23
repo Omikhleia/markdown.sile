@@ -329,7 +329,6 @@ there. Use it wisely around small pieces of text or you might end up with more s
 [^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
 [^:disclaimer:]: _Big disclaimer:_ This interpretation of symbols is not standard.
   We might have to reconsider it as Djot evolves.
-  It is still a specification in progress!
 
 Let's now pretend that you are writing an essay about some fictitious :pumpernickel:.
 
@@ -364,3 +363,27 @@ Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain sy
 
 [^djot-pseudo-footnotes]: You may still use them as regular footnotes.
 Whether this is a good idea is another question...
+
+### Attributed quotes (epigraphs)
+
+{ rule="0.4pt" }
+> The Library is a sphere whose exact centre is any one of its
+> hexagons and whose circumference is inaccessible.
+^ Jorge Luis [Borges]{.smallcaps}, "The Library of Babel"
+
+Standard Djot only honors captions on tables, and ignores them on other block elements.
+When using a **resilient** document class, however, a captioned block quote is rendered as an "epigraph", with the caption content used as its "source" (in a broad sense).
+For instance, the above quote was obtained with:
+
+```
+{ rule="0.4pt" }
+> The Library is a sphere whose exact centre is any one of its
+> hexagons and whose circumference is inaccessible.
+^ Jorge Luis [Borges]{.smallcaps}, "The Library of Babel"
+```
+
+Attributes are passed through to an implicit "div" (so as to honor the language, a link target identifier, etc.) and eventually to the underlying epigraph environment.
+Any option supported by the `\autodoc:package{resilient.epigraph}`{=sile} package may thus be used.
+
+Be aware that this behavior is currently an extension.
+Other Djot renderers will therefore likely skip the caption.

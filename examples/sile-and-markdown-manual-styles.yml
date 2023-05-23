@@ -21,6 +21,46 @@ blockquote:
       before:
         skip: "smallskip"
 
+epigraph:
+  origin: "resilient.epigraph"
+  style:
+    font:
+      size: "0.9em"
+    paragraph:
+      after:
+        skip: "bigskip"
+      before:
+        skip: "medskip"
+
+epigraph-source:
+  origin: "resilient.epigraph"
+  style:
+    paragraph:
+      align: "right"
+      before:
+        indent: false
+        vbreak: false
+
+epigraph-source-norule:
+  inherit: "epigraph-source"
+  origin: "resilient.epigraph"
+  style:
+    paragraph:
+      before:
+        skip: "smallskip"
+
+epigraph-source-rule:
+  inherit: "epigraph-source"
+  origin: "resilient.epigraph"
+  style:
+
+epigraph-text:
+  inherit: "epigraph"
+  origin: "resilient.epigraph"
+  style:
+    paragraph:
+      align: "justify"
+
 fancytoc-base:
   style:
 
@@ -443,9 +483,9 @@ sectioning-chapter-main-number:
   inherit: "sectioning-chapter-base-number"
   origin: "resilient.book"
   style:
+    color: "#66a0b3"
     font:
       size: "3em"
-    color: "#66a0b3"
     numbering:
       after:
         kern: "3spc"

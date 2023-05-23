@@ -82,7 +82,16 @@ end
 
 function Renderer:blockquote (node)
   local content = self:render_children(node)
-  local out = utils.createCommand("markdown:internal:blockquote", {}, content)
+  local out
+  if node.caption then
+    local caption = self:render_children(node.caption)
+    out = utils.createStructuredCommand("markdown:internal:captioned-blockquote", node.attr or {}, {
+      content,
+      utils.createCommand("caption", {}, caption)
+    })
+  else
+    out = utils.createCommand("markdown:internal:blockquote", {}, content)
+  end
   if node.attr then
     -- Add a div when containing attributes
     return utils.createCommand("markdown:internal:div", node.attr, out)
@@ -185,8 +194,8 @@ function Renderer:cell (node)
 end
 
 function Renderer.caption (_, _)
-  -- Extracted at table processing, so we should not enter this method.
-  SU.error("Should not be invoked")
+  -- Extracted at processing, so we should not enter this method.
+  SU.error("Caption rendering is not expected here.")
 end
 
 local listStyle = {
@@ -575,7 +584,7 @@ end
 
 function inputter.parse (_, doc)
   local djot = require("djot")
-  local ast = djot.parse(doc)
+  local ast = djot.parse(doc, false, function (warning) SU.warn(warning.message) end)
   local renderer = Renderer()
   local tree = renderer:render(ast)
 
