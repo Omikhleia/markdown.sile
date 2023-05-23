@@ -170,6 +170,11 @@ function package:_init (_)
 
   -- Optional packages
   pcall(function () return self.class:loadPackage("couyards") end)
+
+  -- Other conditional packages
+  if self.isResilient then
+    self.class:loadPackage("resilient.epigraph")
+  end
 end
 
 function package:hasCouyards ()
@@ -326,6 +331,7 @@ Please consider using a resilient-compatible class!]])
   self:registerCommand("markdown:internal:term", function (_, content)
     SILE.typesetter:leaveHmode()
     SILE.call("font", { weight = 600 }, content)
+    SILE.call("novbreak")
   end, "Definition list term in Markdown (internal)")
 
   self:registerCommand("markdown:internal:definition", function (_, content)
@@ -656,6 +662,27 @@ Please consider using a resilient-compatible class!]])
       SILE.call("kern", { width = widthsp })
     end
   end, "Inserts a non-breakable inter-word space (internal)")
+
+  self:registerCommand("markdown:internal:captioned-blockquote", function (options, content)
+    if type(content) ~= "table" then
+      SU.error("Expected a table AST content in captioned blockquote environment")
+    end
+    local title = utils.extractFromTree(content, "caption")
+
+    if SILE.Commands["epigraph"] then -- asssuming the implementation from resilient.epigraph.
+      if title then
+        -- Trick: Put the extract title back as "\source"
+        title.command = "source"
+        content[#content+1] = title
+      end
+      SILE.call("epigraph", options, content)
+    else
+      SU.warn([[Apparently, you are not using a resilient class.
+Quotation captions are ignored.
+Please consider using a resilient-compatible class!]])
+      SILE.call("markdown:internal:blockquote", options, content)
+    end
+  end, "Captioned blockquote in Djot (internal)")
 
   -- B. Fallback commands
 

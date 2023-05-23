@@ -828,10 +828,23 @@ local function to_ast(parser, sourcepos)
           if prevnode and prevnode.t == "table" then
             -- move caption in table node
             table.insert(prevnode.c, 1, node)
+          -- BEGIN EXTENSION DIDIER 20230523
+          -- Accept caption on other elements (Djot non-standard extension)
+          elseif prevnode then
+            if prevnode.caption then
+              warn({ message = "Ignoring multiple caption",
+                     pos = startpos })
+            end
+            prevnode.caption = { c = node.c }
           else
-            warn({ message = "Ignoring caption without preceding table",
+            warn({ message = "Ignoring caption without preceding content",
                    pos = startpos })
           end
+          -- else
+          --   warn({ message = "Ignoring caption without preceding table",
+          --          pos = startpos })
+          -- end
+          -- END DIDIER
           return
 
         elseif tag == "heading" then
