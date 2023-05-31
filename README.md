@@ -121,7 +121,7 @@ Some *Djot* content
 
 ## Generating the documentation
 
-The example documentation/showcase in this repository additionaly requires the `autodoc` package, so you
+The example documentation/showcase in this repository additionally requires the `autodoc` package, so you
 may generate a PDF from it with as follows:
 
 ```
@@ -146,7 +146,7 @@ other advanced topics and cool use cases. Needed fonts are Libertinus Serif, Sym
 This is but an overview. For more details, please refer to the provided example Markdown document,
 which also serves as documentation, showcase and reference guide.
 
-- Standard Mardown and Djot typesetting (italic, bold, code, etc.)
+- Standard Markdown and Djot typesetting (italic, bold, code, etc.)
 - Smart typography (quotes, apostrophes, ellipsis, dashes, etc.) with Markdown extensions (prime marks)
 - Headers and header attributes
 - Horizontal dividers (a.k.a. horizontal rules, with provision for asterisms, dinkuses, pendants...)
@@ -178,7 +178,7 @@ you also install our [resilient](https://github.com/Omikhleia/resilient.sile)
 collection of classes and packages.
 
 Then, you can automatically benefit from a few advanced features.
-Conversion from command-line just requires to load a resilient class, and optionnaly
+Conversion from command-line just requires to load a resilient class, and optionally
 the poetry package. For instance:
 
 ```
@@ -188,7 +188,7 @@ sile -c resilient.book -u inputters.markdown -u packages.resilient.poetry somefi
 (And likewise for the Pandoc AST or Djot processing.)
 
 A resilient style file is also generated. It can be modified to change many styling
-decisions and adapt the ouput at convenience.
+decisions and adapt the output at convenience.
 
 ## License
 
