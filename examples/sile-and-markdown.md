@@ -20,11 +20,11 @@ advanced capabilities). Guess what, the very chapter you are currently reading i
 There is actually more than one solution to achieve great results in that direction:
 
  1. Directly using a native Markdown converter package,
- 1. Using the Pandoc software to generate an ouput suitable for SILE.
+ 1. Using the Pandoc software to generate an output suitable for SILE.
 
 Each of them has its advantages, and a few limitations as well.
 
-[comment]: # (THIS TEXT SHOULD NOT APPEAR IN THE OUTPUT. It is actually the most platform independent comment in Mardown.)
+[comment]: # (THIS TEXT SHOULD NOT APPEAR IN THE OUTPUT. It is actually the most platform independent comment in Markdown.)
 
 ## The native markdown package
 

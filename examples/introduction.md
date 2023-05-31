@@ -50,7 +50,7 @@ you also install our [**resilient.sile**](https://github.com/Omikhleia/resilient
 collection of classes and packages.
 
 Then, you can automatically benefit from a few advanced features.
-Conversion from command line just requires to load a resilient class, and optionnaly
+Conversion from command line just requires to load a resilient class, and optionally
 the poetry package. For instance:
 
 ```
@@ -60,7 +60,7 @@ sile -c resilient.book -u inputters.markdown -u packages.resilient.poetry somefi
 (And likewise for the Pandoc AST or Djot processing.)
 
 A "resilient style file" is also generated. It can be modified to change many styling
-decisions and adapt the ouput at convenience.
+decisions and adapt the output at convenience.
 
 ### Credits
 
