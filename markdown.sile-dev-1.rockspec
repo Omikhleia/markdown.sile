@@ -15,6 +15,7 @@ description = {
 }
 dependencies = {
    "lua >= 5.1",
+   "penlight >= 1.13.0", -- use of kpairs requires newer Penlight than transitive dependency possibly provided by SILE
    "embedders.sile",
    "labelrefs.sile",
    "ptable.sile",
