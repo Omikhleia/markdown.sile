@@ -17,27 +17,21 @@ package._name = "markdown.commands"
 -- content, avoiding a callback hell with conditionals where it is
 -- used and providing a sequence-oriented presentation.
 local CommandCascade = pl.class({
-  wrapper = nil,
+  _init = function (self)
+    self.inner = {}
+    self.outer = nil
+  end,
   call = function (self, command, options)
-    local inner = self.wrapper
-    if inner then
-      self.wrapper = function (content)
-        SILE.call(command, options, function ()
-          inner(content)
-        end)
-      end
-    else
-      self.wrapper = function (content)
-        SILE.call(command, options, content)
-      end
-    end
+    local out = self.outer and { self.outer } or self.inner
+    self.outer = utils.createStructuredCommand(command, options, out)
   end,
   process = function (self, content)
-    if not self.wrapper then
-      SILE.process(content)
-    else
-      self.wrapper(content)
+    -- As a subTreeContent but into the inner node
+    for _, v in ipairs(content) do
+      self.inner[#self.inner + 1] = v
     end
+    local stacked = self.outer and { self.outer } or self.inner
+    SILE.process(stacked)
   end,
 })
 
