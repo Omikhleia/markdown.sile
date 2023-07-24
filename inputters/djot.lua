@@ -69,6 +69,7 @@ end
 
 function Renderer:para (node)
   if #node.c == 1 and node.c[1].t == "symbol" then
+    -- Tweak the standalone symbol to be marked as "kind of" a block element.
     node.c[1]._standalone_ = true
   end
 
@@ -106,7 +107,13 @@ function Renderer:div (node)
 end
 
 function Renderer:section (node)
-  self.currentid = node.attr and node.attr.id
+  -- djot.lua differs from djot.js
+  -- See https://github.com/jgm/djot/issues/213#issuecomment-1647755452
+  -- A section is inserted when a header is found at the document level.
+  -- The id is set on the section, not on the header.
+  -- But attributes are set on the header, not on the section with djot.lua
+  -- whereas they are set on the section with djot.js.
+  self.sectionid = node.attr and node.attr.id
   local content = self:render_children(node)
   return content
 end
@@ -114,7 +121,10 @@ end
 function Renderer:heading (node)
   local options = node.attr or {}
   local content = self:render_children(node)
-  options.id = self.currentid
+  -- See above:
+  -- At document level, the id is set on the section.
+  -- But in nested blocks (e.g. in divs), the id is set on the header.
+  options.id = options.id or self.sectionid
   options.level = node.level
   return utils.createCommand("markdown:internal:header", options, content)
 end
