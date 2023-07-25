@@ -44,7 +44,7 @@ local utils = require("packages.markdown.utils")
 local Renderer = pl.class()
 
 function Renderer:_init(options)
-  self.shiftheaders = SU.cast("integer", options.shiftheaders or 0)
+  self.shift_headings = SU.cast("integer", options.shift_headings or 0)
 end
 
 -- Allows unpacking tables on some Pandoc AST nodes so as to map them to methods
@@ -281,7 +281,7 @@ end
 function Renderer:Header (level, attributes, inlines)
   local options = pandocAttributes(attributes)
   local content = self:render(inlines)
-  options.level = level
+  options.level = level + self.shift_headings
   return utils.createCommand("markdown:internal:header", options, content)
 end
 

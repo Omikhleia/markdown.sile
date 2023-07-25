@@ -14,11 +14,12 @@ local djotast = require("djot.ast")
 
 local Renderer = pl.class()
 
-function Renderer:_init()
+function Renderer:_init(options)
   self.references = {}
   self.footnotes = {}
   self.metadata = {}
-  self.tight = false -- We do use it currently, though!
+  self.shift_headings = SU.cast("integer", options.shift_headings or 0)
+  self.tight = false -- We do not use it currently, though!
 end
 
 function Renderer:render(doc)
@@ -125,7 +126,7 @@ function Renderer:heading (node)
   -- At document level, the id is set on the section.
   -- But in nested blocks (e.g. in divs), the id is set on the header.
   options.id = options.id or self.sectionid
-  options.level = node.level
+  options.level = node.level + self.shift_headings
   return utils.createCommand("markdown:internal:header", options, content)
 end
 
@@ -592,10 +593,10 @@ function inputter.appropriate (round, filename, _)
   return false
 end
 
-function inputter.parse (_, doc)
+function inputter:parse (doc)
   local djot = require("djot")
   local ast = djot.parse(doc, false, function (warning) SU.warn(warning.message) end)
-  local renderer = Renderer()
+  local renderer = Renderer(self.options)
   local tree = renderer:render(ast)
 
   -- The "writer" returns a SILE AST.
