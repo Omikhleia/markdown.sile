@@ -16,8 +16,6 @@ local Pandoc = {
    API_VERSION = { 1, 22, 0 } -- Supported API version (semver)
 }
 
-local utils = require("packages.markdown.utils")
-
 local function checkAstSemver(version)
   -- We shouldn't care the patch level.
   -- The Pandoc AST may change upon "minor" updates, though.
@@ -39,6 +37,14 @@ local function checkAstSemver(version)
     .. ", is more recent than supported " ..  table.concat(Pandoc.API_VERSION, ".")
     .. ", there could be issues.")
   end
+end
+
+local utils = require("packages.markdown.utils")
+
+local Renderer = pl.class()
+
+function Renderer:_init(options)
+  self.shift_headings = SU.cast("integer", options.shift_headings or 0)
 end
 
 -- Allows unpacking tables on some Pandoc AST nodes so as to map them to methods
@@ -74,7 +80,7 @@ local function addNodes(out, elements)
   end
 end
 
-local function pandocAstParse(element)
+function Renderer:render(element)
   local out
   if type(element) == 'string' then
     out = element
@@ -82,18 +88,18 @@ local function pandocAstParse(element)
   if type(element) == 'table' then
     out = {}
     if element.t then
-      if Pandoc[element.t] then
+      if self[element.t] then
         if HasMultipleArgs[element.t] then
-          addNodes(out, Pandoc[element.t](table.unpack(element.c)))
+          addNodes(out, self[element.t](self, table.unpack(element.c)))
         else
-          addNodes(out, Pandoc[element.t](element.c))
+          addNodes(out, self[element.t](self, element.c))
         end
       else
         SU.warn("Unrecognized Pandoc AST element "..element.t)
       end
     end
     for _, b in ipairs(element) do
-      addNodes(out, pandocAstParse(b))
+      addNodes(out, self:render(b))
     end
   end
   --  Simplify output by removing useless grouping
@@ -162,26 +168,26 @@ end
 
 -- Plain [Inline]
 -- (not a paragraph)
-Pandoc.Plain = function (inlines)
-  return pandocAstParse(inlines)
+function Renderer:Plain (inlines)
+  return self:render(inlines)
 end
 
 -- Para [Inline]
-Pandoc.Para = function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Para (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("markdown:internal:paragraph", {}, content)
 end
 
 -- LineBlock [[Inline]]
-Pandoc.LineBlock = function (lines)
+function Renderer:LineBlock (lines)
   local buffer = {}
   for _, inlines in ipairs(lines) do
     local level, currated_inlines = extractLineBlockLevel(inlines)
     -- Let's be typographically sound and use quad kerns rather than spaces for indentation
     local contents = (level > 0) and {
       utils.createCommand("kern", { width = level.."em" }),
-      pandocAstParse(currated_inlines)
-    } or pandocAstParse(currated_inlines)
+      self:render(currated_inlines)
+    } or self:render(currated_inlines)
     if #contents == 0 then
       buffer[#buffer+1] = utils.createCommand("stanza", {})
     else
@@ -193,19 +199,19 @@ end
 
 -- CodeBlock Attr Text
 -- Code block (literal) with attributes
-Pandoc.CodeBlock = function (attributes, text)
+function Renderer.CodeBlock (_, attributes, text)
   local options = pandocAttributes(attributes)
   return utils.createCommand("markdown:internal:codeblock", options, text)
 end
 
 -- RawBlock Format Text
-Pandoc.RawBlock = function (format, text)
+function Renderer.RawBlock (_, format, text)
   return utils.createCommand("markdown:internal:rawblock", { format = format }, text)
 end
 
 -- BlockQuote [Block]
-Pandoc.BlockQuote = function (blocks)
-  local content = pandocAstParse(blocks)
+function Renderer:BlockQuote (blocks)
+  local content = self:render(blocks)
   return utils.createCommand("markdown:internal:blockquote", {}, content)
 end
 
@@ -225,7 +231,7 @@ local pandocListNumberDelimTags = {
   Period = { after ="." },
   TwoParens = { before = "(", after = ")" }
 }
-Pandoc.OrderedList = function (listattrs, itemblocks)
+function Renderer:OrderedList (listattrs, itemblocks)
   -- ListAttributes = (Int, ListNumberStyle, ListNumberDelim)
   --   Where ListNumberStyle, ListNumberDelim) are tags
   local start, style, delim = table.unpack(listattrs)
@@ -242,29 +248,29 @@ Pandoc.OrderedList = function (listattrs, itemblocks)
 
   local contents = {}
   for i = 1, #itemblocks do
-    contents[i] = utils.createCommand("item", {}, pandocAstParse(itemblocks[i]))
+    contents[i] = utils.createCommand("item", {}, self:render(itemblocks[i]))
   end
   return utils.createStructuredCommand("enumerate", options, contents)
 end
 
 -- BulletList [[Block]]
 -- Bullet list (list of items, each a list of blocks)
-Pandoc.BulletList = function (itemblocks)
+function Renderer:BulletList (itemblocks)
   local contents = {}
   for i = 1, #itemblocks do
     local blocks = itemblocks[i]
     local options = { bullet = extractTaskListBullet(blocks) }
-    contents[i] = utils.createCommand("item", options, pandocAstParse(blocks))
+    contents[i] = utils.createCommand("item", options, self:render(blocks))
   end
   return utils.createStructuredCommand("itemize", {}, contents)
 end
 
 -- DefinitionList [([Inline], [[Block]])]
-Pandoc.DefinitionList = function (items)
+function Renderer:DefinitionList (items)
   local buffer = {}
   for _, item in ipairs(items) do
-    local term = pandocAstParse(item[1])
-    local definition = pandocAstParse(item[2])
+    local term = self:render(item[1])
+    local definition = self:render(item[2])
     buffer[#buffer + 1] = utils.createCommand("markdown:internal:term", {}, term)
     buffer[#buffer + 1] = utils.createStructuredCommand("markdown:internal:definition", {}, definition)
   end
@@ -272,24 +278,24 @@ Pandoc.DefinitionList = function (items)
 end
 
 -- Header Int Attr [Inline]
-Pandoc.Header = function (level, attributes, inlines)
+function Renderer:Header (level, attributes, inlines)
   local options = pandocAttributes(attributes)
-  local content = pandocAstParse(inlines)
-  options.level = level
+  local content = self:render(inlines)
+  options.level = level + self.shift_headings
   return utils.createCommand("markdown:internal:header", options, content)
 end
 
 -- HorizontalRule
 -- Horizontal rule
-Pandoc.HorizontalRule = function ()
+function Renderer.HorizontalRule (_)
   return utils.createCommand("fullrule") -- No way to customize it.
 end
 
 -- Div Attr [Block]
 -- Generic block container with attributes
-Pandoc.Div = function (attributes, blocks)
+function Renderer:Div (attributes, blocks)
   local options = pandocAttributes(attributes)
-  local content = pandocAstParse(blocks)
+  local content = self:render(blocks)
   return utils.createCommand("markdown:internal:div" , options, content)
 end
 
@@ -301,7 +307,7 @@ local pandocAlignmentTags = {
 }
 
 -- Cell Attr Alignment RowSpan:Int ColSpan:Int [Block]
-local function pandocCell (cell, colalign)
+function Renderer:pandocCell (cell, colalign)
   local _, align, rowspan, colspan, blocks = table.unpack(cell)
   if rowspan ~= 1 then
     -- Not doable without pain, ptable has cell splitting but no row spanning.
@@ -310,22 +316,22 @@ local function pandocCell (cell, colalign)
   end
   local cellalign = pandocAlignmentTags[align.t]
   local halign = cellalign ~= "default" and cellalign or colalign
-  return utils.createCommand("cell", { valign="middle", halign = halign, span = colspan }, pandocAstParse(blocks))
+  return utils.createCommand("cell", { valign="middle", halign = halign, span = colspan }, self:render(blocks))
 end
 
 -- Row Attr [Cell]
-local function pandocRow (row, colaligns, options)
+function Renderer:pandocRow (row, colaligns, options)
   local cells = row[2]
   local cols = {}
   for i, cell in ipairs(cells) do
-    local col = pandocCell(cell, colaligns[i])
+    local col = self:pandocCell(cell, colaligns[i])
     cols[#cols+1] = col
   end
   return utils.createStructuredCommand("row", options or {}, cols)
 end
 
 -- Table Attr Caption [ColSpec] TableHead [TableBody] TableFoot
-Pandoc.Table = function (_, caption, colspecs, thead, tbodies, tfoot)
+function Renderer:Table (_, caption, colspecs, thead, tbodies, tfoot)
   -- CAVEAT: This goes far beyond what Markdown needs (quite logically, Pandoc
   -- supporting  other formats) and can be hard to map to SILE's ptable package.
   local aligns = {}
@@ -341,7 +347,7 @@ Pandoc.Table = function (_, caption, colspecs, thead, tbodies, tfoot)
   local hasHeader = false
   for _, row in ipairs(thead[2]) do
     hasHeader = true
-    ptableRows[#ptableRows+1] = pandocRow(row, aligns, { background = "#eee"})
+    ptableRows[#ptableRows+1] = self:pandocRow(row, aligns, { background = "#eee"})
   end
 
   -- TableBody Attr RowHeadColumns [Row] [Row]
@@ -350,13 +356,13 @@ Pandoc.Table = function (_, caption, colspecs, thead, tbodies, tfoot)
   for _, tbody in ipairs(tbodies) do
     if tbody[2] ~= 0 then SU.error("Pandoc AST tables with several head columns are not sup ported") end
     for _, row in ipairs(tbody[4]) do
-      ptableRows[#ptableRows+1] = pandocRow(row, aligns)
+      ptableRows[#ptableRows+1] = self:pandocRow(row, aligns)
     end
   end
 
   -- TableFoot Attr [Row]
   for _, row in ipairs(tfoot[2]) do
-    ptableRows[#ptableRows+1] = pandocRow(row, aligns)
+    ptableRows[#ptableRows+1] = self:pandocRow(row, aligns)
   end
 
   local cWidth = {}
@@ -381,7 +387,7 @@ Pandoc.Table = function (_, caption, colspecs, thead, tbodies, tfoot)
   end
   local captioned = {
     ptable,
-    utils.createCommand("caption", {}, pandocAstParse(caption[#caption]))
+    utils.createCommand("caption", {}, self:render(caption[#caption]))
   }
   return utils.createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
 end
@@ -389,55 +395,55 @@ end
 -- PANDOC AST INLINES
 
 -- Str Text
-Pandoc.Str = function (text)
+function Renderer.Str (_, text)
   return utils.nbspFilter(text)
 end
 
 -- Emph [Inline]
-Pandoc.Emph =  function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Emph (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("em", {}, content)
 end
 -- Underline [Inline]
-Pandoc.Underline = function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Underline (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("underline", {}, content)
 end
 
 -- Strong [Inline]
-Pandoc.Strong = function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Strong (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("strong", {}, content)
 end
 
 -- Strikeout [Inline]
-Pandoc.Strikeout = function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Strikeout (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("strikethrough", {}, content)
 end
 
 -- Superscript [Inline]
-Pandoc.Superscript = function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Superscript (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("textsuperscript", {}, content)
 end
 
 -- Subscript [Inline]
-Pandoc.Subscript = function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Subscript (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("textsubscript", {}, content)
 end
 
 -- SmallCaps [Inline]
-Pandoc.SmallCaps = function (inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:SmallCaps (inlines)
+  local content = self:render(inlines)
   return utils.createCommand("font", { features = "+smcp" }, content)
 end
 
 -- Quoted QuoteType [Inline]
 --   Where QuoteType is a tag DoubleQuote or SingleQuote
-Pandoc.Quoted = function (quotetype, inlines)
-  local content = pandocAstParse(inlines)
+function Renderer:Quoted (quotetype, inlines)
+  local content = self:render(inlines)
   if quotetype.t == "DoubleQuote" then
     return utils.createCommand("doublequoted", {}, content)
   end
@@ -446,61 +452,61 @@ end
 
 -- Cite [Citation] [Inline]
 --   Where a Citation is a dictionary
-Pandoc.Cite = function (_, inlines)
+function Renderer:Cite (_, inlines)
   -- TODO
   -- We could possibly do better.
   -- Just render the inlines and ignore the citations
-  return pandocAstParse(inlines)
+  return self:render(inlines)
 end
 
 -- Code Attr Text
-Pandoc.Code = function (attributes, text)
+function Renderer.Code (_, attributes, text)
   local options = pandocAttributes(attributes)
   return utils.createCommand("code", options, text)
 end
 
 -- Space
-Pandoc.Space = function ()
+function Renderer.Space (_)
   return " "
 end
 
 -- SoftBreak
-Pandoc.SoftBreak = function ()
+function Renderer.SoftBreak (_)
   return " " -- Yup.
 end
 
 -- LineBreak
 -- Hard line break
-Pandoc.LineBreak = function ()
+function Renderer.LineBreak (_)
   return utils.createCommand("cr")
 end
 
 -- Math MathType Text
 -- TeX math (literal)
-Pandoc.Math = function (mathtype, text)
+function Renderer.Math (_, mathtype, text)
   local mode = (mathtype.t and mathtype.t == "DisplayMath") and "display" or "text"
   return utils.createCommand("markdown:internal:math" , { mode = mode }, { text })
 end
 
 -- RawInline Format Text
-Pandoc.RawInline = function (format, text)
+function Renderer.RawInline (_, format, text)
   return utils.createCommand("markdown:internal:rawinline", { format = format }, text)
 end
 
 -- Link Attr [Inline] Target
-Pandoc.Link = function (attributes, inlines, target) -- attributes, inlines, target
+function Renderer:Link (attributes, inlines, target) -- attributes, inlines, target
   local options = pandocAttributes(attributes)
   -- Target = (Url : Text, Title : Text)
   local uri, _ = table.unpack(target) -- uri, title (unused too?)
   options.src = uri
-  local content = pandocAstParse(inlines)
+  local content = self:render(inlines)
   return utils.createCommand("markdown:internal:link", options, content)
 end
 
 -- Image Attr [Inline] Target
-Pandoc.Image = function (attributes, inlines, target) -- attributes, inlines, target
+function Renderer:Image (attributes, inlines, target) -- attributes, inlines, target
   local options = pandocAttributes(attributes)
-  local content = pandocAstParse(inlines)
+  local content = self:render(inlines)
   -- Target = (Url : Text, Title : Text)
   local uri, _ = table.unpack(target)
   options.src = uri
@@ -508,15 +514,15 @@ Pandoc.Image = function (attributes, inlines, target) -- attributes, inlines, ta
 end
 
 -- Note [Block]
-Pandoc.Note = function (blocks)
-  local content = pandocAstParse(blocks)
+function Renderer:Note (blocks)
+  local content = self:render(blocks)
   return utils.createCommand("markdown:internal:footnote", {}, content)
 end
 
 -- Span Attr [Inline]
-Pandoc.Span = function (attributes, inlines)
+function Renderer:Span (attributes, inlines)
   local options = pandocAttributes(attributes)
-  local content = pandocAstParse(inlines)
+  local content = self:render(inlines)
   return utils.createCommand("markdown:internal:span" , options, content)
 end
 
@@ -551,7 +557,7 @@ function inputter.appropriate (round, filename, doc)
   return false
 end
 
-function inputter.parse (_, doc)
+function inputter:parse (doc)
   local has_json, json = pcall(require, "json.decode")
   if not has_json then
     SU.error("The pandocast inputter requires LuaJSON's json.decode() to be available.")
@@ -562,7 +568,8 @@ function inputter.parse (_, doc)
   local PANDOC_API_VERSION = ast['pandoc-api-version']
   checkAstSemver(PANDOC_API_VERSION)
 
-  local tree = pandocAstParse(ast.blocks)
+  local renderer = Renderer(self.options)
+  local tree = renderer:render(ast.blocks)
 
   -- The Markdown parsing returns a SILE AST.
   -- Wrap it in a document structure so we can just process it, and if at

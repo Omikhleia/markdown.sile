@@ -35,15 +35,16 @@ local CommandCascade = pl.class({
   end,
 })
 
-local UsualSectioning = { "chapter", "section", "subsection", "subsubsection" }
+local UsualSectioning = { "part", "chapter", "section", "subsection", "subsubsection" }
 local function getSectioningCommand (level)
-  if level <= #UsualSectioning then
+  local index = level + 1
+  if index > 0 and index <= #UsualSectioning then
     -- Check we actually have those commands (e.g. some classes might not
     -- have subsubsections.)
-    if SILE.Commands[UsualSectioning[level]] then
-      return UsualSectioning[level]
+    if SILE.Commands[UsualSectioning[index]] then
+      return UsualSectioning[index]
     end
-    SU.warn("Unknown command \\"..UsualSectioning[level].." (fallback to a default generic header)")
+    SU.warn("Unknown command \\"..UsualSectioning[index].." (fallback to a default generic header)")
     -- Default to something anyway.
     return "markdown:fallback:header"
   end

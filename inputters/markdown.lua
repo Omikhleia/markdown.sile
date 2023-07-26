@@ -65,9 +65,10 @@ end
 -- Lunamark writer for SILE
 -- Yay, direct lunamark AST ("ropes") conversion to SILE AST
 
-local function SileAstWriter (options)
+local function SileAstWriter (writerOps, renderOps)
   local generic = require("lunamark.writer.generic")
-  local writer = generic.new(options or {})
+  local writer = generic.new(writerOps or {})
+  local shift_headings = SU.cast("integer", renderOps.shift_headings or 0)
 
   -- Simple one-to-one mappings between lunamark AST and SILE
 
@@ -90,7 +91,7 @@ local function SileAstWriter (options)
 
   writer.header = function (s, level, attr)
     local opts = attr or {} -- passthru (class and key-value pairs)
-    opts.level = level
+    opts.level = level + shift_headings
     return utils.createCommand("markdown:internal:header", opts, s)
   end
 
@@ -418,7 +419,7 @@ function inputter:parse (doc)
   local writer = SileAstWriter({
     layout = "minimize" -- The default layout is to output \n\n as inter-block separator
                         -- Let's cancel it completely, and insert our own \par where needed.
-  })
+  }, self.options)
 
   extensions.alter_syntax = customSyntax(writer, extensions)
 
