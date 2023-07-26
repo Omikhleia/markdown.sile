@@ -4,9 +4,9 @@ This collection of modules for the [SILE](https://github.com/sile-typesetter/sil
 system provides a complete redesign of its former native Markdown support, with
 a great set of Pandoc-like extensions and plenty of extra goodies.
 
-- `\autodoc:package{markdown}`{=sile} inputter and package: native support of Markdown files.
-- `\autodoc:package{pandocast}`{=sile} inputter and package: native support of Pandoc JSON AST files.
-- `\autodoc:package{djot}`{=sile} inputter and package: native support of Djot files.
+- `\autodoc:package{markdown}`{=sile} input handler and package: native support of Markdown.
+- `\autodoc:package{djot}`{=sile} input handler and package: native support of Djot.
+- `\autodoc:package{pandocast}`{=sile} input handler and package: native support of Pandoc JSON AST files.
 
 For casual readers, this collection notably aims at easily converting Markdown or Djot documents to print-quality PDFs.
 
@@ -38,20 +38,25 @@ sile -u inputters.markdown somefile.md
 ... Or for a Djot document.
 
 ```
-sile -u inputters.djot -u packages.markdown somefile.dj
+sile -u inputters.djot somefile.dj
 ```
 
-This method directly produces a PDF from the input file, using SILE's standard **book** class.
+This method directly produces a PDF from the input file, using SILE's standard **book** class.[^intro-book-class]
+
+[^intro-book-class]: Actually, it uses a **markdown** class derived from the standard book class and loading the required modules.
+You don't really have to know that, unless you intend to invoke SILE with the `-c` option to specify another class of your choice; in that case you will need to load additional modules explicitly---unless it is a resilient class, of course.
 
 ### Usage with the resilient collection
 
-To unleash the full potential of this package collection, we recommend that
-you also install our [**resilient.sile**](https://github.com/Omikhleia/resilient.sile)
-collection of classes and packages.
+To unleash the full potential of this package collection, we recommend that you also install our [**resilient.sile**](https://github.com/Omikhleia/resilient.sile) collection of classes and packages.
+
+```bash
+luarocks --lua-version 5.4 install --dev resilient.sile
+```
 
 Then, you can automatically benefit from a few advanced features.
-Conversion from command line just requires to load a resilient class, and optionally
-the poetry package. For instance:
+Conversion from command line just requires to load a resilient class, and optionally the poetry package.
+For instance:
 
 ```
 sile -c resilient.book -u inputters.markdown -u packages.resilient.poetry somefile.md
@@ -59,8 +64,17 @@ sile -c resilient.book -u inputters.markdown -u packages.resilient.poetry somefi
 
 (And likewise for the Pandoc AST or Djot processing.)
 
-A "resilient style file" is also generated. It can be modified to change many styling
-decisions and adapt the output at convenience.
+A "resilient style file" is also generated.
+It can be modified to change many styling decisions and adapt the output at convenience.
+
+### Advanced usage from existing documents
+
+While direct conversion from the command line may be adequate for very simple workflows, there are a number of things usually best addressed by using some kind of "wrapper" document.
+
+This package collection provides several ways for including Markdown or Djot content in documents written in SIL syntax, the default mark-up language provided by SILE.
+These are described further in this guide.
+
+The resilient collection also introduces a "master document" format, streamlining several usual tasks. Give it a chance, and you may even end up producing a book with SILE without a single statement in SIL.
 
 ### Credits
 
