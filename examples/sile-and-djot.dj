@@ -387,3 +387,20 @@ Any option supported by the `\autodoc:package{resilient.epigraph}`{=sile} packag
 
 Be aware that this behavior is currently an extension.
 Other Djot renderers will therefore likely skip the caption.
+
+### Configuration
+
+You can pass additional options to the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile} environment to tune the behavior of the renderer.
+
+The `shift_headings` option can take an integer value and causes headers in included or embedded raw content to be offset (that is, shifted by the given amount).
+For instance:
+
+```
+\include[src=somefile.dj, shift_headings=1]
+```
+
+For document classes supporting it, this feature also allows you to access levels above the default scheme, such as "parts".
+
+```
+\include[src=somefile.dj, shift_headings=-1]
+```

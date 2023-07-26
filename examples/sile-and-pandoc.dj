@@ -1,0 +1,49 @@
+# Alternative route: SILE and Pandoc
+
+Pandoc is a free-software document converter, created by the same John MacFarlane who provided the *lunamark* and *djot* libraries which empower SILE’s native Markdown and Djot package.
+The latter, though, do not offer as many options and extensions as Pandoc does, for advanced typesetting.
+
+In the event where the native solution would fall short for you ---e.g. would you need some extension of feature it doesn't yet support--- you may want to use Pandoc directly for converting your document to an output suitable for SILE.
+
+The following solutions are still experimental proof-of-concepts, but you may give them a chance,and help us fill the gaps.
+
+## Using Pandoc's AST with the pandocast package
+
+The experimental `\autodoc:package{pandocast}`{=sile} package allows you to use Pandoc’s JSON AST as an input format for documents.
+You can obtain an AST output from Pandoc for any supported source format. Keeping the focus on Markdown here:
+
+```
+pandoc -t json somefile.md -f markdown -o somefile.pandoc
+```
+
+Once the package is loaded, the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading and processing such a Pandoc AST file, assuming the `.pandoc` extension or specifying the `format=pandocast` parameter:
+
+```
+\use[module=packages.pandocast]
+\include[src=somefile.pandoc]
+```
+
+This package supports the same advanced features as the native Markdown solution, e.g. the ability to use custom styles, to pass native content through to SILE, etc.
+
+The `shift_headings` option is also available, as with the Markdown and Djot solutions.
+
+There is a small _caveat_, though: one must use a version of Pandoc which generates an AST compatible with our input handler ("inputter").
+While the Pandoc AST is somewhat stable, it may change when new features are introduced in the software.
+
+## Using a Pandoc "custom writer" in Lua
+
+Pandoc also supports "custom writers" developed in Lua[^pandoc-writer].
+
+[^pandoc-writer]: <https://pandoc.org/custom-writers.html>
+
+This custom writer API is fairly recent and might change.
+Actually, besides a "Classic style" API (deprecated), there's now also a "New style" API...
+While such custom writers may have some rough edges, the idea is quite appealing nevertheless. 
+After all, SILE is mostly written in Lua, so the skills are there in the community.
+
+Again, there is no official solution using this conversion path, but some pretty neat experimental results have been achieved[^omi-writer].
+That custom writer targets a specific (non-standard) class and a bunch of specific packages, which might not have been ported to the latest version of SILE...
+This said, you can also certainly help pushing the idea forward!
+
+[^omi-writer]: <https://github.com/Omikhleia/omikhleia-sile-packages/blob/main/examples/markdown-sample.pdf>
+

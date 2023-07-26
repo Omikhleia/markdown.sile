@@ -534,9 +534,9 @@ or coordinates (e.g. Oxford is located at 51° 45' 7" N, 1° 15' 27" W).
 
 ### Configuration {#configuration}
 
-Most Markdown syntax extensions are enabled by default. You can pass additional options to
-the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile}
-environment to tune the behavior of the Markdown parser.
+Most Markdown syntax extensions are enabled by default.
+You can pass additional options to
+the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile} environment to tune the behavior of the Markdown parser.
 
 ::: {custom-style=raggedright}
 > Available options are: `smart`, `smart_primes`, `strikeout`, `mark`, `subscript`, `superscript`,
@@ -550,62 +550,18 @@ environment to tune the behavior of the Markdown parser.
 For instance, to disable the smart typography feature:
 
 ```
-\include[src=somefile.pandoc, smart=false]
+\include[src=somefile.md, smart=false]
 ```
 
-## The Pandoc-based converters
-
-Pandoc is a free-software document converter, created by the same John MacFarlane who
-provided the **lunamark** library which empowers SILE’s native markdown package.
-The latter, though, does not offer as many options and extensions as Pandoc does,
-for advanced typesetting.
-
-In the event where the native solution would fall short for you ---e.g. would you need some extension
-it doesn't yet support--- you may want to use Pandoc directly for converting your document to an
-output suitable for SILE.
-
-The following solutions are still experimental proof-of-concepts, but you may give them a chance,
-and help us fill the gaps.
-
-### Using Pandoc's AST with the pandocast package
-
-The experimental `\autodoc:package{pandocast}`{=sile} package allows you to use Pandoc’s JSON AST
-as an input format for documents.
-You can obtain an AST output from Pandoc for any supported source format. Keeping the focus on
-Markdown here:
+The `shift_headings` option can take an integer value and causes headers in included or embedded raw content to be offset (that is, shifted by the given amount).
+For instance:
 
 ```
-pandoc -t json somefile.md -f markdown -o somefile.pandoc
+\include[src=somefile.md, shift_headings=1]
 ```
 
-Once the package is loaded, the `\autodoc:command{\include[src=<file>]}`{=sile} command supports
-reading and processing such a Pandoc AST file, assuming the `.pandoc` extension or specifying
-the `format=pandocast` parameter:
+For document classes supporting it, this feature also allows you to access levels above the default scheme, such as "parts".
 
 ```
-\use[module=packages.pandocast]
-\include[src=somefile.pandoc]
+\include[src=somefile.md, shift_headings=-1]
 ```
-
-This package supports the same advanced features as the native markdown package, e.g. the
-ability to use custom styles, to pass native content through to SILE, etc.
-
-There is a small _caveat_, though: one must use a version of Pandoc which generates
-an AST compatible with our parser ("inputter"). While the Pandoc AST is somewhat stable,
-it may change when new features are introduced in the software.
-
-### Using a Pandoc "custom writer" in Lua
-
-Pandoc also supports "custom writers" developed in Lua^[<https://pandoc.org/custom-writers.html>].
-
-This custom writer API is fairly recent and might change. Actually, besides a "Classic style" API
-(pending deprecation), there's now also a "New style" API...  While such custom writers may have
-some rough edges, the idea is quite appealing nevertheless. After all, SILE is mostly written in Lua,
-so the skills are there in the community.
-
-Again, there is no official solution using this conversion path, but some pretty neat
-experimental results have been
-achieved^[<https://github.com/Omikhleia/omikhleia-sile-packages/blob/main/examples/markdown-sample.pdf>].
-That custom writer targets a specific (non-standard) class and a bunch of specific packages, which might
-not have been ported to the latest version of SILE... This said, you can also certainly help pushing the
-idea forward!
