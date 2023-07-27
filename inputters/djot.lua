@@ -19,6 +19,16 @@ function Renderer:_init(options)
   self.footnotes = {}
   self.metadata = {}
   self.shift_headings = SU.cast("integer", options.shift_headings or 0)
+  for key, val in pairs(options) do
+    local meta = key:match("^meta:(.*)")
+    if meta then
+      if meta:match("[%w_+-]+") then
+        self.metadata[meta] = val
+      else
+        SU.warn("Invalid metadata key is skipped: "..meta)
+      end
+    end
+  end
   self.tight = false -- We do not use it currently, though!
 end
 
@@ -524,15 +534,88 @@ function Renderer.en_dash (_)
   return("–")
 end
 
+local predefinedSymbols = {
+  _TOC_ = {
+    standalone = true,
+    render = function (node)
+      return utils.createCommand("tableofcontents", node.attr)
+    end
+  },
+  _FANCYTOC_ = { -- of course, requires having installed the fancytoc.sile module
+                 -- We are not going to check that here, so I won't document it.
+    standalone = true,
+    render = function (node)
+      return {
+        utils.createCommand("use", { module = "packages.fancytoc" }),
+        utils.createCommand("fancytableofcontents", node.attr)
+      }
+    end
+  },
+}
+
 function Renderer:symbol (node)
-  -- Let's look at fake footnotes to resolve the symbol.
+  -- Let's first look at fake footnotes to resolve the symbol.
   -- We just added unforeseen templating and recursive variable substitution to Djot.
   local label = ":" .. node.alias .. ":"
   local node_fake_metadata = self.footnotes[label]
-  if not node_fake_metadata then
+
+  if node_fake_metadata then
+    if #node_fake_metadata.c > 1 and not node._standalone_ then
+      SU.error("Cannot use multi-paragraph metatada "..label.." as inline content")
+    end
+
+    local content
+    if self.metadata[label] then -- use memoized
+      content = self.metadata[label]
+    else
+      if #node_fake_metadata.c == 1 and node_fake_metadata.c[1].t == "para" then
+        -- Skip a single para node.
+        content = self:render_children(node_fake_metadata.c[1])
+      else
+        content = self:render_children(node_fake_metadata)
+      end
+      self.metadata[label] = content -- memoize
+    end
+    if node.attr then
+      if not node._standalone_ then
+        -- Add a span for attributes on the inline variant.
+        content = utils.createCommand("markdown:internal:span" , node.attr, content)
+      else
+        -- Those should rather come from the paragraph
+        SU.warn("Attributes ignored on block-like symbol '" .. node.alias .. "'")
+      end
+    end
+    return content
+  else
+    -- Let's then look for metadata passed to the renderer
+    if self.metadata[node.alias] then
+      local text = self.metadata[node.alias]
+      if node.attr then
+        -- Add a span for attributes
+        return utils.createCommand("markdown:internal:span" , node.attr, text)
+      end
+      return text
+    end
+    -- Let's finally look for predefined symbols
+    local symbol = predefinedSymbols[node.alias]
+    if symbol then
+      if symbol.standalone and not node._standalone_ then
+        SU.error("Cannot use " .. label .." as inline content")
+      end
+      return symbol.render(node)
+    end
+    if node.alias:match("U%+[0-9A-F]+") then
+      local content = {
+        utils.createCommand("use", { module = "packages.unichar" }),
+        utils.createCommand("unichar", {}, node.alias)
+      }
+      if node.attr then
+        -- Add a span for attributes
+        return utils.createCommand("markdown:internal:span" , node.attr, content)
+      end
+      return content
+    end
     SU.warn("Symbol '" .. node.alias .. "' was not expanded (no corresponding metadata found)")
-    -- TODO Let's not error, but what else could we do with these funny symbols?
-    -- Oh oh oh... Don't get me started... Nah you are not ready yet for more tricks...
     local text = ":" .. node.alias .. ":"
     if node.attr then
       -- Add a span for attributes
@@ -540,33 +623,6 @@ function Renderer:symbol (node)
     end
     return text
   end
-
-  if #node_fake_metadata.c > 1 and not node._standalone_ then
-    SU.error("Cannot use multi-paragraph metatada "..label.." as inline content")
-  end
-
-  local content
-  if self.metadata[label] then -- use memoized
-    content = self.metadata[label]
-  else
-    if #node_fake_metadata.c == 1 and node_fake_metadata.c[1].t == "para" then
-      -- Skip a single para node.
-      content = self:render_children(node_fake_metadata.c[1])
-    else
-      content = self:render_children(node_fake_metadata)
-    end
-    self.metadata[label] = content -- memoize
-  end
-  if node.attr then
-    if not node._standalone_ then
-      -- Add a span for attributes on the inline variant.
-      content = utils.createCommand("markdown:internal:span" , node.attr, content)
-    else
-      -- Those should rather come from the paragraph
-      SU.warn("Attributes ignored on block-like symbol '" .. node.alias .. "'")
-    end
-  end
-  return content
 end
 
 function Renderer.math (_, node)

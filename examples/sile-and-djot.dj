@@ -324,6 +324,8 @@ or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
 The `.nobreak` pseudo-class attribute on inline content ensures that line-breaking will not be applied
 there. Use it wisely around small pieces of text or you might end up with more serious justification issues! Yet, it might be useful for proper names, etc.
 
+### Symbols as Djot extension
+
 ### Templates and variable substitution
 
 [^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
@@ -364,6 +366,27 @@ Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain sy
 [^djot-pseudo-footnotes]: You may still use them as regular footnotes.
 Whether this is a good idea is another question...
 
+### Predefined symbols
+
+This renderer also comes with a few symbols predefined.
+
+- `:_TOC_:` must stand alone in its own paragraph. It inserts a table of contents.
+   Attributes on the symbol are passed through, e.g. `:_TOC_:{depth=3}`.
+- `:U+xxxx:` (where `xxxx` is a hexadecimal value in upper case) is replaced by the corresponding Unicode character --- `:U+2122:` gives :U+2122:.
+
+The above variable substitution mechanism has precedence over these symbols, allowing you to possibly override them.
+
+{#djot-metadata-symbols}
+### Templates and contextual metadata
+
+Some options passed to the renderer (see "[](#djot-configuration){.title}") are also available as symbols.
+
+The calling context (a wrapper document in SIL syntax, a resilient "master document", etc.) is responsible for defining the expected symbols.
+Here, if this very document was processed from its expected master document, then `:title:` is available.
+Let's check how it expands: _:title:._
+
+Again, the variable substitution mechanism also has precedence over these symbols.
+
 ### Attributed quotes (epigraphs)
 
 { rule="0.4pt" }
@@ -388,6 +411,7 @@ Any option supported by the `\autodoc:package{resilient.epigraph}`{=sile} packag
 Be aware that this behavior is currently an extension.
 Other Djot renderers will therefore likely skip the caption.
 
+{#djot-configuration}
 ### Configuration
 
 You can pass additional options to the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile} environment to tune the behavior of the renderer.
@@ -404,3 +428,7 @@ For document classes supporting it, this feature also allows you to access level
 ```
 \include[src=somefile.dj, shift_headings=-1]
 ```
+
+Any other option starting with `meta:` is passed to the renderer (with this prefix removed).
+See "[](#djot-metadata-symbols){.title}" above.
+
