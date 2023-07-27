@@ -147,7 +147,7 @@ our package might not support them well. Its main focus is on Markdown parity wi
 
 \include[src=pandoc-tables.pandoc]
 
-\include[src=sile-and-djot.dj]
+\include[src=sile-and-djot.dj, meta:title=Markdown to PDF with SILE]
 
 \include[src=sile-and-pandoc.dj]
 
