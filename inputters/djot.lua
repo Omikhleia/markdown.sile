@@ -538,7 +538,7 @@ local predefinedSymbols = {
   _TOC_ = {
     standalone = true,
     render = function (node)
-      return utils.createCommand("tableofcontents", node.attr)
+      return utils.createCommand("markdown:internal:toc", node.attr)
     end
   },
   _FANCYTOC_ = { -- of course, requires having installed the fancytoc.sile module
