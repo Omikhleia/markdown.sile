@@ -35,7 +35,7 @@ The native parsing relies on John MacFarlane's *djot* Lua library.
 \include[src=somefile.dj]
 ```
 
-Embedding raw Djot content from within a SILE document is also possible:
+Embedding raw Djot content from within a SIL document is also possible:
 
 ```
 \begin[type=djot]{raw}
@@ -232,9 +232,9 @@ graph {
 }
 ```
 
-Code blocks marked as being in Markdown or Djot are interpretated too (again, unless
+Code blocks marked as being in Markdown or Djot are interpreted too (again, unless
 the `render` attribute is set to false).
-For Markdown, attributes are passed to the renderer, allowing to possibly use different compatibility options (see "[Configuration](#configuration)").
+For Markdown, attributes are passed to the converter, allowing to possibly use different compatibility options (see "[Configuration](#configuration)").
 This feature allows switching between those languages, would there be something one does not support yet.
 At the time of writing, for instance, Djot does not support "line blocks".
 
@@ -324,8 +324,6 @@ or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
 The `.nobreak` pseudo-class attribute on inline content ensures that line-breaking will not be applied
 there. Use it wisely around small pieces of text or you might end up with more serious justification issues! Yet, it might be useful for proper names, etc.
 
-### Symbols as Djot extension
-
 ### Templates and variable substitution
 
 [^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
@@ -368,7 +366,7 @@ Whether this is a good idea is another question...
 
 ### Predefined symbols
 
-This renderer also comes with a few symbols predefined.
+This converter also comes with a few symbols predefined.
 
 - `:_TOC_:` must stand alone in its own paragraph. It inserts a table of contents.
    Attributes on the symbol are passed through, e.g. `:_TOC_:{depth=3}`.
@@ -379,7 +377,7 @@ The above variable substitution mechanism has precedence over these symbols, all
 {#djot-metadata-symbols}
 ### Templates and contextual metadata
 
-Some options passed to the renderer (see "[](#djot-configuration){.title}") are also available as symbols.
+Some options passed to the converter (see "[](#djot-configuration){.title}") are also available as symbols.
 
 The calling context (a wrapper document in SIL syntax, a resilient "master document", etc.) is responsible for defining the expected symbols.
 Here, if this very document was processed from its expected master document, then `:title:` is available.
@@ -409,12 +407,12 @@ Attributes are passed through to an implicit "div" (so as to honor the language,
 Any option supported by the `\autodoc:package{resilient.epigraph}`{=sile} package may thus be used.
 
 Be aware that this behavior is currently an extension.
-Other Djot renderers will therefore likely skip the caption.
+Other Djot converters will therefore likely skip the caption.
 
 {#djot-configuration}
 ### Configuration
 
-You can pass additional options to the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile} environment to tune the behavior of the renderer.
+You can pass additional options to the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile} environment to tune the behavior of the converter.
 
 The `shift_headings` option can take an integer value and causes headers in included or embedded raw content to be offset (that is, shifted by the given amount).
 For instance:
@@ -429,6 +427,6 @@ For document classes supporting it, this feature also allows you to access level
 \include[src=somefile.dj, shift_headings=-1]
 ```
 
-Any other option starting with `meta:` is passed to the renderer (with this prefix removed).
+Any other option starting with `meta:` is passed to the converter (with this prefix removed).
 See "[](#djot-metadata-symbols){.title}" above.
 

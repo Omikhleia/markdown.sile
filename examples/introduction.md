@@ -4,17 +4,26 @@ This collection of modules for the [SILE](https://github.com/sile-typesetter/sil
 system provides a complete redesign of its former native Markdown support, with
 a great set of Pandoc-like extensions and plenty of extra goodies.
 
-- `\autodoc:package{markdown}`{=sile} input handler and package: native support of Markdown.
-- `\autodoc:package{djot}`{=sile} input handler and package: native support of Djot.
-- `\autodoc:package{pandocast}`{=sile} input handler and package: native support of Pandoc JSON AST files.
+- `\autodoc:package{markdown}`{=sile} package: native support of Markdown.
+- `\autodoc:package{djot}`{=sile} package: native support of Djot.
+- `\autodoc:package{pandocast}`{=sile} package: native support of Pandoc JSON AST files.
 
 For casual readers, this collection notably aims at easily converting Markdown or Djot documents to print-quality PDFs.
+There is actually more than one solution to achieve great results in that direction:
+
+ 1. Directly using the native converter packages,
+ 1. Using the Pandoc software to generate an output suitable for SILE.
+
+Each of them has its advantages, and a few limitations as well.
+
+![Supported routes from input to output.](./markdown-sile-overview.dot){width="96%fw"}
 
 ## Installation and usage
 
 ### Installation
 
 This module collection requires SILE v0.14 or upper.
+
 Installation relies on the **luarocks** package manager.
 To install the latest development version, you may use the provided “rockspec”:
 
@@ -27,7 +36,7 @@ detailed 3rd-party package installation information.
 
 ### Usage from command line
 
-The following chapters describe the packages' features, and how to use them within existing documents (say, in SIL syntax).
+The following chapters describe the packages' features, and how to use them within existing documents (themselves in SIL, Djot or Markdown syntax).
 It's perfectly possible, though, to perform direct conversion from the command line.
 For instance, here is how it may be done for Markdown document...
 

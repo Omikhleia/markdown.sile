@@ -55,7 +55,7 @@ Other possibilities exist (such as setting `format=markdown` on the `\include` c
 cannot be one of the supported variants, etc.). Refer to the SILE manual for more details on inputters and their
 usage.
 
-Including raw Markdown content from within a SILE document is also possible:
+Including raw Markdown content from within a document in SIL syntax is also possible:
 
 ```
 \begin[type=markdown]{raw}
@@ -80,7 +80,7 @@ Then, from command line:
 sile -u inputters.pandocast somefile.pandoc
 ```
 
-Or from documents:
+Or from SIL documents:
 
 ```
 \use[module=packages.pandocast]
@@ -111,7 +111,7 @@ Other possibilities exist (such as setting `format=djot` on the `\include` comma
 cannot be one of the supported variants, etc.). Refer to the SILE manual for more details on inputters and their
 usage.
 
-Including raw Djot content from within a SILE document is also possible:
+Including raw Djot content from within a SIL document is also possible:
 
 ```
 \begin[type=djot]{raw}
@@ -137,7 +137,7 @@ It assumes a default font, so a few things might not render as expected, and use
 sile examples/sile-and-markdown-manual.sil
 ```
 
-The latter SILE document also loads extra packages before switching to Markdown, and defines
+The latter SIL “wrapper” document also loads extra packages before switching to Markdown, and defines
 additional commands and styles. Moreover, it includes additional chapters, showcasing
 other advanced topics and cool use cases. Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
 
@@ -170,6 +170,8 @@ which also serves as documentation, showcase and reference guide.
 - Hard line breaks
 - Raw attributes (escaping to inline SILE or Lua scripting)
 - Raw inline HTML convenience subset in Markdown
+- Advanced use of symbols in Djot (variable substitution and templating)
+- Advanced configuration (e.g. Markdown variants, headings shifting, etc.)
 
 ## Use with the resilient collection
 
@@ -213,4 +215,4 @@ Additional thanks to:
 - Vít Novotný, for the good work on lunamark, and the impressive [witiko/markdown](https://github.com/Witiko/markdown)
   package for (La)TeX - a great source of inspiration and a goal of excellence.
 - Caleb Maclennan, for his early work on a Pandoc-to-SILE converter which, though on different grounds,
-  indirectly gave me the idea of the "pandocast" alternative approach.
+  indirectly gave me the idea of the “pandocast” alternative approach.

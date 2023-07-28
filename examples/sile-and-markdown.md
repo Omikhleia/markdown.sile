@@ -17,13 +17,6 @@ such writers and authors may want to use this fine typesetter with their Markdow
 having to learn the SIL language and its specifics (but not, either, fully excluding it for some
 advanced capabilities). Guess what, the very chapter you are currently reading is written in Markdown!
 
-There is actually more than one solution to achieve great results in that direction:
-
- 1. Directly using a native Markdown converter package,
- 1. Using the Pandoc software to generate an output suitable for SILE.
-
-Each of them has its advantages, and a few limitations as well.
-
 [comment]: # (THIS TEXT SHOULD NOT APPEAR IN THE OUTPUT. It is actually the most platform independent comment in Markdown.)
 
 ## The native markdown package
@@ -41,7 +34,7 @@ to the basics here.
 \include[src=somefile.md]
 ```
 
-Embedding raw Markdown content from within a SILE document is also possible:
+Embedding raw Markdown content from within a SIL document is also possible:
 
 ```
 \begin[type=markdown]{raw}
@@ -265,7 +258,7 @@ You will see, further below, another more powerful way to leverage Markdown with
 
 ### Images
 
-Here is an image: ![Invisible caption as in inline](./gutenberg.jpg "An exemplary image"){width=2.5cm}
+Here is an image: ![Invisible caption as in inline](./gutenberg.jpg "An exemplary image"){width=1.5cm}
 
 You can specify the required image width and/or height, as done just above actually,
 by appending the `{width=... height=...}` attributes^[And possibly other attributes,
@@ -288,7 +281,7 @@ Notably ![](./examples/manicule.svg){height=0.6bs} SVG is supported too (`.svg`)
 here with a "manicule" in that format.
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images too.
 
-![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width="90%fw"}
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot "A graph"){width="92%fw"}
 
 ### Maths
 
@@ -320,7 +313,7 @@ the converter uses its own fallback method.
 
 So called "line blocks", a sequence of lines beginning with a vertical bar (`|`) and followed by a
 space, are also supported. The division into lines is preserved in the output. Any additional leading space
-is preserved too, interpretated as an em-quad. These blocks can be useful for typesetting addresses
+is preserved too, interpreted as an em-quad. These blocks can be useful for typesetting addresses
 or poetry.
 
 ::: { custom-style=em }
@@ -333,7 +326,7 @@ or poetry.
 
 This implementation goes a bit beyond the standard Pandoc-inspired support for line blocks.
 In particular, empty lines (i.e. starting with a vertical bar and a single space, but no other content
-afterwards) are interpretated as stanza separators, which should be smaller than an empty line
+afterwards) are interpreted as stanza separators, which should be smaller than an empty line
 (i.e. a small skip, by default).
 
 ::: { .poetry lang=fr step=4 }
@@ -451,10 +444,10 @@ graph {
 }
 ```
 
-Code blocks marked as being in Markdown or Djot are interpretated too (again, unless
+Code blocks marked as being in Markdown or Djot are interpreted too (again, unless
 the `render` attribute is set to false).
 This feature allows switching between those languages, would there be something one does not support yet.
-For Markdown, attributes are passed to the renderer, allowing to possibly use different compatibility options (see "[Configuration](#configuration)").
+For Markdown, attributes are passed to the converter, allowing to possibly use different compatibility options (see "[Configuration](#configuration)").
 
 ### Raw blocks
 
