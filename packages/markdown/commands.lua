@@ -679,6 +679,24 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Captioned blockquote in Djot (internal)")
 
+  self:registerCommand("markdown:internal:toc", function (options, _)
+    if not SILE.Commands["tableofcontents"] then
+      SU.warn("No table of contents command available (skipped)")
+      return
+    end
+    local tocHeaderCmd = SILE.Commands["tableofcontents:header"]
+    if tocHeaderCmd then
+      -- HACK (opinionated)
+      -- By design, resilient.tableofcontents does not output a header.
+      -- In case the standard tableofcontents package from the SILE core
+      -- distribution is used, then we temporarily cancel its header,
+      -- so we get the same behavior in whatever case.
+      SILE.Commands["tableofcontents:header"] = function () end
+    end
+    SILE.call("tableofcontents", options)
+    SILE.Commands["tableofcontents:header"] = tocHeaderCmd
+  end, "Table of contents in Djot (internal)")
+
   -- B. Fallback commands
 
   self:registerCommand("markdown:fallback:blockquote", function (_, content)
