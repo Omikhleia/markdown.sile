@@ -129,8 +129,26 @@ Block quotes work.
 #### Footnotes
 
 Footnotes work.[^djot-fnt]
+Moreover, Djot allows attaching attributes to the footnote reference.
+This offers us some additional flexibility.
+Here is therefore a possibly different footnote.[^djot-fun-note] It is obtained with:
 
-[^djot-fnt]: This is yet another footnote.
+```
+... different footnote[^djot-fun-note]...
+
+{mark="†"}
+[^djot-fun-note]: If using...
+```
+
+It can even be referenced in the flow of text: see note [](#djot-fun-note).
+
+[^djot-fnt]: This is yet another regular footnote.
+
+{mark="†"}
+[^djot-fun-note]: If using a resilient class, this note should be marked with an _obelus_ ("dagger").
+Cross-references are detailed later in this chapter.
+For linking purpose, this converter uses the footnote reference identifier by default, but it can of course be overridden via the attribute syntax.
+Other attributes are passed through to the underlying footnote implementation.
 
 #### Languages
 
