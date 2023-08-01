@@ -314,7 +314,9 @@ function Renderer:footnote_reference (node)
     SU.error("Failure to find footnote '"..label.."'")
   end
   local content = self:render_children(node_footnote)
-  return utils.createCommand("markdown:internal:footnote", {}, content)
+  local options = node_footnote.attr or {}
+  options.id = options.id or label -- use note label as id if not specified
+  return utils.createCommand("markdown:internal:footnote", options, content)
 end
 
 function Renderer.raw_inline (_, node)

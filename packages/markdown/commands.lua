@@ -469,7 +469,7 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Link in Markdown (internal)")
 
-  self:registerCommand("markdown:internal:footnote", function (_, content)
+  self:registerCommand("markdown:internal:footnote", function (options, content)
     if not SILE.Commands["footnote"] then
       -- The reasons for NOT loading a package for this high-level structure
       -- is that the class or other packages may provide their own implementation
@@ -478,7 +478,13 @@ Please consider using a resilient-compatible class!]])
       SU.warn("Trying to enforce fallback for unavailable \\footnote command")
       self.class:loadPackage("footnotes")
     end
-    SILE.call("footnote", {}, content)
+    if options.id then
+      content = {
+        utils.createCommand("label", { marker = options.id }),
+        utils.subTreeContent(content)
+      }
+    end
+    SILE.call("footnote", options, content)
   end, "Footnote in Markdown (internal)")
 
   self:registerCommand("markdown:internal:rawinline", function (options, content)
