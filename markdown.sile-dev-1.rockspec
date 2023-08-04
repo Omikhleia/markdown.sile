@@ -20,6 +20,7 @@ dependencies = {
    "ptable.sile",
    "smartquotes.sile",
    "textsubsuper.sile",
+   "silex.sile",
 }
 
 build = {
