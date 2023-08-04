@@ -86,23 +86,6 @@ local function getFileExtension (fname)
   return fname:match("[^/]+$"):match("[^.]+$")
 end
 
-local function split (source, delimiters)
-  local elements = {}
-  local pattern = '([^'..delimiters..']+)'
-  string.gsub(source, pattern, function (value) elements[#elements + 1] = value;  end);
-  return elements
-end
-
---- Normalize a language code
--- Pandoc says language should be a BCP 47 identifier such as "en-US",
--- SILE only knows about "en" for now...
---
--- tparam  string lang BCP 47 language
--- treturn string 2-character language code
-local function normalizeLang (lang)
-  return split(lang, "-")[1]
-end
-
 local function nbspFilter (str)
   -- Non-breakable space extraction from a string, replacing them with an
   -- appropriate non-breakable inter-word space.
@@ -122,7 +105,6 @@ end
 --- @export
 return {
   getFileExtension = getFileExtension,
-  normalizeLang = normalizeLang,
   createCommand = createCommand,
   createStructuredCommand = createStructuredCommand,
   subTreeContent = subTreeContent,

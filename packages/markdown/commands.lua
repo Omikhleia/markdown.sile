@@ -7,6 +7,7 @@
 -- @copyright License: MIT (c) 2022-2023 Omikhleia
 -- @module packages.markdown.commands
 --
+require("silex.lang")
 local utils = require("packages.markdown.utils")
 local base = require("packages.base")
 
@@ -354,7 +355,7 @@ Please consider using a resilient-compatible class!]])
       cascade:call("markdown:internal:div:id", { id = options.id})
     end
     if options.lang then
-      cascade:call("language", { main = utils.normalizeLang(options.lang) })
+      cascade:call("language", { main = options.lang })
     end
     if options["custom-style"] then
       -- The style (or the hook) is reponsible for paragraphing
@@ -397,7 +398,7 @@ Please consider using a resilient-compatible class!]])
 
     local cascade = CommandCascade()
     if options.lang then
-      cascade:call("language", { main = utils.normalizeLang(options.lang) })
+      cascade:call("language", { main = options.lang })
     end
     if hasClass(options, "smallcaps") then
       cascade:call("font", { features = "+smcp" })
