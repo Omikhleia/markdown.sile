@@ -35,7 +35,6 @@ build = {
       ["sile.packages.markdown.utils"]    = "packages/markdown/utils.lua",
       ["sile.packages.pandocast"]         = "packages/pandocast/init.lua",
       ["sile.packages.djot"]              = "packages/djot/init.lua",
-      ["sile.core.ast"]                   = "core/ast.lua",
 
       ["sile.lunamark"]                 = "lua-libraries/lunamark.lua",
       ["sile.lunamark.entities"]        = "lua-libraries/lunamark/entities.lua",
