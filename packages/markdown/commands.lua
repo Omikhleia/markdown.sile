@@ -645,9 +645,11 @@ Please consider using a resilient-compatible class!]])
 
   self:registerCommand("markdown:internal:math", function (options, content)
     local mode = options.mode or "text"
-    -- NOTE: Not sure why the following doesn't work!!!!
-    -- SILE.call("math", {}, content)
-    SILE.processString("\\math[mode="..mode.."]{"..SU.contentToString(content).."}", "sil")
+    -- NOTE: The following doesn't work: SILE.call("math", {}, content)
+    -- Let's go for a lower-level AST construct instead.
+    SILE.process({
+      utils.createCommand("math", { mode = mode }, SU.contentToString(content))
+    })
   end)
 
   self:registerCommand("markdown:internal:nbsp", function (options, _)
