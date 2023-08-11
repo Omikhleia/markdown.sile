@@ -18,21 +18,20 @@ Each of them has its advantages, and a few limitations as well.
 
 ![Supported routes from input to output.](./markdown-sile-overview.dot){width="96%fw"}
 
-## Installation and usage
-
-### Installation
+## Installation
 
 This module collection requires SILE v0.14 or upper.
 
 Installation relies on the **luarocks** package manager.
-To install the latest development version, you may use the provided “rockspec”:
+To install the latest version, you may use the provided “rockspec”:
 
 ```bash
-luarocks --lua-version 5.4 install --dev markdown.sile
+luarocks install markdown.sile
 ```
 
-Adapt to your version of Lua, if need be, and refer to the SILE manual for more
-detailed 3rd-party package installation information.
+Refer to the SILE manual for more detailed 3rd-party package installation information.
+
+## Usage
 
 ### Usage from command line
 
@@ -60,7 +59,7 @@ You don't really have to know that, unless you intend to invoke SILE with the `-
 To unleash the full potential of this package collection, we recommend that you also install our [**resilient.sile**](https://github.com/Omikhleia/resilient.sile) collection of classes and packages.
 
 ```bash
-luarocks --lua-version 5.4 install --dev resilient.sile
+luarocks install resilient.sile
 ```
 
 Then, you can automatically benefit from a few advanced features.
@@ -85,7 +84,7 @@ These are described further in this guide.
 
 The resilient collection also introduces a "master document" format, streamlining several usual tasks. Give it a chance, and you may even end up producing a book with SILE without a single statement in SIL.
 
-### Credits
+## Credits
 
 Additional thanks to:
 

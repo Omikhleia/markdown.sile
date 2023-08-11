@@ -5,7 +5,7 @@ The latter, though, do not offer as many options and extensions as Pandoc does, 
 
 In the event where the native solution would fall short for you ---e.g. would you need some extension of feature it doesn't yet support--- you may want to use Pandoc directly for converting your document to an output suitable for SILE.
 
-The following solutions are still experimental proof-of-concepts, but you may give them a chance,and help us fill the gaps.
+The following solutions are still experimental proof-of-concepts, but you may give them a chance, and help us fill the gaps.
 
 ## Using Pandoc's AST with the pandocast package
 

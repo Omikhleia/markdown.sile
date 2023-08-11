@@ -21,14 +21,13 @@ This module collection requires SILE v0.14 or upper.
 
 Installation relies on the **luarocks** package manager.
 
-To install the latest development version, you may use the provided “rockspec”:
+To install the latest version, you may use the provided “rockspec”:
 
 ```
-luarocks --lua-version 5.4 install --dev markdown.sile
+luarocks install markdown.sile
 ```
 
-(Adapt to your version of Lua, if need be, and refer to the SILE manual for more
-detailed 3rd-party package installation information.)
+(Refer to the SILE manual for more detailed 3rd-party package installation information.)
 
 ## Usage
 
@@ -51,9 +50,8 @@ Or from documents (e.g. here in SIL language):
 \include[src=somefile.md]
 ```
 
-Other possibilities exist (such as setting `format=markdown` on the `\include` command, if the file extension
-cannot be one of the supported variants, etc.). Refer to the SILE manual for more details on inputters and their
-usage.
+Other possibilities exist (such as setting `format=markdown` on the `\include` command, if the file extension cannot be one of the supported variants, etc.).
+Refer to the SILE manual for more details on inputters and their usage.
 
 Including raw Markdown content from within a document in SIL syntax is also possible:
 
