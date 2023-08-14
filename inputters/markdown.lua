@@ -431,11 +431,8 @@ function inputter:parse (doc)
   -- The Markdown parsing returns a string or a SILE AST table.
   -- Wrap it in some document structure so we can just process it, and if at
   -- root level, load a default support class.
-  tree = { { tree,
-             command = "document", options = { class = "markdown" },
-             lno = 0, col = 0, -- For SILE 0.14.5 (issue https://github.com/sile-typesetter/sile/issues/1637)
-  } }
-  return tree
+  tree = createCommand("document", { class = "markdown" }, tree)
+  return { tree }
 end
 
 return inputter

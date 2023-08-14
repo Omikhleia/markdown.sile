@@ -552,10 +552,10 @@ function inputter.appropriate (round, filename, doc)
       -- we can't decently error here.
       return false
     end
-    local status, ast = pcall(function () return json.decode(doc) end)
+    local status, jsast = pcall(function () return json.decode(doc) end)
     -- JSON must have succeeded AND the resulting object must be a Pandoc AST,
     -- which we just check as having the 'pandoc-api-version' key.
-    return status and type(ast) == "table" and ast['pandoc-api-version']
+    return status and type(jsast) == "table" and jsast['pandoc-api-version']
   end
   return false
 end
@@ -566,22 +566,19 @@ function inputter:parse (doc)
     SU.error("The pandocast inputter requires LuaJSON's json.decode() to be available.")
   end
 
-  local ast = json.decode(doc)
+  local jsast = json.decode(doc)
 
-  local PANDOC_API_VERSION = ast['pandoc-api-version']
+  local PANDOC_API_VERSION = jsast['pandoc-api-version']
   checkAstSemver(PANDOC_API_VERSION)
 
   local renderer = Renderer(self.options)
-  local tree = renderer:render(ast.blocks)
+  local tree = renderer:render(jsast.blocks)
 
   -- The Markdown parsing returns a SILE AST.
   -- Wrap it in a document structure so we can just process it, and if at
   -- root level, load a default support class.
-  tree = { { tree,
-             command = "document", options = { class = "markdown" },
-             lno = 0, col = 0, -- For SILE 0.14.5 (issue https://github.com/sile-typesetter/sile/issues/1637)
-  } }
-  return tree
+  tree = createCommand("document", { class = "markdown" }, tree)
+  return { tree }
 end
 
 return inputter

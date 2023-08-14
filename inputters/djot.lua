@@ -6,7 +6,6 @@
 -- @copyright License: MIT (c) 2023 Omikhleia
 -- @module inputters.djot
 --
-local utils = require("packages.markdown.utils")
 local ast = require("silex.ast")
 local createCommand, createStructuredCommand
         = ast.createCommand, ast.createStructuredCommand
@@ -656,18 +655,15 @@ end
 
 function inputter:parse (doc)
   local djot = require("djot")
-  local ast = djot.parse(doc, false, function (warning) SU.warn(warning.message) end)
+  local djast = djot.parse(doc, false, function (warning) SU.warn(warning.message) end)
   local renderer = Renderer(self.options)
-  local tree = renderer:render(ast)
+  local tree = renderer:render(djast)
 
   -- The "writer" returns a SILE AST.
   -- Wrap it in a document structure so we can just process it, and if at
   -- root level, load a (default) support class.
-  tree = { { tree,
-             command = "document", options = { class = "markdown" },
-             lno = 0, col = 0, -- For SILE 0.14.5 (issue https://github.com/sile-typesetter/sile/issues/1637)
-  } }
-  return tree
+  tree = createCommand("document", { class = "markdown" }, tree)
+  return { tree }
 end
 
 return inputter
