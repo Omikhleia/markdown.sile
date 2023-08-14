@@ -6,11 +6,14 @@
 -- @module inputters.markdown
 --
 local utils = require("packages.markdown.utils")
+local ast = require("silex.ast")
+local createCommand, createStructuredCommand
+        = ast.createCommand, ast.createStructuredCommand
 
 local function simpleCommandWrapper (name)
   -- Simple wrapper argound a SILE command
   return function (content)
-    return utils.createCommand (name, {}, content)
+    return createCommand (name, {}, content)
   end
 end
 
@@ -92,27 +95,27 @@ local function SileAstWriter (writerOps, renderOps)
   writer.header = function (s, level, attr)
     local opts = attr or {} -- passthru (class and key-value pairs)
     opts.level = level + shift_headings
-    return utils.createCommand("markdown:internal:header", opts, s)
+    return createCommand("markdown:internal:header", opts, s)
   end
 
   writer.hrule = function (separator)
     -- The argument is the (right-)trimmed hrule separator
-    return utils.createCommand("markdown:internal:hrule", { separator = separator })
+    return createCommand("markdown:internal:hrule", { separator = separator })
   end
 
   writer.bulletlist = function (items)
     local contents = {}
     for i = 1, #items do contents[i] = writer.listitem(items[i]) end
-    return utils.createStructuredCommand("itemize", {}, contents)
+    return createStructuredCommand("itemize", {}, contents)
   end
 
   writer.tasklist = function (items)
     local contents = {}
     for i = 1, #items do
       local bullet = (items[i][1] == "[X]") and "☑" or "☐"
-      contents[i] = utils.createCommand("item", { bullet = bullet }, items[i][2])
+      contents[i] = createCommand("item", { bullet = bullet }, items[i][2])
      end
-    return utils.createStructuredCommand("itemize", {}, contents)
+    return createStructuredCommand("itemize", {}, contents)
   end
 
   writer.orderedlist = function (items, _, startnum, numstyle, numdelim) -- items, tight, ...
@@ -120,40 +123,40 @@ local function SileAstWriter (writerOps, renderOps)
     local after = numdelim and listDelim[numdelim]
     local contents = {}
     for i= 1, #items do contents[i] = writer.listitem(items[i]) end
-    return utils.createStructuredCommand("enumerate", { start = startnum or 1, display = display, after = after }, contents)
+    return createStructuredCommand("enumerate", { start = startnum or 1, display = display, after = after }, contents)
   end
 
   writer.link = function (label, uri, _, attr) -- label, uri, title, attr
     local opts = attr or {} -- passthru (class and key-value pairs)
     opts.src = uri
-    return utils.createCommand("markdown:internal:link", opts, { label })
+    return createCommand("markdown:internal:link", opts, { label })
   end
 
   writer.image = function (label, src, _, attr) -- label, src, title, attr
     local opts = attr or {} -- passthru (class and key-value pairs)
     opts.src = src
-    return utils.createCommand("markdown:internal:image" , opts, label)
+    return createCommand("markdown:internal:image" , opts, label)
   end
 
   writer.span = function (content, attr)
-    return utils.createCommand("markdown:internal:span" , attr, content)
+    return createCommand("markdown:internal:span" , attr, content)
   end
 
   writer.div = function (content, attr)
-    return utils.createCommand("markdown:internal:div" , attr, content)
+    return createCommand("markdown:internal:div" , attr, content)
   end
 
   writer.fenced_code = function (content, infostring, attr)
     local opts = attr or { class = infostring }
-    return utils.createCommand("markdown:internal:codeblock", opts, content)
+    return createCommand("markdown:internal:codeblock", opts, content)
   end
 
   writer.rawinline = function (content, format, _) -- content, format, attr
-    return utils.createCommand("markdown:internal:rawinline", { format = format }, content)
+    return createCommand("markdown:internal:rawinline", { format = format }, content)
   end
 
   writer.rawblock = function (content, format, _) -- content, format, attr
-    return utils.createCommand("markdown:internal:rawblock", { format = format }, content)
+    return createCommand("markdown:internal:rawblock", { format = format }, content)
   end
 
   writer.table = function (rows, caption) -- rows, caption
@@ -167,19 +170,19 @@ local function SileAstWriter (writerOps, renderOps)
 
     local headerCols = {}
     for j, column in ipairs(rows[1]) do
-      local col = utils.createCommand("cell", { valign="middle", halign = tableCellAlign(aligns[j]) }, column)
+      local col = createCommand("cell", { valign="middle", halign = tableCellAlign(aligns[j]) }, column)
       headerCols[#headerCols+1] = col
     end
-    ptableRows[#ptableRows+1] = utils.createStructuredCommand("row", { background = "#eee" }, headerCols)
+    ptableRows[#ptableRows+1] = createStructuredCommand("row", { background = "#eee" }, headerCols)
 
     for i = 3, #rows do
       local row = rows[i]
       local ptableCols = {}
       for j, column in ipairs(row) do
-        local col = utils.createCommand("cell", { valign = "middle", halign = tableCellAlign(aligns[j]) }, column)
+        local col = createCommand("cell", { valign = "middle", halign = tableCellAlign(aligns[j]) }, column)
         ptableCols[#ptableCols+1] = col
       end
-      ptableRows[#ptableRows+1] = utils.createStructuredCommand("row", {}, ptableCols)
+      ptableRows[#ptableRows+1] = createStructuredCommand("row", {}, ptableCols)
     end
 
     local cWidth = {}
@@ -192,7 +195,7 @@ local function SileAstWriter (writerOps, renderOps)
     -- things worse).
       cWidth[i] = string.format("%.5f%%lw", 99.9 / numberOfCols)
     end
-    local ptable = utils.createStructuredCommand("ptable", { header = true, cols = table.concat(cWidth, " ") }, ptableRows)
+    local ptable = createStructuredCommand("ptable", { header = true, cols = table.concat(cWidth, " ") }, ptableRows)
 
     if not caption then
       return ptable
@@ -200,18 +203,18 @@ local function SileAstWriter (writerOps, renderOps)
 
     local captioned = {
       ptable,
-      utils.createCommand("caption", {}, caption)
+      createCommand("caption", {}, caption)
     }
-    return utils.createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
+    return createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
   end
 
   writer.definitionlist = function (items, _) -- items, tight
     local buffer = {}
     for _, item in ipairs(items) do
-      buffer[#buffer + 1] = utils.createCommand("markdown:internal:term", {}, item.term)
-      buffer[#buffer + 1] = utils.createStructuredCommand("markdown:internal:definition", {}, item.definitions)
+      buffer[#buffer + 1] = createCommand("markdown:internal:term", {}, item.term)
+      buffer[#buffer + 1] = createStructuredCommand("markdown:internal:definition", {}, item.definitions)
     end
-    return utils.createStructuredCommand("markdown:internal:paragraph", {}, buffer)
+    return createStructuredCommand("markdown:internal:paragraph", {}, buffer)
   end
 
   writer.lineblock = function (lines)
@@ -220,25 +223,25 @@ local function SileAstWriter (writerOps, renderOps)
       local level, currated_inlines = extractLineBlockLevel(inlines)
       -- Let's be typographically sound and use quad kerns rather than spaces for indentation
       local contents =  (level > 0) and {
-       utils.createCommand("kern", { width = level.."em" }),
+       createCommand("kern", { width = level.."em" }),
         currated_inlines
       } or currated_inlines
       if #contents == 0 then
-        buffer[#buffer+1] = utils.createCommand("stanza", {})
+        buffer[#buffer+1] = createCommand("stanza", {})
       else
-        buffer[#buffer+1] = utils.createCommand("v", {}, contents)
+        buffer[#buffer+1] = createCommand("v", {}, contents)
       end
     end
-    return utils.createStructuredCommand("markdown:internal:lineblock", {}, buffer)
+    return createStructuredCommand("markdown:internal:lineblock", {}, buffer)
   end
 
   writer.inline_html = function (inlinehtml)
-    return utils.createCommand("markdown:internal:rawinline", { format = "html" }, inlinehtml)
+    return createCommand("markdown:internal:rawinline", { format = "html" }, inlinehtml)
   end
 
   writer.math = function (mathtype, text) -- first arg is "InlineMath" or "DisplayMath"
     local mode = mathtype == "DisplayMath" and "display" or "text"
-    return utils.createCommand("markdown:internal:math" , { mode = mode }, { text })
+    return createCommand("markdown:internal:math" , { mode = mode }, { text })
   end
 
   -- Final AST conversion logic.

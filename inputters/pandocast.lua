@@ -40,6 +40,9 @@ local function checkAstSemver(version)
 end
 
 local utils = require("packages.markdown.utils")
+local ast = require("silex.ast")
+local createCommand, createStructuredCommand
+        = ast.createCommand, ast.createStructuredCommand
 
 local Renderer = pl.class()
 
@@ -175,7 +178,7 @@ end
 -- Para [Inline]
 function Renderer:Para (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("markdown:internal:paragraph", {}, content)
+  return createCommand("markdown:internal:paragraph", {}, content)
 end
 
 -- LineBlock [[Inline]]
@@ -185,34 +188,34 @@ function Renderer:LineBlock (lines)
     local level, currated_inlines = extractLineBlockLevel(inlines)
     -- Let's be typographically sound and use quad kerns rather than spaces for indentation
     local contents = (level > 0) and {
-      utils.createCommand("kern", { width = level.."em" }),
+      createCommand("kern", { width = level.."em" }),
       self:render(currated_inlines)
     } or self:render(currated_inlines)
     if #contents == 0 then
-      buffer[#buffer+1] = utils.createCommand("stanza", {})
+      buffer[#buffer+1] = createCommand("stanza", {})
     else
-      buffer[#buffer+1] = utils.createCommand("v", {}, contents)
+      buffer[#buffer+1] = createCommand("v", {}, contents)
     end
   end
-  return utils.createStructuredCommand("markdown:internal:lineblock", {}, buffer)
+  return createStructuredCommand("markdown:internal:lineblock", {}, buffer)
 end
 
 -- CodeBlock Attr Text
 -- Code block (literal) with attributes
 function Renderer.CodeBlock (_, attributes, text)
   local options = pandocAttributes(attributes)
-  return utils.createCommand("markdown:internal:codeblock", options, text)
+  return createCommand("markdown:internal:codeblock", options, text)
 end
 
 -- RawBlock Format Text
 function Renderer.RawBlock (_, format, text)
-  return utils.createCommand("markdown:internal:rawblock", { format = format }, text)
+  return createCommand("markdown:internal:rawblock", { format = format }, text)
 end
 
 -- BlockQuote [Block]
 function Renderer:BlockQuote (blocks)
   local content = self:render(blocks)
-  return utils.createCommand("markdown:internal:blockquote", {}, content)
+  return createCommand("markdown:internal:blockquote", {}, content)
 end
 
 -- OrderedList ListAttributes [[Block]]
@@ -248,9 +251,9 @@ function Renderer:OrderedList (listattrs, itemblocks)
 
   local contents = {}
   for i = 1, #itemblocks do
-    contents[i] = utils.createCommand("item", {}, self:render(itemblocks[i]))
+    contents[i] = createCommand("item", {}, self:render(itemblocks[i]))
   end
-  return utils.createStructuredCommand("enumerate", options, contents)
+  return createStructuredCommand("enumerate", options, contents)
 end
 
 -- BulletList [[Block]]
@@ -260,9 +263,9 @@ function Renderer:BulletList (itemblocks)
   for i = 1, #itemblocks do
     local blocks = itemblocks[i]
     local options = { bullet = extractTaskListBullet(blocks) }
-    contents[i] = utils.createCommand("item", options, self:render(blocks))
+    contents[i] = createCommand("item", options, self:render(blocks))
   end
-  return utils.createStructuredCommand("itemize", {}, contents)
+  return createStructuredCommand("itemize", {}, contents)
 end
 
 -- DefinitionList [([Inline], [[Block]])]
@@ -271,10 +274,10 @@ function Renderer:DefinitionList (items)
   for _, item in ipairs(items) do
     local term = self:render(item[1])
     local definition = self:render(item[2])
-    buffer[#buffer + 1] = utils.createCommand("markdown:internal:term", {}, term)
-    buffer[#buffer + 1] = utils.createStructuredCommand("markdown:internal:definition", {}, definition)
+    buffer[#buffer + 1] = createCommand("markdown:internal:term", {}, term)
+    buffer[#buffer + 1] = createStructuredCommand("markdown:internal:definition", {}, definition)
   end
-  return utils.createStructuredCommand("markdown:internal:paragraph", {}, buffer)
+  return createStructuredCommand("markdown:internal:paragraph", {}, buffer)
 end
 
 -- Header Int Attr [Inline]
@@ -282,13 +285,13 @@ function Renderer:Header (level, attributes, inlines)
   local options = pandocAttributes(attributes)
   local content = self:render(inlines)
   options.level = level + self.shift_headings
-  return utils.createCommand("markdown:internal:header", options, content)
+  return createCommand("markdown:internal:header", options, content)
 end
 
 -- HorizontalRule
 -- Horizontal rule
 function Renderer.HorizontalRule (_)
-  return utils.createCommand("fullrule") -- No way to customize it.
+  return createCommand("fullrule") -- No way to customize it.
 end
 
 -- Div Attr [Block]
@@ -296,7 +299,7 @@ end
 function Renderer:Div (attributes, blocks)
   local options = pandocAttributes(attributes)
   local content = self:render(blocks)
-  return utils.createCommand("markdown:internal:div" , options, content)
+  return createCommand("markdown:internal:div" , options, content)
 end
 
 local pandocAlignmentTags = {
@@ -316,7 +319,7 @@ function Renderer:pandocCell (cell, colalign)
   end
   local cellalign = pandocAlignmentTags[align.t]
   local halign = cellalign ~= "default" and cellalign or colalign
-  return utils.createCommand("cell", { valign="middle", halign = halign, span = colspan }, self:render(blocks))
+  return createCommand("cell", { valign="middle", halign = halign, span = colspan }, self:render(blocks))
 end
 
 -- Row Attr [Cell]
@@ -327,7 +330,7 @@ function Renderer:pandocRow (row, colaligns, options)
     local col = self:pandocCell(cell, colaligns[i])
     cols[#cols+1] = col
   end
-  return utils.createStructuredCommand("row", options or {}, cols)
+  return createStructuredCommand("row", options or {}, cols)
 end
 
 -- Table Attr Caption [ColSpec] TableHead [TableBody] TableFoot
@@ -375,7 +378,7 @@ function Renderer:Table (_, caption, colspecs, thead, tbodies, tfoot)
     -- things worse).
     cWidth[i] = string.format("%.5f%%lw", 99.9 / numberOfCols)
   end
-  local ptable = utils.createStructuredCommand("ptable", {
+  local ptable = createStructuredCommand("ptable", {
     cols = table.concat(cWidth, " "),
     header = hasHeader,
   }, ptableRows)
@@ -387,9 +390,9 @@ function Renderer:Table (_, caption, colspecs, thead, tbodies, tfoot)
   end
   local captioned = {
     ptable,
-    utils.createCommand("caption", {}, self:render(caption[#caption]))
+    createCommand("caption", {}, self:render(caption[#caption]))
   }
-  return utils.createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
+  return createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
 end
 
 -- PANDOC AST INLINES
@@ -402,42 +405,42 @@ end
 -- Emph [Inline]
 function Renderer:Emph (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("em", {}, content)
+  return createCommand("em", {}, content)
 end
 -- Underline [Inline]
 function Renderer:Underline (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("underline", {}, content)
+  return createCommand("underline", {}, content)
 end
 
 -- Strong [Inline]
 function Renderer:Strong (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("strong", {}, content)
+  return createCommand("strong", {}, content)
 end
 
 -- Strikeout [Inline]
 function Renderer:Strikeout (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("strikethrough", {}, content)
+  return createCommand("strikethrough", {}, content)
 end
 
 -- Superscript [Inline]
 function Renderer:Superscript (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("textsuperscript", {}, content)
+  return createCommand("textsuperscript", {}, content)
 end
 
 -- Subscript [Inline]
 function Renderer:Subscript (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("textsubscript", {}, content)
+  return createCommand("textsubscript", {}, content)
 end
 
 -- SmallCaps [Inline]
 function Renderer:SmallCaps (inlines)
   local content = self:render(inlines)
-  return utils.createCommand("font", { features = "+smcp" }, content)
+  return createCommand("font", { features = "+smcp" }, content)
 end
 
 -- Quoted QuoteType [Inline]
@@ -445,9 +448,9 @@ end
 function Renderer:Quoted (quotetype, inlines)
   local content = self:render(inlines)
   if quotetype.t == "DoubleQuote" then
-    return utils.createCommand("doublequoted", {}, content)
+    return createCommand("doublequoted", {}, content)
   end
-  return utils.createCommand("singlequoted", {}, content)
+  return createCommand("singlequoted", {}, content)
 end
 
 -- Cite [Citation] [Inline]
@@ -462,7 +465,7 @@ end
 -- Code Attr Text
 function Renderer.Code (_, attributes, text)
   local options = pandocAttributes(attributes)
-  return utils.createCommand("code", options, text)
+  return createCommand("code", options, text)
 end
 
 -- Space
@@ -478,19 +481,19 @@ end
 -- LineBreak
 -- Hard line break
 function Renderer.LineBreak (_)
-  return utils.createCommand("cr")
+  return createCommand("cr")
 end
 
 -- Math MathType Text
 -- TeX math (literal)
 function Renderer.Math (_, mathtype, text)
   local mode = (mathtype.t and mathtype.t == "DisplayMath") and "display" or "text"
-  return utils.createCommand("markdown:internal:math" , { mode = mode }, { text })
+  return createCommand("markdown:internal:math" , { mode = mode }, { text })
 end
 
 -- RawInline Format Text
 function Renderer.RawInline (_, format, text)
-  return utils.createCommand("markdown:internal:rawinline", { format = format }, text)
+  return createCommand("markdown:internal:rawinline", { format = format }, text)
 end
 
 -- Link Attr [Inline] Target
@@ -500,7 +503,7 @@ function Renderer:Link (attributes, inlines, target) -- attributes, inlines, tar
   local uri, _ = table.unpack(target) -- uri, title (unused too?)
   options.src = uri
   local content = self:render(inlines)
-  return utils.createCommand("markdown:internal:link", options, content)
+  return createCommand("markdown:internal:link", options, content)
 end
 
 -- Image Attr [Inline] Target
@@ -510,20 +513,20 @@ function Renderer:Image (attributes, inlines, target) -- attributes, inlines, ta
   -- Target = (Url : Text, Title : Text)
   local uri, _ = table.unpack(target)
   options.src = uri
-  return utils.createCommand("markdown:internal:image", options, content)
+  return createCommand("markdown:internal:image", options, content)
 end
 
 -- Note [Block]
 function Renderer:Note (blocks)
   local content = self:render(blocks)
-  return utils.createCommand("markdown:internal:footnote", {}, content)
+  return createCommand("markdown:internal:footnote", {}, content)
 end
 
 -- Span Attr [Inline]
 function Renderer:Span (attributes, inlines)
   local options = pandocAttributes(attributes)
   local content = self:render(inlines)
-  return utils.createCommand("markdown:internal:span" , options, content)
+  return createCommand("markdown:internal:span" , options, content)
 end
 
 local base = require("inputters.base")

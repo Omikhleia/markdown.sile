@@ -9,6 +9,12 @@
 --
 require("silex.lang")
 local utils = require("packages.markdown.utils")
+local ast = require("silex.ast")
+local createCommand, createStructuredCommand,
+      extractFromTree, subContent
+        = ast.createCommand, ast.createStructuredCommand,
+          ast.extractFromTree, ast.subContent
+
 local base = require("packages.base")
 
 local package = pl.class(base)
@@ -24,7 +30,7 @@ local CommandCascade = pl.class({
   end,
   call = function (self, command, options)
     local out = self.outer and { self.outer } or self.inner
-    self.outer = utils.createStructuredCommand(command, options, out)
+    self.outer = createStructuredCommand(command, options, out)
   end,
   process = function (self, content)
     -- As a subTreeContent but into the inner node
@@ -62,11 +68,11 @@ local function hasClass (options, classname)
   return false
 end
 
-local function hasLinkContent(ast)
-  if type(ast) == "table" then
-    return #ast > 1 or hasLinkContent(ast[1])
+local function hasLinkContent(tree)
+  if type(tree) == "table" then
+    return #tree > 1 or hasLinkContent(tree[1])
   end
-  if type(ast) == "string" and ast ~= "" then
+  if type(tree) == "string" and tree ~= "" then
     return true
   end
   return false
@@ -108,7 +114,7 @@ local function decimalFilter (input, _)
     if(token.string) then
       t[#t+1] = token.string
     else
-      t[#t+1] = utils.createCommand("markdown:internal:decimal", {}, token.separator)
+      t[#t+1] = createCommand("markdown:internal:decimal", {}, token.separator)
     end
   end
   return t
@@ -126,7 +132,7 @@ local function wrapLinkContent (options, content)
   if next(passedOptions) ~= nil then
     -- Wrap a span into the AST directly, it plays better with styles when we
     -- do not invoke functions.
-    content = { utils.createCommand("markdown:internal:span", passedOptions, utils.subTreeContent(content)) }
+    content = { createCommand("markdown:internal:span", passedOptions, subContent(content)) }
   end
   return content
 end
@@ -207,8 +213,8 @@ function package:registerCommands ()
         -- We also propagate image options to the englobing environment
         SILE.call("markdown:internal:captioned-figure", image.options, {
           image,
-          utils.createCommand("caption", {}, {
-            utils.createCommand("label", { marker = id }),
+          createCommand("caption", {}, {
+            createCommand("label", { marker = id }),
             caption,
           }),
         })
@@ -216,7 +222,7 @@ function package:registerCommands ()
         -- We also propagate image options to the englobing environment
         SILE.call("markdown:internal:captioned-figure", image.options, {
           image,
-          utils.createCommand("caption", {}, caption),
+          createCommand("caption", {}, caption),
         })
       end
     else
@@ -481,8 +487,8 @@ Please consider using a resilient-compatible class!]])
     end
     if options.id then
       content = {
-        utils.createCommand("label", { marker = options.id }),
-        utils.subTreeContent(content)
+        createCommand("label", { marker = options.id }),
+        subContent(content)
       }
     end
     SILE.call("footnote", options, content)
@@ -648,7 +654,7 @@ Please consider using a resilient-compatible class!]])
     -- NOTE: The following doesn't work: SILE.call("math", {}, content)
     -- Let's go for a lower-level AST construct instead.
     SILE.process({
-      utils.createCommand("math", { mode = mode }, SU.contentToString(content))
+      createCommand("math", { mode = mode }, SU.contentToString(content))
     })
   end)
 
@@ -671,7 +677,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned blockquote environment")
     end
-    local title = utils.extractFromTree(content, "caption")
+    local title = extractFromTree(content, "caption")
 
     if SILE.Commands["epigraph"] then -- asssuming the implementation from resilient.epigraph.
       if title then
@@ -739,7 +745,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned table environment")
     end
-    local caption = utils.extractFromTree(content, "caption")
+    local caption = extractFromTree(content, "caption")
 
     SILE.process(content)
     if caption then
@@ -757,7 +763,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned figure environment")
     end
-    local caption = utils.extractFromTree(content, "caption")
+    local caption = extractFromTree(content, "caption")
 
     SILE.call("smallskip")
     SILE.call("center", {}, function ()
