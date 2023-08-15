@@ -40,6 +40,15 @@ function Renderer:render(doc)
   return self[doc.t](self, doc)
 end
 
+function Renderer.render_pos(_, node)
+  local p = node.pos and node.pos[1]
+  if not p then
+    return nil
+  end
+  local lno, col, pos = p:match("^(%d+):(%d+):(%d+)$")
+  return { lno = tonumber(lno), col = tonumber(col), pos = tonumber(pos) }
+end
+
 function Renderer:render_children(node)
   -- trap stack overflow
   local out = {}
@@ -76,8 +85,8 @@ function Renderer:doc(node)
   return self:render_children(node)
 end
 
-function Renderer.raw_block (_, node)
-  return createCommand("markdown:internal:rawblock", { format = node.format }, node.s)
+function Renderer:raw_block (node)
+  return createCommand("markdown:internal:rawblock", { format = node.format }, node.s, self:render_pos(node))
 end
 
 function Renderer:para (node)
@@ -87,28 +96,30 @@ function Renderer:para (node)
   end
 
   local content = self:render_children(node)
+  local pos = self:render_pos(node)
   -- interpret as a div when containing attributes
   if node.attr then
-    return createCommand("markdown:internal:div", node.attr, content)
+    return createCommand("markdown:internal:div", node.attr, content, pos)
   end
-  return createCommand("markdown:internal:paragraph", {}, content)
+  return createCommand("markdown:internal:paragraph", {}, content, pos)
 end
 
 function Renderer:blockquote (node)
   local content = self:render_children(node)
+  local pos = self:render_pos(node)
   local out
   if node.caption then
     local caption = self:render_children(node.caption)
     out = createStructuredCommand("markdown:internal:captioned-blockquote", node.attr or {}, {
       content,
       createCommand("caption", {}, caption)
-    })
+    }, pos)
   else
-    out = createCommand("markdown:internal:blockquote", {}, content)
+    out = createCommand("markdown:internal:blockquote", {}, content, pos)
   end
   if node.attr then
     -- Add a div when containing attributes
-    return createCommand("markdown:internal:div", node.attr, out)
+    return createCommand("markdown:internal:div", node.attr, out, pos)
   end
   return out
 end
@@ -116,7 +127,7 @@ end
 function Renderer:div (node)
   local options = node.attr or {}
   local content = self:render_children(node)
-  return createCommand("markdown:internal:div" , options, content)
+  return createCommand("markdown:internal:div", options, content, self:render_pos(node))
 end
 
 function Renderer:section (node)
@@ -139,18 +150,18 @@ function Renderer:heading (node)
   -- But in nested blocks (e.g. in divs), the id is set on the header.
   options.id = options.id or self.sectionid
   options.level = node.level + self.shift_headings
-  return createCommand("markdown:internal:header", options, content)
+  return createCommand("markdown:internal:header", options, content, self:render_pos(node))
 end
 
-function Renderer.thematic_break (_, node)
+function Renderer:thematic_break (node)
   local options = node.attr or {}
-  return createCommand("markdown:internal:thematicbreak", options)
+  return createCommand("markdown:internal:thematicbreak", options, nil, self:render_pos(node))
 end
 
-function Renderer.code_block (_, node)
+function Renderer:code_block (node)
   local options = node.attr or {}
   options.class = node.lang and ((options.class and (options.class.." ") or "") .. node.lang) or options.class
-  return createCommand("markdown:internal:codeblock", options, node.s)
+  return createCommand("markdown:internal:codeblock", options, node.s, self:render_pos(node))
 end
 
 function Renderer:table (node)
@@ -158,6 +169,7 @@ function Renderer:table (node)
   if not node.c then
     SU.error("Table without content (should not occur)")
   end
+  local pos = self:render_pos(node)
   -- extract caption, check rows
   local rows = {}
   local caption
@@ -190,30 +202,30 @@ function Renderer:table (node)
   local ptable = createStructuredCommand("ptable", {
      cols = table.concat(cWidth, " "),
      header = SU.boolean(row.head, false),
-  }, self:render_children(node))
+  }, self:render_children(node), pos)
 
   if not caption then
     return ptable
   end
   local captioned = {
     ptable,
-    createCommand("caption", {}, caption)
+    createCommand("caption", {}, caption, pos)
   }
-  return createStructuredCommand("markdown:internal:captioned-table", options, captioned)
+  return createStructuredCommand("markdown:internal:captioned-table", options, captioned, pos)
 end
 
 function Renderer:row (node)
   local options = {}
   local content = self:render_children(node)
   options.background = node.head and "#eee"
-  return createStructuredCommand("row", options, content)
+  return createStructuredCommand("row", options, content, self:render_pos(node))
 end
 
 function Renderer:cell (node)
   local options = {}
   local content = self:render_children(node)
   options.halign = node.align
-  return createStructuredCommand("cell", options, content)
+  return createStructuredCommand("cell", options, content, self:render_pos(node))
 end
 
 function Renderer.caption (_, _)
@@ -230,30 +242,31 @@ local listStyle = {
 }
 
 function Renderer:list (node)
+  local pos = self:render_pos(node)
   local sty = node.style
   if sty == "*" or sty == "+" or sty == "-" then
     local content = self:render_children(node)
     for i = 1, #content do
       if content[i].command ~= "item" then
-        content[i] = createCommand("item", {}, content[i])
+        content[i] = createCommand("item", {}, content[i], pos)
       end
     end
-    return createStructuredCommand("itemize", {}, content)
+    return createStructuredCommand("itemize", {}, content, pos)
   end
 
   if sty == "X" then
     local content = self:render_children(node)
     for i = 1, #content do
       if content[i].command ~= "item" then
-        content[i] = createCommand("item", {}, content[i])
+        content[i] = createCommand("item", {}, content[i], pos)
       end
     end
-    return createStructuredCommand("itemize", {}, content)
+    return createStructuredCommand("itemize", {}, content, pos)
   end
 
   if sty == ":" then
     local content = self:render_children(node)
-    return createStructuredCommand("markdown:internal:paragraph", {}, content)
+    return createStructuredCommand("markdown:internal:paragraph", {}, content, pos)
   end
 
   -- Enumerate
@@ -274,10 +287,10 @@ function Renderer:list (node)
   local content = self:render_children(node)
   for i = 1, #content do
     if content[i].command ~= "item" then
-      content[i] = createCommand("item", {}, content[i])
+      content[i] = createCommand("item", {}, content[i], pos)
     end
   end
-  return createStructuredCommand("enumerate", options, content)
+  return createStructuredCommand("enumerate", options, content, pos)
 end
 
 function Renderer:list_item (node)
@@ -287,17 +300,17 @@ function Renderer:list_item (node)
   options.bullet = bullet
 
   local content = self:render_children(node)
-  return createCommand("item", options, content)
+  return createCommand("item", options, content, self:render_pos(node))
 end
 
 function Renderer:term (node)
   local content = self:render_children(node)
-  return createCommand("markdown:internal:term", {}, content)
+  return createCommand("markdown:internal:term", {}, content, self:render_pos(node))
 end
 
 function Renderer:definition (node)
   local content = self:render_children(node)
-  return createCommand("markdown:internal:definition", {}, content)
+  return createCommand("markdown:internal:definition", {}, content, self:render_pos(node))
 end
 
 function Renderer:definition_list_item (node)
@@ -318,17 +331,17 @@ function Renderer:footnote_reference (node)
   local content = self:render_children(node_footnote)
   local options = node_footnote.attr or {}
   options.id = options.id or label -- use note label as id if not specified
-  return createCommand("markdown:internal:footnote", options, content)
+  return createCommand("markdown:internal:footnote", options, content, self:render_pos(node))
 end
 
-function Renderer.raw_inline (_, node)
-  return createCommand("markdown:internal:rawinline", { format = node.format }, node.s)
+function Renderer:raw_inline (node)
+  return createCommand("markdown:internal:rawinline", { format = node.format }, node.s, self:render_pos(node))
 end
 
-function Renderer.str (_, node)
+function Renderer:str (node)
   if node.attr then
     -- add a span, if needed, to contain attribute on a bare string:
-    return createCommand("markdown:internal:span" , node.attr, node.s)
+    return createCommand("markdown:internal:span", node.attr, node.s, self:render_pos(node))
   end
   return node.s
 end
@@ -341,15 +354,15 @@ function Renderer.hardbreak (_)
   return createCommand("cr")
 end
 
-function Renderer.nbsp (_, node)
+function Renderer:nbsp (node)
   local options = node.attr or {}
-  return createCommand("markdown:internal:nbsp", options)
+  return createCommand("markdown:internal:nbsp", options, nil, self:render_pos(node))
 end
 
-function Renderer.verbatim (_, node)
+function Renderer:verbatim (node)
   -- TODO options/attrs... but we need more work on pandocast/markdown and a replacement for \code
   local options = {}
-  return createCommand("code", options, node.s)
+  return createCommand("code", options, node.s, self:render_pos(node))
 end
 
 function Renderer:link (node)
@@ -368,7 +381,7 @@ function Renderer:link (node)
   end
   -- link's attributes override reference's:
   djotast.copy_attributes(options, node.attr)
-  return createCommand("markdown:internal:link", options, content)
+  return createCommand("markdown:internal:link", options, content, self:render_pos(node))
 end
 
 Renderer.url = Renderer.link
@@ -391,20 +404,20 @@ function Renderer:image (node)
   end
   -- image's attributes override reference's:
   djotast.copy_attributes(options, node.attr)
-  return createCommand("markdown:internal:image", options, content)
+  return createCommand("markdown:internal:image", options, content, self:render_pos(node))
 end
 
 function Renderer:span (node)
   local options = node.attr or {}
   local content = self:render_children(node)
-  return createCommand("markdown:internal:span" , options, content)
+  return createCommand("markdown:internal:span", options, content, self:render_pos(node))
 end
 
 function Renderer:mark (node)
   local options = node.attr or {}
   local content = self:render_children(node)
   djotast.insert_attribute(options, "class", "mark")
-  return createCommand("markdown:internal:span", options, content)
+  return createCommand("markdown:internal:span", options, content, self:render_pos(node))
 end
 
 function Renderer:insert (node)
@@ -412,7 +425,7 @@ function Renderer:insert (node)
   local out = { "⟨", content, "⟩" }
   if node.attr then
     -- Add a div when containing attributes
-    return createCommand("markdown:internal:span", node.attr, out)
+    return createCommand("markdown:internal:span", node.attr, out, self:render_pos(node))
   end
   return out
 end
@@ -422,7 +435,7 @@ function Renderer:delete (node)
   local out = { "{", content, "}" }
   if node.attr then
     -- Add a div when containing attributes
-    return createCommand("markdown:internal:span", node.attr, out)
+    return createCommand("markdown:internal:span", node.attr, out, self:render_pos(node))
   end
   return out
 end
@@ -442,70 +455,76 @@ end
 
 function Renderer:subscript (node)
   local content = self:render_children(node)
+  local pos = self:render_pos(node)
   local fake, hasOtherAttrs = extractAttrValue(node.attr, "fake")
-  local out = createCommand("textsubscript", { fake = fake }, content)
+  local out = createCommand("textsubscript", { fake = fake }, content, pos)
   if hasOtherAttrs then
     -- Add a span when containing other attributes
-    return createCommand("markdown:internal:span", node.attr, out)
+    return createCommand("markdown:internal:span", node.attr, out, pos)
   end
   return out
 end
 
 function Renderer:superscript (node)
   local content = self:render_children(node)
+  local pos = self:render_pos(node)
   local fake, hasOtherAttrs = extractAttrValue(node.attr, "fake")
-  local out = createCommand("textsuperscript", { fake = fake }, content)
+  local out = createCommand("textsuperscript", { fake = fake }, content, pos)
   if hasOtherAttrs then
     -- Add a span when containing other attributes
-    return createCommand("markdown:internal:span", node.attr, out)
+    return createCommand("markdown:internal:span", node.attr, out, pos)
   end
   return out
 end
 
 function Renderer:emph (node)
   local content = self:render_children(node)
+  local pos = self:render_pos(node)
   if node.attr then
     -- Add a span for attributes
     -- Applied first before the font change, so that font-specific attributes
     -- are applied in the right context (e.g. .underline)
-    content = createCommand("markdown:internal:span" , node.attr, content)
+    content = createCommand("markdown:internal:span", node.attr, content, pos)
   end
-  return createCommand("em", {}, content)
+  return createCommand("em", {}, content, pos)
 end
 
 function Renderer:strong (node)
   local content = self:render_children(node)
+  local pos = self:render_pos(node)
   if node.attr then
     -- Add a span for attributes
     -- Applied first before the font change, so that font-specific attributes
     -- are applied in the right context (e.g. .underline)
-    content = createCommand("markdown:internal:span" , node.attr, content)
+    content = createCommand("markdown:internal:span", node.attr, content, pos)
   end
-  return createCommand("strong", {}, content)
+  return createCommand("strong", {}, content, pos)
 end
 
 function Renderer:double_quoted (node)
   local content = self:render_children(node)
-  content = createCommand("doublequoted", {}, content)
+  local pos = self:render_pos(node)
+  content = createCommand("doublequoted", {}, content, pos)
   if node.attr then
     -- Add a span for attributes
     -- Applied after, so as to encompass the quotes.
     -- That's probably the expectation, so e.g. "text"{lang=fr} will use French
     -- primary quotations marks.
-    content = createCommand("markdown:internal:span" , node.attr, content)
+    content = createCommand("markdown:internal:span", node.attr, content, pos)
   end
   return content
 end
 
 function Renderer:single_quoted (node)
   local content = self:render_children(node)
-  content = createCommand("singlequoted", {}, content)
+  local pos = self:render_pos(node)
+  content = createCommand("singlequoted", {}, content, pos)
   if node.attr then
     -- Add a span for attributes
     -- Applied after, so as to encompass the quotes.
     -- That's probably the expectation, so e.g. 'text'{lang=fr} will use French
     -- secondary quotations marks.
-    content = createCommand("markdown:internal:span" , node.attr, content)
+    content = createCommand("markdown:internal:span", node.attr, content, pos)
   end
   return content
 end
@@ -583,7 +602,7 @@ function Renderer:symbol (node)
     if node.attr then
       if not node._standalone_ then
         -- Add a span for attributes on the inline variant.
-        content = createCommand("markdown:internal:span" , node.attr, content)
+        content = createCommand("markdown:internal:span", node.attr, content, self:render_pos(node))
       else
         -- Those should rather come from the paragraph
         SU.warn("Attributes ignored on block-like symbol '" .. node.alias .. "'")
@@ -596,7 +615,7 @@ function Renderer:symbol (node)
       local text = self.metadata[node.alias]
       if node.attr then
         -- Add a span for attributes
-        return createCommand("markdown:internal:span" , node.attr, text)
+        return createCommand("markdown:internal:span", node.attr, text, self:render_pos(node))
       end
       return text
     end
@@ -608,14 +627,15 @@ function Renderer:symbol (node)
       end
       return symbol.render(node)
     end
+    local pos = self:render_pos(node)
     if node.alias:match("U%+[0-9A-F]+") then
       local content = {
         createCommand("use", { module = "packages.unichar" }),
-        createCommand("unichar", {}, node.alias)
+        createCommand("unichar", {}, node.alias, pos)
       }
       if node.attr then
         -- Add a span for attributes
-        return createCommand("markdown:internal:span" , node.attr, content)
+        return createCommand("markdown:internal:span", node.attr, content, pos)
       end
       return content
     end
@@ -623,18 +643,18 @@ function Renderer:symbol (node)
     local text = ":" .. node.alias .. ":"
     if node.attr then
       -- Add a span for attributes
-      return createCommand("markdown:internal:span" , node.attr, text)
+      return createCommand("markdown:internal:span", node.attr, text, pos)
     end
     return text
   end
 end
 
-function Renderer.math (_, node)
+function Renderer:math (node)
   local mode = "text"
   if string.find(node.attr.class, "display") then
     mode = "display"
   end
-  return createCommand("markdown:internal:math" , { mode = mode }, { node.s })
+  return createCommand("markdown:internal:math", { mode = mode }, { node.s }, self:render_pos(node))
 end
 
 -- SILE INPUTTER LOGIC
@@ -655,7 +675,7 @@ end
 
 function inputter:parse (doc)
   local djot = require("djot")
-  local djast = djot.parse(doc, false, function (warning) SU.warn(warning.message) end)
+  local djast = djot.parse(doc, true, function (warning) SU.warn(warning.message) end)
   local renderer = Renderer(self.options)
   local tree = renderer:render(djast)
 
