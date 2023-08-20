@@ -242,18 +242,18 @@ function package:registerCommands ()
     elseif hasClass(options, "bigrule") then
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
-          SILE.call("hrule", { width = "33%lw" })
+          SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
     elseif hasClass(options, "fullrule") and self:hasCouyards() then
-      SILE.call("fullrule")
+      SILE.call("fullrule", { thickness = "0.4pt" })
     elseif hasClass(options, "pendant") and self:hasCouyards() then
       SILE.call("smallskip")
       SILE.call("couyard", { type = 6, width = "default" })
     elseif not hasClass(options, "none") then
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
-          SILE.call("hrule", { width = "20%lw" })
+          SILE.call("hrule", { width = "20%lw", height = "0.4pt" })
         end)
       end)
     end
@@ -271,13 +271,13 @@ function package:registerCommands ()
     elseif options.separator == "---" then
         SILE.call("center", {}, function ()
           SILE.call("raise", { height = "0.5ex" }, function ()
-            SILE.call("hrule", { width = "20%lw" })
+            SILE.call("hrule", { width = "20%lw", height = "0.4pt" })
         end)
       end)
     elseif options.separator == "----" then
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
-          SILE.call("hrule", { width = "33%lw" })
+          SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
     elseif options.separator == "- - - -" and self:hasCouyards() then
@@ -286,7 +286,7 @@ function package:registerCommands ()
     elseif options.separator == "--------------" then -- Page break
       SILE.call("eject")
     else
-      SILE.call("fullrule")
+      SILE.call("fullrule", { thickness = "0.4pt" })
     end
   end, "Horizontal rule in Markdown (internal)")
 
