@@ -6,6 +6,7 @@
 -- @copyright License: MIT (c) 2023 Omikhleia
 -- @module inputters.djot
 --
+local utils = require("packages.markdown.utils")
 local ast = require("silex.ast")
 local createCommand, createStructuredCommand
         = ast.createCommand, ast.createStructuredCommand
@@ -19,13 +20,15 @@ local Renderer = pl.class()
 function Renderer:_init(options)
   self.references = {}
   self.footnotes = {}
-  self.metadata = {}
   self.shift_headings = SU.cast("integer", options.shift_headings or 0)
+  self.metadata = {}
+  self.parentmetadata = {}
   for key, val in pairs(options) do
     local meta = key:match("^meta:(.*)")
     if meta then
       if meta:match("[%w_+-]+") then
         self.metadata[meta] = val
+        self.parentmetadata[key] = val
       else
         SU.warn("Invalid metadata key is skipped: "..meta)
       end
@@ -161,6 +164,20 @@ end
 function Renderer:code_block (node)
   local options = node.attr or {}
   options.class = node.lang and ((options.class and (options.class.." ") or "") .. node.lang) or options.class
+  if utils.hasClass(options, "djot") or utils.hasClass(options, "markdown") then
+    --options = pl.tablex.union(self.parentmetadata, options)
+    options.shift_headings = self.shift_headings
+    self:resolveAllUserDefinedSymbols()
+    -- Parent metadata just have a label xxx
+    -- User-defined memoized metadata have the symbol (:xxx:) as key
+    -- So we sort the keys to get the user-defined metadata first as overrides.
+    for key, val in SU.sortedpairs(self.metadata) do
+      key = key.gsub(key, ":", "")
+      if not options["meta:" .. key] then
+        options["meta:" .. key] = val
+      end
+    end
+  end
   return createCommand("markdown:internal:codeblock", options, node.s, self:render_pos(node))
 end
 
@@ -576,6 +593,31 @@ local predefinedSymbols = {
   },
 }
 
+function Renderer:getUserDefinedSymbol (label, node_fake_metadata)
+  local content
+  if self.metadata[label] then -- use memoized
+    content = self.metadata[label]
+  else
+    if #node_fake_metadata.c == 1 and node_fake_metadata.c[1].t == "para" then
+      -- Skip a single para node.
+      content = self:render_children(node_fake_metadata.c[1])
+    else
+      content = self:render_children(node_fake_metadata)
+    end
+    self.metadata[label] = content -- memoize
+  end
+  return content
+end
+
+function Renderer:resolveAllUserDefinedSymbols ()
+  -- Ensure all fake footnotes are rendered and memoized, even unused ones.
+  for label, node_fake_metadata in pairs(self.footnotes) do
+    if label:match("^:([%w_+-]+):$") then
+      self:getUserDefinedSymbol(label, node_fake_metadata)
+    end
+  end
+end
+
 function Renderer:symbol (node)
   -- Let's first look at fake footnotes to resolve the symbol.
   -- We just added unforeseen templating and recursive variable substitution to Djot.
@@ -586,19 +628,7 @@ function Renderer:symbol (node)
     if #node_fake_metadata.c > 1 and not node._standalone_ then
       SU.error("Cannot use multi-paragraph metatada "..label.." as inline content")
     end
-
-    local content
-    if self.metadata[label] then -- use memoized
-      content = self.metadata[label]
-    else
-      if #node_fake_metadata.c == 1 and node_fake_metadata.c[1].t == "para" then
-        -- Skip a single para node.
-        content = self:render_children(node_fake_metadata.c[1])
-      else
-        content = self:render_children(node_fake_metadata)
-      end
-      self.metadata[label] = content -- memoize
-    end
+    local content = self:getUserDefinedSymbol(label, node_fake_metadata)
     if node.attr then
       if not node._standalone_ then
         -- Add a span for attributes on the inline variant.

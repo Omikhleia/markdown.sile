@@ -72,6 +72,19 @@ local function SileAstWriter (writerOps, renderOps)
   local generic = require("lunamark.writer.generic")
   local writer = generic.new(writerOps or {})
   local shift_headings = SU.cast("integer", renderOps.shift_headings or 0)
+  local parentmetadata = {}
+  for key, val in pairs(renderOps) do
+    local meta = key:match("^meta:(.*)")
+    if meta then
+      if meta:match("[%w_+-]+") then
+        -- We don't use them in this renderer, but we can pass them through
+        -- to embedded djot documents.
+        parentmetadata[key] = val
+      else
+        SU.warn("Invalid metadata key is skipped: "..meta)
+      end
+    end
+  end
 
   -- Simple one-to-one mappings between lunamark AST and SILE
 
@@ -148,6 +161,10 @@ local function SileAstWriter (writerOps, renderOps)
 
   writer.fenced_code = function (content, infostring, attr)
     local opts = attr or { class = infostring }
+    if utils.hasClass(opts, "djot") or utils.hasClass(opts, "markdown") then
+      opts = pl.tablex.union(parentmetadata, opts)
+      opts.shift_headings = shift_headings
+    end
     return createCommand("markdown:internal:codeblock", opts, content)
   end
 

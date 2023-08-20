@@ -9,6 +9,7 @@
 --
 require("silex.lang")
 local utils = require("packages.markdown.utils")
+local hasClass = utils.hasClass
 local ast = require("silex.ast")
 local createCommand, createStructuredCommand,
       extractFromTree, subContent
@@ -58,14 +59,6 @@ local function getSectioningCommand (level)
   -- Also default to something anyway, but different message
   SU.warn("No support found for heading level "..level.." (fallback to a default generic header)")
   return "markdown:fallback:header"
-end
-
-local function hasClass (options, classname)
-  -- N.B. we want a true boolean here
-  if options.class and string.match(' ' .. options.class .. ' ',' '..classname..' ') then
-    return true
-  end
-  return false
 end
 
 local function hasLinkContent(tree)

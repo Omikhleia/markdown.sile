@@ -48,6 +48,19 @@ local Renderer = pl.class()
 
 function Renderer:_init(options)
   self.shift_headings = SU.cast("integer", options.shift_headings or 0)
+  self.parentmetadata = {}
+  for key, val in pairs(options) do
+    local meta = key:match("^meta:(.*)")
+    if meta then
+      if meta:match("[%w_+-]+") then
+        -- We don't use them in this renderer, but we can pass them through
+        -- to embedded djot documents.
+        self.parentmetadata[key] = val
+      else
+        SU.warn("Invalid metadata key is skipped: "..meta)
+      end
+    end
+  end
 end
 
 -- Allows unpacking tables on some Pandoc AST nodes so as to map them to methods
@@ -202,8 +215,12 @@ end
 
 -- CodeBlock Attr Text
 -- Code block (literal) with attributes
-function Renderer.CodeBlock (_, attributes, text)
+function Renderer:CodeBlock (attributes, text)
   local options = pandocAttributes(attributes)
+  if utils.hasClass(options, "djot") or utils.hasClass(options, "markdown") then
+    options = pl.tablex.union(self.parentmetadata, options)
+    options.shift_headings = self.shift_headings
+  end
   return createCommand("markdown:internal:codeblock", options, text)
 end
 
