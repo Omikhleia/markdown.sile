@@ -22,13 +22,11 @@ function Renderer:_init(options)
   self.footnotes = {}
   self.shift_headings = SU.cast("integer", options.shift_headings or 0)
   self.metadata = {}
-  self.parentmetadata = {}
   for key, val in pairs(options) do
     local meta = key:match("^meta:(.*)")
     if meta then
       if meta:match("[%w_+-]+") then
         self.metadata[meta] = val
-        self.parentmetadata[key] = val
       else
         SU.warn("Invalid metadata key is skipped: "..meta)
       end
@@ -174,16 +172,15 @@ function Renderer:code_block (node)
   local options = node.attr or {}
   options.class = node.lang and ((options.class and (options.class.." ") or "") .. node.lang) or options.class
   if utils.hasClass(options, "djot") or utils.hasClass(options, "markdown") then
-    --options = pl.tablex.union(self.parentmetadata, options)
     options.shift_headings = self.shift_headings
     self:resolveAllUserDefinedSymbols()
     -- Parent metadata just have a label xxx
     -- User-defined memoized metadata have the symbol (:xxx:) as key
     -- So we sort the keys to get the user-defined metadata first as overrides.
     for key, val in SU.sortedpairs(self.metadata) do
-      key = key.gsub(key, ":", "")
-      if not options["meta:" .. key] then
-        options["meta:" .. key] = val
+      local name = key:match("^:([%w_+-]+):$") or key -- remove leading and trailing colons
+      if not options["meta:" .. name] then
+        options["meta:" .. name] = val
       end
     end
   end
