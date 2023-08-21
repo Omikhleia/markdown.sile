@@ -368,7 +368,7 @@ function Renderer.softbreak (_)
 end
 
 function Renderer.hardbreak (_)
-  return createCommand("cr")
+  return createCommand("markdown:internal:hardbreak")
 end
 
 function Renderer:nbsp (node)

@@ -505,12 +505,32 @@ Please consider using a resilient-compatible class!]])
       SILE.processString(rawtext, "lua")
     elseif format == "html" then
       if rawtext:match("^<br[>/%s]") then
-        SILE.call("cr")
+        SILE.call("markdown:internal:hardbreak")
       elseif rawtext:match("^<wbr[>/%s]") then
         SILE.call("penalty", { penalty = 100 })
       end
     end
   end, "Raw native inline content in Markdown (internal)")
+
+  self:registerCommand("markdown:internal:hardbreak", function (_, _)
+    -- It's a bit tricky to decide whether we need a break or a cr (fill + break) here,
+    -- depending on the alignment of the paragraph.
+    --     justified = we must use a cr
+    --     ragged left = we must use a break
+    --     centered =  we must use a break
+    --     ragged right = we don't care, a break is sufficient and safer
+    local lskip = SILE.settings:get("document.lskip")
+    local rskip = SILE.settings:get("document.rskip")
+    -- Knowning the alignment is not obvious, we have to guess it from the skips.
+    -- A bit tricky and probably no a very clever HACK.
+    -- Maybe we should check whether the stretch is actually infinite?
+    if (lskip and lskip.width.stretch > 0)
+       or (rskip and rskip.width.stretch > 0) then
+      SILE.call("break")
+    else
+      SILE.call("cr")
+    end
+  end, "Hard break in Markdown (internal)")
 
   self:registerCommand("markdown:internal:rawblock", function (options, content)
     local format = SU.required(options, "format", "rawcontent")

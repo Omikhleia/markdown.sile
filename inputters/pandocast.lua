@@ -498,7 +498,7 @@ end
 -- LineBreak
 -- Hard line break
 function Renderer.LineBreak (_)
-  return createCommand("cr")
+  return createCommand("markdown:internal:hardbreak")
 end
 
 -- Math MathType Text

@@ -99,7 +99,7 @@ local function SileAstWriter (writerOps, renderOps)
   writer.blockquote = simpleCommandWrapper("markdown:internal:blockquote")
   writer.verbatim = simpleCommandWrapper("verbatim")
   writer.listitem = simpleCommandWrapper("item")
-  writer.linebreak = simpleCommandWrapper("cr")
+  writer.linebreak = simpleCommandWrapper("markdown:internal:hardbreak")
   writer.singlequoted = simpleCommandWrapper("singlequoted")
   writer.doublequoted = simpleCommandWrapper("doublequoted")
 
