@@ -63,7 +63,16 @@ function Renderer:render_children(node)
         self.tight = node.tight
       end
       for i=1,#node.c do
-        out[#out+1] = self[node.c[i].t](self, node.c[i])
+        local content = self[node.c[i].t](self, node.c[i])
+        -- Simplify outputs by collating strings
+        if type(content) == "string" and type(out[#out]) == "string" then
+          out[#out] = out[#out] .. content
+        else
+          -- Simplify out by removing empty elements
+          if type(content) ~= "table" or content.command or #content > -1 then
+            out[#out+1] = content
+          end
+        end
       end
       if node.tight ~= nil then
         self.tight = oldtight
