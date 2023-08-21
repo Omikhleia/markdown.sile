@@ -513,23 +513,20 @@ Please consider using a resilient-compatible class!]])
   end, "Raw native inline content in Markdown (internal)")
 
   self:registerCommand("markdown:internal:hardbreak", function (_, _)
-    -- It's a bit tricky to decide whether we need a break or a cr (fill + break) here,
-    -- depending on the alignment of the paragraph.
-    --     justified = we must use a cr
-    --     ragged left = we must use a break
-    --     centered =  we must use a break
-    --     ragged right = we don't care, a break is sufficient and safer
-    local lskip = SILE.settings:get("document.lskip")
-    local rskip = SILE.settings:get("document.rskip")
-    -- Knowning the alignment is not obvious, we have to guess it from the skips.
-    -- A bit tricky and probably no a very clever HACK.
-    -- Maybe we should check whether the stretch is actually infinite?
-    if (lskip and lskip.width.stretch > 0)
-       or (rskip and rskip.width.stretch > 0) then
-      SILE.call("break")
-    else
-      SILE.call("cr")
-    end
+    -- We don't want to use a cr here, because it would affect parindents,
+    -- insert a parskip, and maybe other things.
+    -- It's a bit tricky to handle a hardbreak depending on depending on the
+    -- alignment of the paragraph:
+    --    justified = we can't use a break, a cr (hfill+break) would work
+    --    ragged left = we can't use a cr
+    --    centered = we can't use a cr
+    --    ragged right = we don't care, a break is sufficient
+    -- Knowning the alignment is not obvious, neither guessing it from the skips.
+    -- Using a parfillskip seems to do the trick, but it's maybe a bit hacky.
+    -- This is nevertheless what would have occurred with a par in the same
+    -- situation.
+    SILE.typesetter:pushGlue(SILE.settings:get("typesetter.parfillskip"))
+    SILE.call("break")
   end, "Hard break in Markdown (internal)")
 
   self:registerCommand("markdown:internal:rawblock", function (options, content)
