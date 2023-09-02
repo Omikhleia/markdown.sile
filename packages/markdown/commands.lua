@@ -9,6 +9,7 @@
 --
 require("silex.lang")
 local utils = require("packages.markdown.utils")
+local hasClass = utils.hasClass
 local ast = require("silex.ast")
 local createCommand, createStructuredCommand,
       extractFromTree, subContent
@@ -58,14 +59,6 @@ local function getSectioningCommand (level)
   -- Also default to something anyway, but different message
   SU.warn("No support found for heading level "..level.." (fallback to a default generic header)")
   return "markdown:fallback:header"
-end
-
-local function hasClass (options, classname)
-  -- N.B. we want a true boolean here
-  if options.class and string.match(' ' .. options.class .. ' ',' '..classname..' ') then
-    return true
-  end
-  return false
 end
 
 local function hasLinkContent(tree)
@@ -242,18 +235,18 @@ function package:registerCommands ()
     elseif hasClass(options, "bigrule") then
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
-          SILE.call("hrule", { width = "33%lw" })
+          SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
     elseif hasClass(options, "fullrule") and self:hasCouyards() then
-      SILE.call("fullrule")
+      SILE.call("fullrule", { thickness = "0.4pt" })
     elseif hasClass(options, "pendant") and self:hasCouyards() then
       SILE.call("smallskip")
       SILE.call("couyard", { type = 6, width = "default" })
     elseif not hasClass(options, "none") then
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
-          SILE.call("hrule", { width = "20%lw" })
+          SILE.call("hrule", { width = "20%lw", height = "0.4pt" })
         end)
       end)
     end
@@ -271,13 +264,13 @@ function package:registerCommands ()
     elseif options.separator == "---" then
         SILE.call("center", {}, function ()
           SILE.call("raise", { height = "0.5ex" }, function ()
-            SILE.call("hrule", { width = "20%lw" })
+            SILE.call("hrule", { width = "20%lw", height = "0.4pt" })
         end)
       end)
     elseif options.separator == "----" then
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
-          SILE.call("hrule", { width = "33%lw" })
+          SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
     elseif options.separator == "- - - -" and self:hasCouyards() then
@@ -286,7 +279,7 @@ function package:registerCommands ()
     elseif options.separator == "--------------" then -- Page break
       SILE.call("eject")
     else
-      SILE.call("fullrule")
+      SILE.call("fullrule", { thickness = "0.4pt" })
     end
   end, "Horizontal rule in Markdown (internal)")
 
@@ -512,12 +505,29 @@ Please consider using a resilient-compatible class!]])
       SILE.processString(rawtext, "lua")
     elseif format == "html" then
       if rawtext:match("^<br[>/%s]") then
-        SILE.call("cr")
+        SILE.call("markdown:internal:hardbreak")
       elseif rawtext:match("^<wbr[>/%s]") then
         SILE.call("penalty", { penalty = 100 })
       end
     end
   end, "Raw native inline content in Markdown (internal)")
+
+  self:registerCommand("markdown:internal:hardbreak", function (_, _)
+    -- We don't want to use a cr here, because it would affect parindents,
+    -- insert a parskip, and maybe other things.
+    -- It's a bit tricky to handle a hardbreak depending on depending on the
+    -- alignment of the paragraph:
+    --    justified = we can't use a break, a cr (hfill+break) would work
+    --    ragged left = we can't use a cr
+    --    centered = we can't use a cr
+    --    ragged right = we don't care, a break is sufficient
+    -- Knowning the alignment is not obvious, neither guessing it from the skips.
+    -- Using a parfillskip seems to do the trick, but it's maybe a bit hacky.
+    -- This is nevertheless what would have occurred with a par in the same
+    -- situation.
+    SILE.typesetter:pushGlue(SILE.settings:get("typesetter.parfillskip"))
+    SILE.call("break")
+  end, "Hard break in Markdown (internal)")
 
   self:registerCommand("markdown:internal:rawblock", function (options, content)
     local format = SU.required(options, "format", "rawcontent")

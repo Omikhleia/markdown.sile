@@ -32,8 +32,17 @@ local function nbspFilter (str)
   return #t == 1 and t[1] or t
 end
 
+local function hasClass (options, classname)
+  -- N.B. we want a true boolean here
+  if options.class and string.match(' ' .. options.class .. ' ',' '..classname..' ') then
+    return true
+  end
+  return false
+end
+
 --- @export
 return {
   getFileExtension = getFileExtension,
   nbspFilter = nbspFilter,
+  hasClass = hasClass
 }
