@@ -90,8 +90,8 @@ local function addNodes(out, elements)
     out[#out] = out[#out] .. elements
   else
     -- Simplify out by removing empty elements
-    if type(elements) ~= "table" or elements.command or #elements > -1 then
-      out [#out+1] = elements
+    if type(elements) ~= "table" or elements.command or #elements > 0 then
+      out[#out+1] = elements
     end
   end
 end

@@ -67,8 +67,11 @@ function Renderer:render_children(node)
           out[#out] = out[#out] .. content
         else
           -- Simplify out by removing empty elements
-          if type(content) ~= "table" or content.command or #content > -1 then
+          if type(content) ~= "table" or content.command or #content > 1 then
             out[#out+1] = content
+          elseif #content == 1 then
+            -- Simplify out by removing useless grouping
+            out[#out+1] = content[1]
           end
         end
       end
