@@ -510,12 +510,7 @@ function Parser:specs()
         if not ep1 then
           return false
         end
-        -- BEGIN EXTENSION DIDIER 20230818
-        -- Accept ? and ! as starting pseudo-class for conditionnal symbols
-        -- Of course hacking this in the class attribute is not a good idea,
-        -- but it is a quick way to get it working.
-        local clsp, ep = find(self.subject, "^[?!]?[%w_-]*", ep1 + 1)
-        -- END EXTENSION DIDIER 20230818
+        local clsp, ep = find(self.subject, "^[%w_-]*", ep1 + 1)
         local _, eol = find(self.subject, "^[ \t]*[\r\n]", ep + 1)
         if eol then
           self:add_container(Container:new(spec, {equals = #equals}))
