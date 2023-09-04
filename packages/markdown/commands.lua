@@ -229,21 +229,32 @@ function package:registerCommands ()
 
   self:registerCommand("markdown:internal:thematicbreak", function (options, _)
     if hasClass(options, "asterism") then
-      SILE.call("center", {}, { "⁂" }) -- Asterism
+      -- Asterism
+      SILE.call("center", {}, { "⁂" })
     elseif hasClass(options, "dinkus") then
-      SILE.call("center", {}, { "* * *" }) -- Dinkus (with em-spaces)
+      -- Dinkus (with em-spaces)
+      SILE.call("center", {}, { "* * *" })
     elseif hasClass(options, "bigrule") then
+      -- 33% line
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
           SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
     elseif hasClass(options, "fullrule") and self:hasCouyards() then
+      -- Full line
       SILE.call("fullrule", { thickness = "0.4pt" })
     elseif hasClass(options, "pendant") and self:hasCouyards() then
+      -- Pendant, with more options available than in Markdown
+      local opts = {
+        type = SU.cast("integer", options.type or 6),
+        height = options.height,
+        width = not options.height and (options.width or "default")
+      }
       SILE.call("smallskip")
-      SILE.call("couyard", { type = 6, width = "default" })
+      SILE.call("couyard", opts)
     elseif not hasClass(options, "none") then
+      -- 20% line
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
           SILE.call("hrule", { width = "20%lw", height = "0.4pt" })
@@ -258,27 +269,33 @@ function package:registerCommands ()
 
   self:registerCommand("markdown:internal:hrule", function (options, _)
     if options.separator == "***" then
-      SILE.call("center", {}, { "⁂" }) -- Asterism
+      -- Asterism
+      SILE.call("center", {}, { "⁂" })
     elseif options.separator == "* * *" then
-      SILE.call("center", {}, { "* * *" }) -- Dinkus (with em-spaces)
+      -- Dinkus (with em-spaces)
+      SILE.call("center", {}, { "* * *" })
     elseif options.separator == "---" then
+        -- 20% line
         SILE.call("center", {}, function ()
           SILE.call("raise", { height = "0.5ex" }, function ()
             SILE.call("hrule", { width = "20%lw", height = "0.4pt" })
         end)
       end)
     elseif options.separator == "----" then
+      -- 33% line
       SILE.call("center", {}, function ()
         SILE.call("raise", { height = "0.5ex" }, function ()
           SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
     elseif options.separator == "- - - -" and self:hasCouyards() then
+      -- Pendant (fixed choice = the one I regularly use)
       SILE.call("smallskip")
       SILE.call("couyard", { type = 6, width = "default" })
     elseif options.separator == "--------------" then -- Page break
       SILE.call("eject")
     else
+      -- Full line
       SILE.call("fullrule", { thickness = "0.4pt" })
     end
   end, "Horizontal rule in Markdown (internal)")
