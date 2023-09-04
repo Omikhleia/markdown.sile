@@ -403,6 +403,8 @@ Let's check how it expands: _:title:._
 
 Again, the variable substitution mechanism also has precedence over these symbols.
 
+## Syntax extensions
+
 ### Attributed quotes (epigraphs)
 
 { rule="0.4pt" }
@@ -427,8 +429,36 @@ Any option supported by the `\autodoc:package{resilient.epigraph}`{=sile} packag
 Be aware that this behavior is currently an extension.
 Other Djot converters will therefore likely skip the caption.
 
+### Conditionals
+
+While the interpretation of symbols presented above is not a standard, the Djot specification leaves it to the rendering engine.
+What we proposed there is thus perfectly acceptable so far.
+
+Since user-defined symbols and context metadata are now made available.
+There's a trickier problem, however, if you want to only use a symbol if it is defined.
+If you use a non-existent symbol, say `:non-existent:`, you just get :non-existent: in the output.
+We cannot just ignore it, since something might have been expected there, but this is objectively not what you want.
+
+This converter therefore introduces an extension to the Djot attributes syntax, allowing you to conditionally render content based on the existence of a symbol.
+The content is always parsed (so it has to remain valid Djot), but is only rendered if the symbol is defined.
+
+[This content has the `{?title}` condition, and since the `:title:` symbol is defined (_:title:_), it is rendered.]{?title}
+Just below, however, a paragraph is annotated with the `{?non-existent}` condition, so you should not see it.
+
+{?non-existent}
+You should NOT see this paragraph in the output.
+
+{!non-existent}
+Now, this paragraph has the `{!non-existent}` condition, and since the `non-existent` symbol is NOT defined, it is rendered.
+
+Conditions work on blocks and inline elements alike.
+They only apply to user-defined symbols (defined as pseudo-footnotes) and metadata symbols (set by the calling context).
+
+We can't say if future versions of the Djot specification will make use of `?` and `!` in attributes or bracketed content.
+Therefore, we recommend that you call template files containing conditional content with the `.djt` extension, as a way to remember.
+
 {#djot-configuration}
-### Configuration
+## Configuration
 
 You can pass additional options to the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile} environment to tune the behavior of the converter.
 

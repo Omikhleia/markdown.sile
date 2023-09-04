@@ -17,7 +17,7 @@ local djotast = require("djot.ast")
 
 local Renderer = pl.class()
 
-function Renderer:_init(options)
+function Renderer:_init (options)
   self.references = {}
   self.footnotes = {}
   self.shift_headings = SU.cast("integer", options.shift_headings or 0)
@@ -35,13 +35,13 @@ function Renderer:_init(options)
   self.tight = false -- We do not use it currently, though!
 end
 
-function Renderer:render(doc)
+function Renderer:render (doc)
   self.references = doc.references
   self.footnotes = doc.footnotes
   return self[doc.t](self, doc)
 end
 
-function Renderer.render_pos(_, node)
+function Renderer.render_pos (_, node)
   local p = node.pos and node.pos[1]
   if not p then
     return nil
@@ -50,7 +50,41 @@ function Renderer.render_pos(_, node)
   return { lno = tonumber(lno), col = tonumber(col), pos = tonumber(pos) }
 end
 
-function Renderer:render_children(node)
+function Renderer:matchConditions(node)
+  -- Djot extension: conditional symbols
+  -- NOTE: We went for a quick hack in our modified Djot parser,
+  -- having the conditions in the class attribute.
+  -- Of course, it should be done in a more elegant way.
+  if node.attr and node.attr.class then
+    local conds_exist = {}
+    local conds_notexist = {}
+    local newclass = node.attr.class:gsub( "[?][%w_-]*", function(key)
+      table.insert(conds_exist, key:sub(2))
+      return ""
+    end)
+    -- newclass =
+    newclass:gsub( "[!][%w_-]*", function(key)
+      table.insert(conds_notexist, key:sub(2))
+      return ""
+    end)
+    for _, cond in ipairs(conds_exist) do
+      if not self.footnotes[":"..cond..":"] and not self.metadata[cond] then
+        return false
+      end
+    end
+    for _, cond in ipairs(conds_notexist) do
+      if self.footnotes[":"..cond..":"] or self.metadata[cond] then
+        return false
+      end
+    end
+    -- We could avoid passing the conditions further:
+    -- node.attr.class = newclass
+    -- Have to check we correctly memoize symbol substitution, though.
+  end
+  return true
+end
+
+function Renderer:render_children (node)
   -- trap stack overflow
   local out = {}
   local ok, err = pcall(function ()
@@ -60,18 +94,20 @@ function Renderer:render_children(node)
         oldtight = self.tight
         self.tight = node.tight
       end
-      for i=1,#node.c do
-        local content = self[node.c[i].t](self, node.c[i])
-        -- Simplify outputs by collating strings
-        if type(content) == "string" and type(out[#out]) == "string" then
-          out[#out] = out[#out] .. content
-        else
-          -- Simplify out by removing empty elements
-          if type(content) ~= "table" or content.command or #content > 1 then
-            out[#out+1] = content
-          elseif #content == 1 then
-            -- Simplify out by removing useless grouping
-            out[#out+1] = content[1]
+      for i=1, #node.c do
+        if self:matchConditions(node.c[i]) then
+          local content = self[node.c[i].t](self, node.c[i])
+          -- Simplify outputs by collating strings
+          if type(content) == "string" and type(out[#out]) == "string" then
+            out[#out] = out[#out] .. content
+          else
+            -- Simplify out by removing empty elements
+            if type(content) ~= "table" or content.command or #content > 1 then
+              out[#out+1] = content
+            elseif #content == 1 then
+              -- Simplify out by removing useless grouping
+              out[#out+1] = content[1]
+            end
           end
         end
       end
@@ -94,7 +130,7 @@ function Renderer:render_children(node)
   return out
 end
 
-function Renderer:doc(node)
+function Renderer:doc (node)
   return self:render_children(node)
 end
 
@@ -610,6 +646,7 @@ function Renderer:getUserDefinedSymbol (label, node_fake_metadata)
     if #node_fake_metadata.c == 1 and node_fake_metadata.c[1].t == "para" then
       -- Skip a single para node.
       content = self:render_children(node_fake_metadata.c[1])
+      if type(content) == "table" then content._single_ = true end
     else
       content = self:render_children(node_fake_metadata)
     end
@@ -639,7 +676,7 @@ function Renderer:symbol (node)
     end
     local content = self:getUserDefinedSymbol(label, node_fake_metadata)
     if node.attr then
-      if not node._standalone_ then
+      if type(content) ~= "table" or content._single_ or not node._standalone_ then
         -- Add a span for attributes on the inline variant.
         content = createCommand("markdown:internal:span", node.attr, content, self:render_pos(node))
       else

@@ -525,7 +525,7 @@ straight single and double quotes after digits to single and double primes.
 It can be useful for easily typesetting units (e.g. 6")
 or coordinates (e.g. Oxford is located at 51° 45' 7" N, 1° 15' 27" W).
 
-### Configuration {#configuration}
+## Configuration {#configuration}
 
 Most Markdown syntax extensions are enabled by default.
 You can pass additional options to
