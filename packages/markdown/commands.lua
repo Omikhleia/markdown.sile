@@ -133,9 +133,9 @@ end
 function package:_init (_)
   base._init(self)
 
-  -- HACK very lame detection
-  -- Try to guess if the resilient classes are used
-  self.isResilient = self.class._name:match("^resilient")
+  -- Check if document class is a resilient class or derived from one
+  local ok, ResilientBase = pcall(require, 'classes.resilient.base')
+  self.isResilient = ok and self.class:is_a(ResilientBase)
 
   -- Only load low-level packages (= utilities)
   -- The class should be responsible for loading the appropriate higher-level
