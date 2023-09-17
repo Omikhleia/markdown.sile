@@ -1,0 +1,6 @@
+```=sile-lua
+SILE.call("open-on-odd-page")
+SILE.call("noheaders")
+```
+
+:_TOC_:
