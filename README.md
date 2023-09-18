@@ -63,8 +63,8 @@ Some **Markdown** content
 
 ### Pandoc AST alternative package
 
-_Prerequisites:_ The [LuaJSON](https://github.com/harningt/luajson) module must be
-installed and available to your SILE environment. This topic is not covered here.
+_Prerequisites:_ The [LuaJSON](https://github.com/harningt/luajson) module must be installed and available to your SILE environment.
+This topic is not covered here.
 
 First, using the appropriate version of Pandoc, convert your file to a JSON AST:
 
@@ -87,10 +87,8 @@ Or from SIL documents:
 
 ### Native Djot package
 
-[Djot](https://djot.net/) is a fairly recent “light markup syntax” derived from Markdown,
-fixing most of its complex syntax pitfalls, and also extending it on various aspects.
-Since many concepts are similar, it felt rather natural to include it too in this collection,
-so that authors interested in Markdown can give it a try.
+[Djot](https://djot.net/) is a fairly recent “light markup syntax” derived from Markdown, fixing most of its complex syntax pitfalls, and also extending it on various aspects.
+Since many concepts are similar, it felt rather natural to include it too in this collection, so that authors interested in Markdown can give it a try.
 
 From command line:
 
@@ -105,9 +103,8 @@ Or from documents (e.g. here in SIL language):
 \include[src=somefile.dj]
 ```
 
-Other possibilities exist (such as setting `format=djot` on the `\include` command, if the file extension
-cannot be one of the supported variants, etc.). Refer to the SILE manual for more details on inputters and their
-usage.
+Other possibilities exist (such as setting `format=djot` on the `\include` command, if the file extension cannot be one of the supported variants, etc.).
+Refer to the SILE manual for more details on inputters and their usage.
 
 Including raw Djot content from within a SIL document is also possible:
 
@@ -119,8 +116,7 @@ Some *Djot* content
 
 ## Generating the documentation
 
-The example documentation/showcase in this repository additionally requires the `autodoc` package, so you
-may generate a PDF from it with as follows:
+The example documentation/showcase in this repository additionally requires the `autodoc` package, so you may generate a PDF from it with as follows:
 
 ```
 sile -u inputters.markdown -u packages.autodoc examples/sile-and-markdown.md
@@ -128,16 +124,15 @@ sile -u inputters.markdown -u packages.autodoc examples/sile-and-markdown.md
 
 It assumes a default font, so a few things might not render as expected, and uses SILE's standard book class.
 
-**Recommended:** For even best results (in this writer's biased opinion), provided you have installed the
-[resilient](https://github.com/Omikhleia/resilient.sile) collection of classes and packages:
+**Recommended:** For even best results (in this writer's biased opinion), provided you have installed the [resilient](https://github.com/Omikhleia/resilient.sile) collection of classes and packages:
 
 ```
-sile examples/sile-and-markdown-manual.sil
+sile -u inputters.silm examples/sile-and-markdown-manual.silm
 ```
 
-The latter SIL “wrapper” document also loads extra packages before switching to Markdown, and defines
-additional commands and styles. Moreover, it includes additional chapters, showcasing
-other advanced topics and cool use cases. Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
+The latter SIL “wrapper” document also loads extra packages before switching to Markdown, and defines additional commands and styles.
+Moreover, it includes additional chapters, showcasing other advanced topics and cool use cases.
+Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
 
 ## Supported features
 
@@ -192,7 +187,7 @@ decisions and adapt the output at convenience.
 
 ## License
 
-All SILE-related code and samples in this repository are released under the MIT License, (c) 2022 Omikhleia.
+All SILE-related code and samples in this repository are released under the MIT License, (c) 2022-2023 Omikhleia.
 
 A vendored (subset) of the [lunamark](https://github.com/jgm/lunamark) Lua parsing library is
 distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
@@ -203,7 +198,7 @@ distributed alongside. All corresponding files (in the `lua-libraries` folder) a
 the MIT license, (c) 2022 John MacFarlane.
 
 Before you ask, it is expected the vendored code will be replaced by proper dependencies,
-when the packages all reach a stable state.
+when these packages all reach a stable state.
 
 ## Credits
 
