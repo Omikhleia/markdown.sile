@@ -33,13 +33,17 @@ local CommandCascade = pl.class({
     local out = self.outer and { self.outer } or self.inner
     self.outer = createStructuredCommand(command, options, out)
   end,
-  process = function (self, content)
-    -- As a subTreeContent but into the inner node
+  tree = function (self, content)
+    -- Return the cascaded AST without processing it
     for _, v in ipairs(content) do
       self.inner[#self.inner + 1] = v
     end
     local stacked = self.outer and { self.outer } or self.inner
-    SILE.process(stacked)
+    return stacked
+  end,
+  process = function (self, content)
+    -- For convenience
+    SILE.process(self:tree(content))
   end,
 })
 
@@ -130,6 +134,19 @@ local function wrapLinkContent (options, content)
   return content
 end
 
+function package:loadPackageAlt(resilientpack, legacypack)
+  if not self.class.packages[resilientpack] then
+    -- In resilient context, try enforcing the use of resilient variants,
+    -- assuming its compatible with SILE's legacy implementation (command-wise),
+    -- so that we benefit from its extended features and its styling.
+    if self.isResilient then
+      self:loadPackage(resilientpack)
+    else
+      self:loadPackage(legacypack)
+    end
+  end
+end
+
 function package:_init (_)
   base._init(self)
 
@@ -140,35 +157,29 @@ function package:_init (_)
   -- Only load low-level packages (= utilities)
   -- The class should be responsible for loading the appropriate higher-level
   -- constructs, see fallback commands further below for more details.
-  self.class:loadPackage("color")
-  self.class:loadPackage("embedders")
-  self.class:loadPackage("image")
-  self.class:loadPackage("inputfilter")
-  self.class:loadPackage("labelrefs")
-  if not self.class.packages["resilient.lists"] then
-    -- In resilient context, try enforcing the use of resilient.lists,
-    -- assuming its compatible with SILE's lists (command-wise).
-    -- So that we benefit from its extended features and its styling.
-    if self.isResilient then
-      self.class:loadPackage("resilient.lists")
-    else
-      self.class:loadPackage("lists")
-    end
-  end
-  self.class:loadPackage("math")
-  self.class:loadPackage("ptable")
-  self.class:loadPackage("rules")
-  self.class:loadPackage("smartquotes")
-  self.class:loadPackage("svg")
-  self.class:loadPackage("textsubsuper")
-  self.class:loadPackage("url")
+  self:loadPackage("color")
+  self:loadPackage("embedders")
+  self:loadPackage("image")
+  self:loadPackage("inputfilter")
+  self:loadPackage("labelrefs")
+  self:loadPackage("math")
+  self:loadPackage("ptable")
+  self:loadPackage("rules")
+  self:loadPackage("smartquotes")
+  self:loadPackage("svg")
+  self:loadPackage("textsubsuper")
+  self:loadPackage("url")
+
+  -- Do those at the end so the resilient versions may possibly override things.
+  self:loadPackageAlt("resilient.lists", "lists")
+  self:loadPackageAlt("resilient.verbatim", "verbatim")
 
   -- Optional packages
-  pcall(function () return self.class:loadPackage("couyards") end)
+  pcall(function () return self:loadPackage("couyards") end)
 
   -- Other conditional packages
   if self.isResilient then
-    self.class:loadPackage("resilient.epigraph")
+    self:loadPackage("resilient.epigraph")
   end
 end
 
@@ -622,44 +633,44 @@ Please consider using a resilient-compatible class!]])
       SILE.processString(SU.contentToString(content), "markdown", nil, options)
     elseif hasClass(options, "lua") then
       -- Naive syntax highlighting for Lua, until we have a more general solution
-      SILE.call("verbatim", {}, function ()
-        if options.id then
-          SILE.call("label", { marker = options.id })
+      local tree = {}
+      if options.id then
+        tree[#tree+1] = createCommand("label", { marker = options.id })
+      end
+      local toks = pl.lexer.lua(content[1], {})
+      for tag, v in toks do
+        local out = tostring(v)
+        if tag == "string" then
+          -- rebuild string quoting...
+          out = out:match('"') and ("'"..out.."'") or ('"'..out..'"')
         end
-        local toks = pl.lexer.lua(content[1], {})
-        for tag, v in toks do
-          local out = tostring(v)
-          if tag == "string" then
-            -- rebuild string quoting...
-            out = out:match('"') and ("'"..out.."'") or ('"'..out..'"')
+        if naiveLuaCodeTheme[tag] then
+          local cascade = CommandCascade()
+          if naiveLuaCodeTheme[tag].color then
+            cascade:call("color", { color = naiveLuaCodeTheme[tag].color })
           end
-          if naiveLuaCodeTheme[tag] then
-            local cascade = CommandCascade()
-            if naiveLuaCodeTheme[tag].color then
-              cascade:call("color", { color = naiveLuaCodeTheme[tag].color })
-            end
-            if naiveLuaCodeTheme[tag].bold then
-              cascade:call("strong", {})
-            end
-            if naiveLuaCodeTheme[tag].italic then
-              cascade:call("em", {})
-            end
-            cascade:process({ out })
-          else
-            SILE.typesetter:typeset(SU.utf8charfromcodepoint("U+200B")..out) -- HACK with ZWSP to trick the typesetter respecting standalone linebreaks
+          if naiveLuaCodeTheme[tag].bold then
+            cascade:call("strong", {})
           end
+          if naiveLuaCodeTheme[tag].italic then
+            cascade:call("em", {})
+          end
+          tree[#tree+1] = cascade:tree({ out })
+        else
+          tree[#tree+1] = SU.utf8charfromcodepoint("U+200B")..out -- HACK with ZWSP to trick the typesetter respecting standalone linebreaks
         end
-        SILE.typesetter:leaveHmode()
-      end)
+      end
+      SILE.call("verbatim", {}, tree)
     else
       -- Just raw unstyled verbatim
-      SILE.call("verbatim", {}, function ()
-        if options.id then
-          SILE.call("label", { marker = options.id })
-        end
-        SILE.process(content)
-        SILE.typesetter:leaveHmode()
-      end)
+      SILE.call("verbatim", {},
+        options.id and {
+          createCommand("label", { marker = options.id }),
+          subContent(content)
+        } or {
+          subContent(content)
+        }
+      )
     end
     SILE.call("smallskip")
   end, "(Fenced) code block in Markdown (internal)")
