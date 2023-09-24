@@ -351,24 +351,6 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Header in Markdown (internal)")
 
-  self:registerCommand("markdown:internal:term", function (_, content)
-    SILE.typesetter:leaveHmode()
-    SILE.call("font", { weight = 600 }, content)
-    SILE.call("novbreak")
-  end, "Definition list term in Markdown (internal)")
-
-  self:registerCommand("markdown:internal:definition", function (_, content)
-    SILE.typesetter:leaveHmode()
-    SILE.settings:temporarily(function ()
-      local indent = SILE.measurement("2em"):absolute()
-      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
-      SILE.settings:set("document.lskip", SILE.nodefactory.glue(lskip.width + indent))
-      SILE.process(content)
-      SILE.typesetter:leaveHmode()
-    end)
-    SILE.call("smallskip")
-  end, "Definition list block in Markdown (internal)")
-
   self:registerCommand("markdown:internal:div:id", function (options, content)
     local id = SU.required(options, "id", "div")
     SILE.call("label", { marker = id })
@@ -750,6 +732,17 @@ Please consider using a resilient-compatible class!]])
     SILE.Commands["tableofcontents:header"] = tocHeaderCmd
   end, "Table of contents in Djot (internal)")
 
+  self:registerCommand("markdown:internal:defn", function (options, content)
+    -- Makes it easier for class/packages to provide their own definition
+    -- environment if they want to do so (possibly with more features),
+    -- while minimally providing a default fallback solution.
+    if not SILE.Commands["defn"] then
+      SILE.call("markdown:fallback:defn", {}, content)
+    else
+      SILE.call("defn", options, content)
+    end
+  end, "Definition item in Markdown (internal)")
+
   -- B. Fallback commands
 
   self:registerCommand("markdown:fallback:blockquote", function (_, content)
@@ -796,6 +789,26 @@ Please consider using a resilient-compatible class!]])
     end
     SILE.call("smallskip")
   end, "A fallback command for Markdown to insert a captioned table")
+
+  self:registerCommand("markdown:fallback:defn", function (_, content)
+    if type(content) ~= "table" then
+      SU.error("Expected a table AST content in captioned table environment")
+    end
+    local term = extractFromTree(content, "term")
+    local desc = extractFromTree(content, "desc")
+
+    SILE.typesetter:leaveHmode()
+    SILE.call("strong", {}, term)
+    SILE.call("novbreak")
+    SILE.settings:temporarily(function ()
+      local indent = SILE.measurement("2em"):absolute()
+      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
+      SILE.settings:set("document.lskip", SILE.nodefactory.glue(lskip.width + indent))
+      SILE.process(desc)
+      SILE.typesetter:leaveHmode()
+    end)
+    SILE.call("smallskip")
+  end, "A fallback command for Markdown to insert a definition item (term, desc)")
 
   self:registerCommand("markdown:fallback:captioned-figure", function (_, content)
     if type(content) ~= "table" then

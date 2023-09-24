@@ -173,6 +173,9 @@ apples
 citrus
   : Like oranges but yellow.
 
+If your class or previously loaded packages provide a `defn` environment, it will be used.
+Otherwise, the converter uses its own fallback method.
+
 ### Block quotes
 
 > Block quotes are written like so.

@@ -118,6 +118,10 @@ Definition lists are also decently supported. Note the syntax differs from Pando
 
    Like oranges but yellow.
 
+Djot attributes are passed to the underlying definition environment.[^djot-resilient-defn]
+
+[^djot-resilient-defn]: With the *resilient.defn* environment, the `variant` option may thus be used to switch to an alternate style.
+
 #### Block quotes
 
 Block quotes work.

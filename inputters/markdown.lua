@@ -228,8 +228,10 @@ local function SileAstWriter (writerOps, renderOps)
   writer.definitionlist = function (items, _) -- items, tight
     local buffer = {}
     for _, item in ipairs(items) do
-      buffer[#buffer + 1] = createCommand("markdown:internal:term", {}, item.term)
-      buffer[#buffer + 1] = createStructuredCommand("markdown:internal:definition", {}, item.definitions)
+      buffer[#buffer + 1] = createStructuredCommand("markdown:internal:defn", {}, {
+        createCommand("term", {}, item.term),
+        createStructuredCommand("desc", {}, item.definitions)
+      })
     end
     return createStructuredCommand("markdown:internal:paragraph", {}, buffer)
   end
