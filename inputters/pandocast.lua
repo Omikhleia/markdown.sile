@@ -291,8 +291,10 @@ function Renderer:DefinitionList (items)
   for _, item in ipairs(items) do
     local term = self:render(item[1])
     local definition = self:render(item[2])
-    buffer[#buffer + 1] = createCommand("markdown:internal:term", {}, term)
-    buffer[#buffer + 1] = createStructuredCommand("markdown:internal:definition", {}, definition)
+    buffer[#buffer + 1] = createStructuredCommand("markdown:internal:defn", {}, {
+      createCommand("term", {}, term),
+      createStructuredCommand("desc", {}, definition)
+    })
   end
   return createStructuredCommand("markdown:internal:paragraph", {}, buffer)
 end

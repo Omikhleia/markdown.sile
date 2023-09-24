@@ -17,7 +17,7 @@ SILE.call("medskip")
 ```
 
 With Djot and Markdown being made first-class citizens in SILE, you can now write your documents in these lightweight markup languages.
-You do not have to learn SILE's default language or Lua programming, although both are still available under the hood if you really want, for the best of several worlds!
+You do not have to learn SILE's default language or Lua programming, although both are still available under the hood if you really want, for the best of several worlds.
 
 Discover the capabilities of this collection in this manual, and start authoring your own _perfect_ book today!
 

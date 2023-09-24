@@ -114,6 +114,32 @@ code:
       family: "Hack"
       size: "1.4ex"
 
+defn-base:
+  origin: "resilient.defn"
+  style:
+
+defn-desc:
+  inherit: "defn-base"
+  origin: "resilient.defn"
+  style:
+    paragraph:
+      after:
+        skip: "smallskip"
+      before:
+        vbreak: false
+
+defn-term:
+  inherit: "defn-base"
+  origin: "resilient.defn"
+  style:
+    font:
+      weight: 700
+    paragraph:
+      after:
+        vbreak: false
+      before:
+        skip: "smallskip"
+
 dropcap:
   origin: "resilient.book"
   style:
@@ -521,6 +547,18 @@ lists-itemize6:
     itemize:
       symbol: "–"
 
+poetry:
+  origin: "resilient.poetry"
+  style:
+    font:
+      size: "0.95em"
+    paragraph:
+      after:
+        skip: "medskip"
+      align: "poetry"
+      before:
+        skip: "medskip"
+
 poetry-prosody:
   origin: "resilient.poetry"
   style:
@@ -533,6 +571,16 @@ poetry-verseno:
     font:
       features: "+onum"
       size: "0.9em"
+
+prosody:
+  origin: "resilient.poetry"
+  style:
+    font:
+      size: "0.95em"
+    paragraph:
+      align: "poetry"
+      before:
+        skip: "smallskip"
 
 sectioning-base:
   origin: "resilient.book"

@@ -328,6 +328,12 @@ function Renderer:list (node)
 
   if sty == ":" then
     local content = self:render_children(node)
+    for _, v in ipairs(content) do
+      -- Kind of a hack: propagate Djot attributes to the defn (item) nodes
+      if type(v) == "table" and v.command then
+        v.options = node.attr or {}
+      end
+    end
     return createStructuredCommand("markdown:internal:paragraph", {}, content, pos)
   end
 
@@ -367,16 +373,16 @@ end
 
 function Renderer:term (node)
   local content = self:render_children(node)
-  return createCommand("markdown:internal:term", {}, content, self:render_pos(node))
+  return createCommand("term", {}, content, self:render_pos(node))
 end
 
 function Renderer:definition (node)
   local content = self:render_children(node)
-  return createCommand("markdown:internal:definition", {}, content, self:render_pos(node))
+  return createCommand("desc", {}, content, self:render_pos(node))
 end
 
 function Renderer:definition_list_item (node)
-  return self:render_children(node)
+  return createStructuredCommand("markdown:internal:defn", {}, self:render_children(node))
 end
 
 function Renderer.reference_definition (_)
