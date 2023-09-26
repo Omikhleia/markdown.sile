@@ -44,6 +44,7 @@ sile:
   packages:
     - autodoc-resilient # REQUIRED FOR RESILIENT, do not use regular autodoc
     - dropcaps
+    - resilient.defn
     - resilient.poetry
 chapters:
   - toc.dj
