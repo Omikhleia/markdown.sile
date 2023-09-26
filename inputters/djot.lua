@@ -328,13 +328,20 @@ function Renderer:list (node)
 
   if sty == ":" then
     local content = self:render_children(node)
-    for _, v in ipairs(content) do
-      -- Kind of a hack: propagate Djot attributes to the defn (item) nodes
-      if type(v) == "table" and v.command then
-        v.options = node.attr or {}
+    -- Kind of a hack: propagate Djot attributes to the defn (item) nodes
+    -- This is not very cleverly done...
+    if content.command then
+      -- We have only one definition item so the AST got simplified
+      content.options = node.attr or {}
+    else
+      -- Or we have a list of definition items...
+      for _, v in ipairs(content) do
+        if type(v) == "table" and v.command then
+          v.options = node.attr or {}
+        end
       end
     end
-    return createStructuredCommand("markdown:internal:paragraph", {}, content, pos)
+    return createCommand("markdown:internal:paragraph", {}, content, pos)
   end
 
   -- Enumerate
@@ -382,6 +389,8 @@ function Renderer:definition (node)
 end
 
 function Renderer:definition_list_item (node)
+  -- See the list renderer, we'll override options on defn nodes from
+  -- Djot attributes on the whole list.
   return createStructuredCommand("markdown:internal:defn", {}, self:render_children(node))
 end
 
