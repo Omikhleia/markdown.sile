@@ -1,4 +1,4 @@
-std = "max+sile"
+std = "min+sile"
 include_files = {
   "**/*.lua",
   "sile.in",
