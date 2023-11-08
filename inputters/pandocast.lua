@@ -21,8 +21,8 @@ local utils = require("packages.markdown.utils")
 local function checkAstSemver(version)
   -- We shouldn't care the patch level.
   -- The Pandoc AST may change upon "minor" updates, though.
-  local major, minor = table.unpack(version)
-  local expected_major, expected_minor = table.unpack(Pandoc.API_VERSION)
+  local major, minor = pl.utils.unpack(version)
+  local expected_major, expected_minor = pl.utils.unpack(Pandoc.API_VERSION)
   if not major or major ~= expected_major then
     SU.error("Unsupported Pandoc AST major version " .. major
       .. ", only version " .. expected_major.. " is supported")
@@ -84,7 +84,7 @@ local function pandocAstParse(element)
     if element.t then
       if Pandoc[element.t] then
         if HasMultipleArgs[element.t] then
-          addNodes(out, Pandoc[element.t](table.unpack(element.c)))
+          addNodes(out, Pandoc[element.t](pl.utils.unpack(element.c)))
         else
           addNodes(out, Pandoc[element.t](element.c))
         end
@@ -109,7 +109,7 @@ end
 --   Lua custom writer would expose, and which also looks like regular SILE
 --   options.
 local function pandocAttributes(attributes)
-  local id, class, keyvals = table.unpack(attributes)
+  local id, class, keyvals = pl.utils.unpack(attributes)
   local options = {
     id = id and id ~= "" and id or nil,
     class = table.concat(class, " "),
@@ -135,7 +135,7 @@ local function extractLineBlockLevel (inlines)
     -- Or any other inline content if there are not leading spaces.
     local line = f.c
     line = line:gsub("^[ ]+", function (match) -- Warning, U+00A0 here.
-      level = utf8.len(match)
+      level = luautf8.len(match)
       return ""
     end)
     f.c = line -- replace
@@ -228,7 +228,7 @@ local pandocListNumberDelimTags = {
 Pandoc.OrderedList = function (listattrs, itemblocks)
   -- ListAttributes = (Int, ListNumberStyle, ListNumberDelim)
   --   Where ListNumberStyle, ListNumberDelim) are tags
-  local start, style, delim = table.unpack(listattrs)
+  local start, style, delim = pl.utils.unpack(listattrs)
   local display = pandocListNumberStyleTags[style.t]
   local delimiters = pandocListNumberDelimTags[delim.t]
   local options = {
@@ -302,7 +302,7 @@ local pandocAlignmentTags = {
 
 -- Cell Attr Alignment RowSpan:Int ColSpan:Int [Block]
 local function pandocCell (cell, colalign)
-  local _, align, rowspan, colspan, blocks = table.unpack(cell)
+  local _, align, rowspan, colspan, blocks = pl.utils.unpack(cell)
   if rowspan ~= 1 then
     -- Not doable without pain, ptable has cell splitting but no row spanning.
     -- We'd have to handle this very differently.
@@ -491,7 +491,7 @@ end
 Pandoc.Link = function (attributes, inlines, target) -- attributes, inlines, target
   local options = pandocAttributes(attributes)
   -- Target = (Url : Text, Title : Text)
-  local uri, _ = table.unpack(target) -- uri, title (unused too?)
+  local uri, _ = pl.utils.unpack(target) -- uri, title (unused too?)
   options.src = uri
   local content = pandocAstParse(inlines)
   return utils.createCommand("markdown:internal:link", options, content)
@@ -502,7 +502,7 @@ Pandoc.Image = function (attributes, inlines, target) -- attributes, inlines, ta
   local options = pandocAttributes(attributes)
   local content = pandocAstParse(inlines)
   -- Target = (Url : Text, Title : Text)
-  local uri, _ = table.unpack(target)
+  local uri, _ = pl.utils.unpack(target)
   options.src = uri
   return utils.createCommand("markdown:internal:image", options, content)
 end
