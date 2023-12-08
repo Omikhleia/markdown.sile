@@ -1,32 +1,19 @@
-std = "max"
+std = "min+sile"
 include_files = {
   "**/*.lua",
-  "sile.in",
   "*.rockspec",
   ".busted",
   ".luacheckrc"
 }
 exclude_files = {
-  "benchmark-*",
-  "compare-*",
-  "sile-*",
   "lua_modules",
-  "lua-libraries",
+  -- "lua-libraries",
   ".lua",
   ".luarocks",
   ".install"
 }
 files["**/*_spec.lua"] = {
   std = "+busted"
-}
-globals = {
-  "SILE",
-  "SU",
-  "luautf8",
-  "pl",
-  "fluent",
-  "SYSTEM_SILE_PATH",
-  "SHARED_LIB_EXT"
 }
 max_line_length = false
 ignore = {
