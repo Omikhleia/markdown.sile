@@ -166,7 +166,7 @@ parsers.attrvalue   = (parsers.dquote
                       * parsers.squote)
                     + C((parsers.anyescaped - parsers.dquote - parsers.space - P("}"))^1)
 
-parsers.attrpair    = Cg(C((parsers.attrid)^1)
+parsers.attrpair    = Cg(C(parsers.attrid)
                       * parsers.optionalspace * parsers.equal * parsers.optionalspace
                       * parsers.attrvalue)
                       * parsers.optionalspace^-1
@@ -1221,12 +1221,11 @@ function M.new(writer, options)
                                    parsers.doubletildes)
                    ) / writer.strikeout
 
-  larsers.Mark
-                 = ( parsers.between(parsers.Inline, parsers.doubleequals,
-                                   parsers.doubleequals)
-                   ) / function (inlines, x, y)
-                        return writer.span(inlines, { class="mark" })
-                       end
+  larsers.Mark = parsers.between(parsers.Inline, parsers.doubleequals,
+                                 parsers.doubleequals)
+               / function (inlines)
+                   return writer.span(inlines, { class="mark" })
+                 end
 
   larsers.Span   = ( parsers.between(parsers.Inline, parsers.lbracket,
                                    parsers.rbracket) ) * ( parsers.attributes )
@@ -1402,7 +1401,8 @@ function M.new(writer, options)
   larsers.Blockquote  = Cs((((parsers.leader * parsers.more * parsers.space^-1)/""
                              * parsers.linechar^0 * parsers.newline)^1
                             * (-(parsers.leader * parsers.more
-                                + parsers.blankline + larsers.fenced_div_out) * parsers.linechar^1
+                                + parsers.blankline
+                                + larsers.fenced_div_out) * parsers.linechar^1
                               * parsers.newline)^0 * parsers.blankline^0
                            )^1) / parse_blocks / writer.blockquote
 
