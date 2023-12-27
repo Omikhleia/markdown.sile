@@ -157,7 +157,7 @@ local function extractLineBlockLevel (inlines)
     -- Or any other inline content if there are not leading spaces.
     local line = f.c
     line = line:gsub("^[ ]+", function (match) -- Warning, U+00A0 here.
-      level = utf8.len(match)
+      level = luautf8.len(match)
       return ""
     end)
     f.c = line -- replace
