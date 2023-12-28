@@ -40,10 +40,13 @@ local escape_char_map = {
   [ "\t" ] = "t",
 }
 
-local escape_char_map_inv = { [ "/" ] = "/" }
-for k, v in pairs(escape_char_map) do
-  escape_char_map_inv[v] = k
-end
+-- BEGIN EXTENSION DIDIER 20231227
+-- This escape_char_map_inv is not used...
+-- local escape_char_map_inv = { [ "/" ] = "/" }
+-- for k, v in pairs(escape_char_map) do
+--   escape_char_map_inv[v] = k
+-- end
+-- END EXTENSION DIDIER 20231227
 
 
 local function escape_char(c)

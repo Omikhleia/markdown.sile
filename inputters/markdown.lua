@@ -53,7 +53,7 @@ local function extractLineBlockLevel (inlines)
   if f and type(f) == "string" then
     local line = f
     line = line:gsub("^[ ]+", function (match) -- Warning, U+00A0 here.
-      level = utf8.len(match)
+      level = luautf8.len(match)
       return ""
     end)
     if line == "" then -- and #inlines == 1 then
