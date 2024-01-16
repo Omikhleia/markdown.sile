@@ -1,10 +1,10 @@
---- Common commands for Markdown support in SILE, when there is no
--- direct mapping to existing commands or packages.
+--- Common commands for Markdown, Djot and Pandoc AST support in SILE,
+-- when there is no direct mapping to existing commands or packages.
 --
 -- Split in a standalone package so that it can be reused and
 -- generalized somewhat independently from the undelying parsing code.
 --
--- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @copyright License: MIT (c) 2022-2024 Omikhleia
 -- @module packages.markdown.commands
 --
 require("silex.lang")
@@ -91,6 +91,50 @@ local function implicitFigure (paracontent)
     end
   end
   return image, caption
+end
+
+-- AST helper to find "initial text node" in content.
+-- Due to the way commands are build, we might have groups, hence the recursion.
+-- (tricky) This assumes a lot of knowledge about the AST...
+-- We know our Djot and Markdown output ASTs that are always structured
+-- the expected way. A general SILE AST traversal would be more complex,
+-- possibly with empty groups etc.
+local function initialTextNode(content)
+  if type(content) == "table" and #content >= 1 then
+    if type(content[1]) == "string" then
+      return content[1], content
+    elseif not content[1].command then
+      local text, node = initialTextNode(content[1])
+      return text, node
+    end
+  end
+end
+
+-- AST helper for the "speaker change" detection in dialogues.
+-- (tricky) This assumes a lot of knowledge about the AST...
+-- Note: modifies the content AST in-place.
+local function checkAndApplySpeakerChange (content)
+  if not SILE.settings:get("markdown.dialog") then return end
+
+  -- In French (at least), an em-dash at the very start of a paragraph is
+  -- considered as a speaker change.
+  -- In such case, the next space shall be a *fixed* inter-word space so that the
+  -- justification doesn't change the way sentences start from line to line.
+  -- The approach here is a bit naive, replacing the space only if it occurs
+  -- in the same text string.
+  local text, node = initialTextNode(content)
+  if node then
+    local dialog = false
+    local dialogue = text:gsub("^—[  ]+", function () --  Warning, space and U+00A0 here.
+      dialog = true
+      return ""
+    end)
+    if dialog then
+      node[1] = dialogue
+      table.insert(node, 1, "—")
+      table.insert(node, 2, createCommand("markdown:internal:nbsp", { class = "fixed" }))
+    end
+  end
 end
 
 -- Default color theme for syntax highlighted Lua code blocks
@@ -194,6 +238,12 @@ function package.declareSettings (_)
     default = false,
     help = "Fixed-width non-breakable space."
   })
+  SILE.settings:declare({
+    parameter = "markdown.dialog",
+    type = "boolean",
+    default = true,
+    help = "Em-dash starting a paragraph considered as a speaker change."
+  })
 end
 
 function package:registerCommands ()
@@ -230,6 +280,7 @@ function package:registerCommands ()
         })
       end
     else
+      checkAndApplySpeakerChange(content)
       SILE.process(content)
       -- See comment on the lunamark writer layout option. With the default layout,
       -- this \par was not necessary... We switched to "compact" layout, to decide
