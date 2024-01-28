@@ -63,6 +63,7 @@ files["lua-libraries/djot"] = {
 }
 max_line_length = false
 ignore = {
-  "581" -- operator order warning doesn't account for custom table metamethods
+  "581", -- operator order warning doesn't account for custom table metamethods
+  "212/self", -- unused argument self: counterproductive warning
 }
 -- vim: ft=lua

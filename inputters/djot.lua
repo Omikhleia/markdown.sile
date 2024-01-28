@@ -3,13 +3,44 @@
 -- Using the djot Lua library for parsing.
 -- Reusing the common commands initially made for the "markdown" inputter/package.
 --
--- @copyright License: MIT (c) 2023 Omikhleia
+-- @copyright License: MIT (c) 2023-2024 Omikhleia, Didier Willis
 -- @module inputters.djot
 --
+require("silex.ast") -- Compatibility layer
+
 local utils = require("packages.markdown.utils")
-local ast = require("silex.ast")
 local createCommand, createStructuredCommand
-        = ast.createCommand, ast.createStructuredCommand
+        = SU.ast.createCommand, SU.ast.createStructuredCommand
+
+local function node_pos (node)
+  if not node._sp_ then
+    local p = node.pos and node.pos[1]
+    if not p then
+      return nil
+    end
+    local lno, col, pos = p:match("^(%d+):(%d+):(%d+)$")
+    node._sp_ = { lno = tonumber(lno), col = tonumber(col), pos = tonumber(pos) }
+  end
+  return node._sp_
+end
+
+-- Extend SILE's trace stack system
+local djotFrame = pl.class(SILE.traceStack.defaultFrame)
+
+function djotFrame:_init (node)
+  self.file = SILE.currentlyProcessingFile
+  self.node = node
+  local sp = node_pos(node)
+  if sp then
+    self.lno = sp.lno or 0
+    self.col = sp.col or 0
+    self.pos = sp.pos or 0
+  end
+end
+
+function djotFrame:__tostring ()
+  return self.node.t
+end
 
 -- DJOT AST CONVERTER TO SILE AST
 
@@ -39,15 +70,6 @@ function Renderer:render (doc)
   self.references = doc.references
   self.footnotes = doc.footnotes
   return self[doc.t](self, doc)
-end
-
-function Renderer.render_pos (_, node)
-  local p = node.pos and node.pos[1]
-  if not p then
-    return nil
-  end
-  local lno, col, pos = p:match("^(%d+):(%d+):(%d+)$")
-  return { lno = tonumber(lno), col = tonumber(col), pos = tonumber(pos) }
 end
 
 function Renderer:matchConditions(node)
@@ -95,8 +117,10 @@ function Renderer:render_children (node)
         self.tight = node.tight
       end
       for i=1, #node.c do
-        if self:matchConditions(node.c[i]) then
-          local content = self[node.c[i].t](self, node.c[i])
+        local child = node.c[i]
+        local pId = SILE.traceStack:pushFrame(djotFrame(child, self.xxx))
+        if self:matchConditions(child) then
+          local content = self[child.t](self, child)
           -- Simplify outputs by collating strings
           if type(content) == "string" and type(out[#out]) == "string" then
             out[#out] = out[#out] .. content
@@ -109,6 +133,7 @@ function Renderer:render_children (node)
               out[#out+1] = content[1]
             end
           end
+          SILE.traceStack:pop(pId)
         end
       end
       if node.tight ~= nil then
@@ -117,10 +142,19 @@ function Renderer:render_children (node)
     end
   end)
   if not ok then
+    -- Here we shall not use SU.error...
     if err:find("stack overflow") then
-      SU.warn("DJOT: DEEPLY NESTED CONTENT OMITTED")
+      -- The HTML example had a warning here, but it is dubious
+      -- that we can just try to ignore content.
+      error("Djot content too deeply nested", 2)
+    elseif err:find("paperSize") then
+       -- HACK
+       -- SILE 0.14.16 is still unimaginative how to avoid crashing the outputter
+       -- and SU.error raises another error in the process.
+      SILE.scratch.caughterror = true
+      error("", 2)
     else
-      SU.error(err)
+      error(err, 2) -- rethrow
     end
   end
   --  Simplify output by removing useless grouping
@@ -135,7 +169,7 @@ function Renderer:doc (node)
 end
 
 function Renderer:raw_block (node)
-  return createCommand("markdown:internal:rawblock", { format = node.format }, node.s, self:render_pos(node))
+  return createCommand("markdown:internal:rawblock", { format = node.format }, node.s, node_pos(node))
 end
 
 function Renderer:para (node)
@@ -145,7 +179,7 @@ function Renderer:para (node)
   end
 
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   -- interpret as a div when containing attributes
   if node.attr then
     return createCommand("markdown:internal:div", node.attr, content, pos)
@@ -155,7 +189,7 @@ end
 
 function Renderer:blockquote (node)
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   local out
   if node.caption then
     local caption = self:render_children(node.caption)
@@ -176,7 +210,7 @@ end
 function Renderer:div (node)
   local options = node.attr or {}
   local content = self:render_children(node)
-  return createCommand("markdown:internal:div", options, content, self:render_pos(node))
+  return createCommand("markdown:internal:div", options, content, node_pos(node))
 end
 
 function Renderer:section (node)
@@ -199,12 +233,12 @@ function Renderer:heading (node)
   -- But in nested blocks (e.g. in divs), the id is set on the header.
   options.id = options.id or self.sectionid
   options.level = node.level + self.shift_headings
-  return createCommand("markdown:internal:header", options, content, self:render_pos(node))
+  return createCommand("markdown:internal:header", options, content, node_pos(node))
 end
 
 function Renderer:thematic_break (node)
   local options = node.attr or {}
-  return createCommand("markdown:internal:thematicbreak", options, nil, self:render_pos(node))
+  return createCommand("markdown:internal:thematicbreak", options, nil, node_pos(node))
 end
 
 function Renderer:code_block (node)
@@ -223,7 +257,7 @@ function Renderer:code_block (node)
       end
     end
   end
-  return createCommand("markdown:internal:codeblock", options, node.s, self:render_pos(node))
+  return createCommand("markdown:internal:codeblock", options, node.s, node_pos(node))
 end
 
 function Renderer:table (node)
@@ -231,7 +265,7 @@ function Renderer:table (node)
   if not node.c then
     SU.error("Table without content (should not occur)")
   end
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   -- extract caption, check rows
   local rows = {}
   local caption
@@ -280,14 +314,14 @@ function Renderer:row (node)
   local options = {}
   local content = self:render_children(node)
   options.background = node.head and "#eee"
-  return createStructuredCommand("row", options, content, self:render_pos(node))
+  return createStructuredCommand("row", options, content, node_pos(node))
 end
 
 function Renderer:cell (node)
   local options = {}
   local content = self:render_children(node)
   options.halign = node.align
-  return createStructuredCommand("cell", options, content, self:render_pos(node))
+  return createStructuredCommand("cell", options, content, node_pos(node))
 end
 
 function Renderer.caption (_, _)
@@ -304,7 +338,7 @@ local listStyle = {
 }
 
 function Renderer:list (node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   local sty = node.style
   if sty == "*" or sty == "+" or sty == "-" then
     local content = self:render_children(node)
@@ -375,17 +409,17 @@ function Renderer:list_item (node)
   options.bullet = bullet
 
   local content = self:render_children(node)
-  return createCommand("item", options, content, self:render_pos(node))
+  return createCommand("item", options, content, node_pos(node))
 end
 
 function Renderer:term (node)
   local content = self:render_children(node)
-  return createCommand("term", {}, content, self:render_pos(node))
+  return createCommand("term", {}, content, node_pos(node))
 end
 
 function Renderer:definition (node)
   local content = self:render_children(node)
-  return createCommand("desc", {}, content, self:render_pos(node))
+  return createCommand("desc", {}, content, node_pos(node))
 end
 
 function Renderer:definition_list_item (node)
@@ -408,17 +442,17 @@ function Renderer:footnote_reference (node)
   local content = self:render_children(node_footnote)
   local options = node_footnote.attr or {}
   options.id = options.id or label -- use note label as id if not specified
-  return createCommand("markdown:internal:footnote", options, content, self:render_pos(node))
+  return createCommand("markdown:internal:footnote", options, content, node_pos(node))
 end
 
 function Renderer:raw_inline (node)
-  return createCommand("markdown:internal:rawinline", { format = node.format }, node.s, self:render_pos(node))
+  return createCommand("markdown:internal:rawinline", { format = node.format }, node.s, node_pos(node))
 end
 
 function Renderer:str (node)
   if node.attr then
     -- add a span, if needed, to contain attribute on a bare string:
-    return createCommand("markdown:internal:span", node.attr, node.s, self:render_pos(node))
+    return createCommand("markdown:internal:span", node.attr, node.s, node_pos(node))
   end
   return node.s
 end
@@ -433,13 +467,13 @@ end
 
 function Renderer:nbsp (node)
   local options = node.attr or {}
-  return createCommand("markdown:internal:nbsp", options, nil, self:render_pos(node))
+  return createCommand("markdown:internal:nbsp", options, nil, node_pos(node))
 end
 
 function Renderer:verbatim (node)
   -- TODO options/attrs... but we need more work on pandocast/markdown and a replacement for \code
   local options = {}
-  return createCommand("code", options, node.s, self:render_pos(node))
+  return createCommand("code", options, node.s, node_pos(node))
 end
 
 function Renderer:link (node)
@@ -458,7 +492,7 @@ function Renderer:link (node)
   end
   -- link's attributes override reference's:
   djotast.copy_attributes(options, node.attr)
-  return createCommand("markdown:internal:link", options, content, self:render_pos(node))
+  return createCommand("markdown:internal:link", options, content, node_pos(node))
 end
 
 Renderer.url = Renderer.link
@@ -481,20 +515,20 @@ function Renderer:image (node)
   end
   -- image's attributes override reference's:
   djotast.copy_attributes(options, node.attr)
-  return createCommand("markdown:internal:image", options, content, self:render_pos(node))
+  return createCommand("markdown:internal:image", options, content, node_pos(node))
 end
 
 function Renderer:span (node)
   local options = node.attr or {}
   local content = self:render_children(node)
-  return createCommand("markdown:internal:span", options, content, self:render_pos(node))
+  return createCommand("markdown:internal:span", options, content, node_pos(node))
 end
 
 function Renderer:mark (node)
   local options = node.attr or {}
   local content = self:render_children(node)
   djotast.insert_attribute(options, "class", "mark")
-  return createCommand("markdown:internal:span", options, content, self:render_pos(node))
+  return createCommand("markdown:internal:span", options, content, node_pos(node))
 end
 
 function Renderer:insert (node)
@@ -502,7 +536,7 @@ function Renderer:insert (node)
   local out = { "⟨", content, "⟩" }
   if node.attr then
     -- Add a div when containing attributes
-    return createCommand("markdown:internal:span", node.attr, out, self:render_pos(node))
+    return createCommand("markdown:internal:span", node.attr, out, node_pos(node))
   end
   return out
 end
@@ -512,7 +546,7 @@ function Renderer:delete (node)
   local out = { "{", content, "}" }
   if node.attr then
     -- Add a div when containing attributes
-    return createCommand("markdown:internal:span", node.attr, out, self:render_pos(node))
+    return createCommand("markdown:internal:span", node.attr, out, node_pos(node))
   end
   return out
 end
@@ -532,7 +566,7 @@ end
 
 function Renderer:subscript (node)
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   local fake, hasOtherAttrs = extractAttrValue(node.attr, "fake")
   local out = createCommand("textsubscript", { fake = fake }, content, pos)
   if hasOtherAttrs then
@@ -544,7 +578,7 @@ end
 
 function Renderer:superscript (node)
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   local fake, hasOtherAttrs = extractAttrValue(node.attr, "fake")
   local out = createCommand("textsuperscript", { fake = fake }, content, pos)
   if hasOtherAttrs then
@@ -556,7 +590,7 @@ end
 
 function Renderer:emph (node)
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   if node.attr then
     -- Add a span for attributes
     -- Applied first before the font change, so that font-specific attributes
@@ -568,7 +602,7 @@ end
 
 function Renderer:strong (node)
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   if node.attr then
     -- Add a span for attributes
     -- Applied first before the font change, so that font-specific attributes
@@ -580,7 +614,7 @@ end
 
 function Renderer:double_quoted (node)
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   content = createCommand("doublequoted", {}, content, pos)
   if node.attr then
     -- Add a span for attributes
@@ -594,7 +628,7 @@ end
 
 function Renderer:single_quoted (node)
   local content = self:render_children(node)
-  local pos = self:render_pos(node)
+  local pos = node_pos(node)
   content = createCommand("singlequoted", {}, content, pos)
   if node.attr then
     -- Add a span for attributes
@@ -693,7 +727,7 @@ function Renderer:symbol (node)
     if node.attr then
       if type(content) ~= "table" or content._single_ or not node._standalone_ then
         -- Add a span for attributes on the inline variant.
-        content = createCommand("markdown:internal:span", node.attr, content, self:render_pos(node))
+        content = createCommand("markdown:internal:span", node.attr, content, node_pos(node))
       else
         -- Those should rather come from the paragraph
         SU.warn("Attributes ignored on block-like symbol '" .. node.alias .. "'")
@@ -706,7 +740,7 @@ function Renderer:symbol (node)
       local text = self.metadata[node.alias]
       if node.attr then
         -- Add a span for attributes
-        return createCommand("markdown:internal:span", node.attr, text, self:render_pos(node))
+        return createCommand("markdown:internal:span", node.attr, text, node_pos(node))
       end
       return text
     end
@@ -718,7 +752,7 @@ function Renderer:symbol (node)
       end
       return symbol.render(node)
     end
-    local pos = self:render_pos(node)
+    local pos = node_pos(node)
     if node.alias:match("U%+[0-9A-F]+") then
       local content = {
         createCommand("use", { module = "packages.unichar" }),
@@ -745,7 +779,7 @@ function Renderer:math (node)
   if string.find(node.attr.class, "display") then
     mode = "display"
   end
-  return createCommand("markdown:internal:math", { mode = mode }, { node.s }, self:render_pos(node))
+  return createCommand("markdown:internal:math", { mode = mode }, { node.s }, node_pos(node))
 end
 
 -- SILE INPUTTER LOGIC
@@ -766,8 +800,21 @@ end
 
 function inputter:parse (doc)
   local djot = require("djot")
-  local djast = djot.parse(doc, true, function (warning) SU.warn(warning.message) end)
-  local renderer = Renderer(self.options)
+  local djast = djot.parse(doc, true, function (warning)
+    local text = doc:sub(1, warning.pos)
+    local ep = luautf8.len(text) -- byte to utf8 position
+    local sp = ep
+    while sp > ep - 16 do -- at most 16 characters...
+      local current = luautf8.sub(doc, sp, sp)
+      if current:match("[\n\r]") then
+        break -- ...on same line
+      end
+      sp = sp - 1
+    end
+    local snippet = luautf8.sub(doc, sp + 1, ep)
+    SU.warn(warning.message .. " near [[…" .. snippet .. "]]")
+  end)
+  local renderer = Renderer(self.options, doc)
   local tree = renderer:render(djast)
 
   -- The "writer" returns a SILE AST.

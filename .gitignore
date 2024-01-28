@@ -45,3 +45,6 @@ luac.out
 tests/*.pdf
 tests/*.debug
 
+# I often have crappy test files here
+temp/*
+

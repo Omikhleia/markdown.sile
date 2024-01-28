@@ -9,9 +9,15 @@
 -- Using the LuaJSON library for parsing.
 -- Reusing the common commands initially made for the "markdown" inputter/package.
 --
--- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
 -- @module inputters.pandocast
 --
+require("silex.ast") -- Compatibility layer
+
+local utils = require("packages.markdown.utils")
+local createCommand, createStructuredCommand
+        = SU.ast.createCommand, SU.ast.createStructuredCommand
+
 local Pandoc = {
    API_VERSION = { 1, 22, 0 } -- Supported API version (semver)
 }
@@ -38,11 +44,6 @@ local function checkAstSemver(version)
     .. ", there could be issues.")
   end
 end
-
-local utils = require("packages.markdown.utils")
-local ast = require("silex.ast")
-local createCommand, createStructuredCommand
-        = ast.createCommand, ast.createStructuredCommand
 
 local Renderer = pl.class()
 
