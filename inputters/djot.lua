@@ -118,7 +118,7 @@ function Renderer:render_children (node)
       end
       for i=1, #node.c do
         local child = node.c[i]
-        local pId = SILE.traceStack:pushFrame(djotFrame(child, self.xxx))
+        local pId = SILE.traceStack:pushFrame(djotFrame(child))
         if self:matchConditions(child) then
           local content = self[child.t](self, child)
           -- Simplify outputs by collating strings
