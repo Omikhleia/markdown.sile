@@ -4,17 +4,19 @@
 -- Split in a standalone package so that it can be reused and
 -- generalized somewhat independently from the undelying parsing code.
 --
--- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
 -- @module packages.markdown.commands
 --
-require("silex.lang")
+require("silex.lang") -- Compatibility layer
+require("silex.ast")  -- Compatibility layer
+
 local utils = require("packages.markdown.utils")
 local hasClass = utils.hasClass
-local ast = require("silex.ast")
+
 local createCommand, createStructuredCommand,
-      extractFromTree, subContent
-        = ast.createCommand, ast.createStructuredCommand,
-          ast.extractFromTree, ast.subContent
+      removeFromTree, subContent
+        = SU.ast.createCommand, SU.ast.createStructuredCommand,
+          SU.ast.removeFromTree, SU.ast.subContent
 
 local base = require("packages.base")
 
@@ -717,7 +719,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned blockquote environment")
     end
-    local title = extractFromTree(content, "caption")
+    local title = removeFromTree(content, "caption")
 
     if SILE.Commands["epigraph"] then -- asssuming the implementation from resilient.epigraph.
       if title then
@@ -796,7 +798,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned table environment")
     end
-    local caption = extractFromTree(content, "caption")
+    local caption = removeFromTree(content, "caption")
 
     SILE.process(content)
     if caption then
@@ -814,8 +816,8 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned table environment")
     end
-    local term = extractFromTree(content, "term")
-    local desc = extractFromTree(content, "desc")
+    local term = removeFromTree(content, "term")
+    local desc = removeFromTree(content, "desc")
 
     SILE.typesetter:leaveHmode()
     SILE.call("strong", {}, term)
@@ -834,7 +836,7 @@ Please consider using a resilient-compatible class!]])
     if type(content) ~= "table" then
       SU.error("Expected a table AST content in captioned figure environment")
     end
-    local caption = extractFromTree(content, "caption")
+    local caption = removeFromTree(content, "caption")
 
     SILE.call("smallskip")
     SILE.call("center", {}, function ()

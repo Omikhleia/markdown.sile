@@ -3,13 +3,14 @@
 -- Using the djot Lua library for parsing.
 -- Reusing the common commands initially made for the "markdown" inputter/package.
 --
--- @copyright License: MIT (c) 2023 Omikhleia
+-- @copyright License: MIT (c) 2023-2024 Omikhleia, Didier Willis
 -- @module inputters.djot
 --
+require("silex.ast") -- Compatibility layer
+
 local utils = require("packages.markdown.utils")
-local ast = require("silex.ast")
 local createCommand, createStructuredCommand
-        = ast.createCommand, ast.createStructuredCommand
+        = SU.ast.createCommand, SU.ast.createStructuredCommand
 
 -- DJOT AST CONVERTER TO SILE AST
 

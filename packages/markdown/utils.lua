@@ -1,8 +1,8 @@
 --- A few utilities for the markdown / pandocast inputters
 --
 --
-local ast = require("silex.ast")
-local createCommand = ast.createCommand
+require("silex.ast") -- Compatibility layer
+local createCommand = SU.ast.createCommand
 
 --- Some utility functions.
 -- @section utils

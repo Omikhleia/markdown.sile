@@ -2,18 +2,19 @@
 --
 -- Using the lunamark Lua library for parsing.
 --
--- @copyright License: MIT (c) 2022-2023 Omikhleia
+-- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
 -- @module inputters.markdown
 --
+require("silex.ast")
+
 local utils = require("packages.markdown.utils")
-local ast = require("silex.ast")
 local createCommand, createStructuredCommand
-        = ast.createCommand, ast.createStructuredCommand
+        = SU.ast.createCommand, SU.ast.createStructuredCommand
 
 local function simpleCommandWrapper (name)
   -- Simple wrapper argound a SILE command
   return function (content)
-    return createCommand (name, {}, content)
+    return createCommand(name, {}, content)
   end
 end
 
