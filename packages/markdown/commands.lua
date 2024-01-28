@@ -147,12 +147,32 @@ function package:loadPackageAlt(resilientpack, legacypack)
   end
 end
 
+-- For feature detection.
+-- NOTE: The previous implementation was clever;
+--   local ok, ResilientBase = pcall(require, 'classes.resilient.base')
+--   return ok and self.class:is_a(ResilientBase)
+-- However this loads the class, which loads all the silex extensions, even if
+-- the class is not used...
+-- Enforcing the silex extensions is not what we wanted.
+-- So we are back to a more naive implementation, checking the class hierarchy
+-- by name.
+-- This is lame and knows too much about internals, but heh.
+local function isResilientClass(cl)
+  while cl do
+    if cl._name == "resilient.base" then
+      return true
+    end
+    cl = cl._base
+  end
+  return false
+end
+
 function package:_init (_)
   base._init(self)
 
   -- Check if document class is a resilient class or derived from one
-  local ok, ResilientBase = pcall(require, 'classes.resilient.base')
-  self.isResilient = ok and self.class:is_a(ResilientBase)
+  self.isResilient = isResilientClass(self.class)
+  SU.debug("markdown", self.isResilient and "Used in a resilient class" or "Used in a non-resilient class")
 
   -- Only load low-level packages (= utilities)
   -- The class should be responsible for loading the appropriate higher-level
