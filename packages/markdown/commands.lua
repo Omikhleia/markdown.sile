@@ -1,4 +1,4 @@
---- Common commands for Markdown support in SILE, when there is no
+--- Common commands for Markdown and Djot support in SILE, when there is no
 -- direct mapping to existing commands or packages.
 --
 -- Split in a standalone package so that it can be reused and
@@ -149,6 +149,11 @@ function package:loadPackageAlt(resilientpack, legacypack)
   end
 end
 
+function package:loadPackageOptional(pack)
+  local ok, _ = pcall(function () return self:loadPackage(pack) end)
+  SU.debug("markdown", "Optional package "..pack.. (ok and " loaded" or " not loaded"))
+end
+
 -- For feature detection.
 -- NOTE: The previous implementation was clever;
 --   local ok, ResilientBase = pcall(require, 'classes.resilient.base')
@@ -197,7 +202,8 @@ function package:_init (_)
   self:loadPackageAlt("resilient.verbatim", "verbatim")
 
   -- Optional packages
-  pcall(function () return self:loadPackage("couyards") end)
+  self:loadPackageOptional("couyards")
+  self:loadPackageOptional("piecharts")
 
   -- Other conditional packages
   if self.isResilient then
@@ -621,52 +627,65 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Captioned figure in Markdown (internal)")
 
+  -- Code blocks
+
+  self:registerCommand("markdown:internal:lua-highlighter", function (options, content)
+    -- Naive syntax highlighting for Lua, until we have a more general solution
+    local tree = {}
+    if options.id then
+      tree[#tree+1] = createCommand("label", { marker = options.id })
+    end
+    local toks = pl.lexer.lua(content[1], {})
+    for tag, v in toks do
+      local out = tostring(v)
+      if tag == "string" then
+        -- rebuild string quoting...
+        out = out:match('"') and ("'"..out.."'") or ('"'..out..'"')
+      end
+      if naiveLuaCodeTheme[tag] then
+        local cascade = CommandCascade()
+        if naiveLuaCodeTheme[tag].color then
+          cascade:call("color", { color = naiveLuaCodeTheme[tag].color })
+        end
+        if naiveLuaCodeTheme[tag].bold then
+          cascade:call("strong", {})
+        end
+        if naiveLuaCodeTheme[tag].italic then
+          cascade:call("em", {})
+        end
+        tree[#tree+1] = cascade:tree({ out })
+      else
+        tree[#tree+1] = SU.utf8charfromcodepoint("U+200B")..out -- HACK with ZWSP to trick the typesetter respecting standalone linebreaks
+      end
+    end
+    SILE.call("verbatim", {}, tree)
+  end, "Lua code block naive syntax highlighting in Markdown or Djot (internal)")
+
   self:registerCommand("markdown:internal:codeblock", function (options, content)
     local render = SU.boolean(options.render, true)
-    if render and hasClass(options, "dot") then
-      local handler = SILE.rawHandlers["embed"]
-      if not handler then
-        -- Shouldn't occur since we loaded the embedders package
-        SU.error("No inline handler for image embedding")
-      end
-      options.format = options.class
-      handler(options, content)
-    elseif render and hasClass(options, "djot") then
-      SILE.processString(SU.contentToString(content), "djot", nil, options)
-    elseif render and hasClass(options, "markdown") then
-      SILE.processString(SU.contentToString(content), "markdown", nil, options)
-    elseif hasClass(options, "lua") then
-      -- Naive syntax highlighting for Lua, until we have a more general solution
-      local tree = {}
-      if options.id then
-        tree[#tree+1] = createCommand("label", { marker = options.id })
-      end
-      local toks = pl.lexer.lua(content[1], {})
-      for tag, v in toks do
-        local out = tostring(v)
-        if tag == "string" then
-          -- rebuild string quoting...
-          out = out:match('"') and ("'"..out.."'") or ('"'..out..'"')
-        end
-        if naiveLuaCodeTheme[tag] then
-          local cascade = CommandCascade()
-          if naiveLuaCodeTheme[tag].color then
-            cascade:call("color", { color = naiveLuaCodeTheme[tag].color })
-          end
-          if naiveLuaCodeTheme[tag].bold then
-            cascade:call("strong", {})
-          end
-          if naiveLuaCodeTheme[tag].italic then
-            cascade:call("em", {})
-          end
-          tree[#tree+1] = cascade:tree({ out })
-        else
-          tree[#tree+1] = SU.utf8charfromcodepoint("U+200B")..out -- HACK with ZWSP to trick the typesetter respecting standalone linebreaks
+    local processed = false
+    if hasClass(options, "lua") then
+      -- Comes first as we don't want SILE raw handler to take over here.
+      -- (There's no such raw handler in the standard SILE distribution currently,
+      -- but let's be cautious.)
+      SILE.call("markdown:internal:lua-highlighter", options, content)
+      processed = true
+    elseif render then
+      local handler = utils.hasRawHandler(options)
+      if handler then
+        handler(options, content)
+        processed = true
+      else
+        local format, embed = utils.hasEmbedHandler(options)
+        if format then
+          options.format = format
+          embed(options, content)
+          processed = true
         end
       end
-      SILE.call("verbatim", {}, tree)
-    else
-      -- Just raw unstyled verbatim
+    end
+    if not processed then
+      -- Default case: just raw unstyled verbatim text
       SILE.call("verbatim", {},
         options.id and {
           createCommand("label", { marker = options.id }),
@@ -676,7 +695,7 @@ Please consider using a resilient-compatible class!]])
         }
       )
     end
-    SILE.call("smallskip")
+    SILE.call("par")
   end, "(Fenced) code block in Markdown (internal)")
 
   self:registerCommand("markdown:internal:lineblock", function (_, content)
@@ -893,7 +912,7 @@ Please consider using a resilient-compatible class!]])
 end
 
 package.documentation = [[\begin{document}
-A helper package for Markdown processing, providing common hooks and fallback commands.
+A helper package for Markdown and Djot processing, providing common hooks and fallback commands.
 
 It is not intended to be used alone.
 \end{document}]]
