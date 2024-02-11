@@ -20,6 +20,8 @@ Each of them has its advantages, and a few limitations as well.
 
 ## Installation
 
+### Standard installation
+
 This module collection requires SILE v0.14 or upper.
 
 Installation relies on the **luarocks** package manager.
@@ -30,6 +32,37 @@ luarocks install markdown.sile
 ```
 
 Refer to the SILE manual for more detailed 3rd-party package installation information.
+
+### Recommended additional packages
+
+The following package collections are not strictly required, but they are recommended for a better experience.
+When installed, they provide additional features:
+
+ - The [**couyards.sile**](https://github.com/Omikhleia/couyards.sile) collection provides additional support for fancy thematic breaks.
+ - The [**piecharts**](https://github.com/Omikhleia/piecharts.sile) collection provides support for rendering pie charts from CSV data.
+
+To install them, use the following commands:
+
+```bash
+luarocks install couyards.sile
+luarocks install piecharts.sile
+```
+
+Also recommended is the **resilient.sile** collection, which provides a set of classes and packages for a more advanced usage.
+It is described below in §[](#usage-with-the-resilient-collection).
+Note that it takes care of installing the above collections as well, so you don't have to install them separately if you go the "resilient" way.
+
+### Recommended additional software {#recommended-additional-software}
+
+This module also installs the [**embedders.sile**](https://github.com/Omikhleia/embedders.sile) collection, a general framework for embedding
+images from textual representations, performing their on-the-fly conversion via shell commands.
+
+These require additional software to be installed on your host system, to invoke the necessary conversion commands.
+Please refer to its documentation for more information.
+Typically, this manual illustrates the use of the Graphviz collection of tools to render graphs in the DOT language.
+
+As with anything that relies on invoking external programs on your host system, please be aware of potential security concerns.
+Be cautious with the source of the elements you include in your documents!
 
 ## Usage
 
@@ -54,7 +87,7 @@ This method directly produces a PDF from the input file, using SILE's standard *
 [^intro-book-class]: Actually, it uses a **markdown** class derived from the standard book class and loading the required modules.
 You don't really have to know that, unless you intend to invoke SILE with the `-c` option to specify another class of your choice; in that case you will need to load additional modules explicitly---unless it is a resilient class, of course.
 
-### Usage with the resilient collection
+### Usage with the resilient collection {#usage-with-the-resilient-collection}
 
 To unleash the full potential of this package collection, we recommend that you also install our [**resilient.sile**](https://github.com/Omikhleia/resilient.sile) collection of classes and packages.
 
