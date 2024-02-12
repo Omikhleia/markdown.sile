@@ -33,7 +33,7 @@ luarocks install markdown.sile
 
 Refer to the SILE manual for more detailed 3rd-party package installation information.
 
-### Recommended additional packages
+### Recommended additional packages {#recommended-additional-packages}
 
 The following package collections are not strictly required, but they are recommended for a better experience.
 When installed, they provide additional features:
@@ -124,3 +124,4 @@ Additional thanks to:
 - Simon Cozens, _et al._ concerned, for the early attempts at using **lunamark** with SILE.
 - Vít Novotný, for the good work on lunamark, and the impressive [**witiko/markdown**](https://github.com/Witiko/markdown) package for (La)TeX---a great source of inspiration and a goal of excellence.
 - Caleb Maclennan, for his early work on a Pandoc-to-SILE converter which, though on different grounds, indirectly gave me the idea of the Pandoc AST alternative approach proposed here.
+- John MacFarlane, for the Djot and Markdown libraries which empowers this module.
