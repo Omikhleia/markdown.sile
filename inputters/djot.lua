@@ -192,6 +192,7 @@ function Renderer:blockquote (node)
   local pos = node_pos(node)
   local out
   if node.caption then
+    -- Djot extension: caption supported on blockquotes
     local caption = self:render_children(node.caption)
     out = createStructuredCommand("markdown:internal:captioned-blockquote", node.attr or {}, {
       content,
@@ -210,7 +211,18 @@ end
 function Renderer:div (node)
   local options = node.attr or {}
   local content = self:render_children(node)
-  return createCommand("markdown:internal:div", options, content, node_pos(node))
+  local pos = node_pos(node)
+  local out
+  --- Djot extension: caption supported on div blocks
+  out = createCommand("markdown:internal:div", options, content, pos)
+  if node.caption then
+    local caption = self:render_children(node.caption)
+    out = createStructuredCommand("markdown:internal:captioned-figure", node.attr or {}, {
+      out,
+      createCommand("caption", {}, caption)
+    }, pos)
+  end
+  return out
 end
 
 function Renderer:section (node)
@@ -257,7 +269,15 @@ function Renderer:code_block (node)
       end
     end
   end
-  return createCommand("markdown:internal:codeblock", options, node.s, node_pos(node))
+  local pos = node_pos(node)
+  local out
+  out = createCommand("markdown:internal:codeblock", options, node.s, pos)
+  if node.caption then
+    -- Potential Djot extension (but not yet -- explicit wrapping in a div block might
+    -- be sufficient for now.
+    SU.warn("Caption on code block is not supported (ignored)")
+  end
+  return out
 end
 
 function Renderer:table (node)
