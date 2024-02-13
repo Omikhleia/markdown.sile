@@ -395,7 +395,7 @@ Please consider using a resilient-compatible class!]])
       cascade:call("font", { features = "+smcp" })
     end
     if hasClass(options, "mark") then
-      cascade:call("color", { color = "red" }) -- FIXME TODO We'd need real support
+      cascade:call("markdown:fallback:mark") -- FIXME Better that before... but be more generic and style-aware
     end
     if hasClass(options, "strike") then
       cascade:call("strikethrough")
@@ -830,6 +830,48 @@ Please consider using a resilient-compatible class!]])
     end)
     SILE.call("smallskip")
   end, "A fallback command for Markdown to insert a captioned figure")
+
+  self:registerCommand("markdown:fallback:mark", function (_, content)
+    local leading = SILE.measurement("1bs"):tonumber()
+    local bsratio = utils.computeBaselineRatio()
+    if SILE.typesetter.liner then
+      SILE.typesetter:liner("markdown:fallback:mark", content,
+        function (box, typesetter, line)
+          local outputWidth = SU.rationWidth(box.width, box.width, line.ratio)
+          local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
+          local D = SU.max(box.depth:tonumber(), bsratio * leading)
+          local X = typesetter.frame.state.cursorX
+          SILE.outputter:pushColor(SILE.color("yellow"))
+          SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
+          SILE.outputter:popColor()
+          box:outputContent(typesetter, line)
+        end
+      )
+    else
+      SU.debug("markdown", "Feature detection: No liner, using a simpler fallback for mark")
+      -- Liners are introduced in SILE 0.15.
+      -- Resilient (with the silex compatibility layer) has them too for SILE 0.14.
+      -- For now, also support older versions of SILE when used in a non-resilient context.
+      -- This is not as good, since an hbox can't be broken across lines.
+      local hbox, hlist = SILE.typesetter:makeHbox(content)
+      SILE.typesetter:pushHbox({
+        width = hbox.width,
+        height = hbox.height,
+        depth = hbox.depth,
+        outputYourself = function (box, typesetter, line)
+          local outputWidth = SU.rationWidth(box.width, box.width, line.ratio)
+          local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
+          local D = SU.max(box.depth:tonumber(), bsratio * leading)
+          local X = typesetter.frame.state.cursorX
+          SILE.outputter:pushColor(SILE.color("yellow"))
+          SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
+          SILE.outputter:popColor()
+          hbox:outputYourself(typesetter, line)
+        end
+      })
+      SILE.typesetter:pushHlist(hlist)
+    end
+  end)
 
   -- C. Customizable hooks
 

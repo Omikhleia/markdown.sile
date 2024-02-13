@@ -82,6 +82,24 @@ local function hasEmbedHandler (options)
   return nil
 end
 
+local metrics = require("fontmetrics")
+local bsratiocache = {}
+
+--- Compute the baseline ratio for the current font.
+--- This is a ratio of the descender to the theoretical height of the font.
+--- @return   number   Descender ratio
+local computeBaselineRatio = function ()
+  local fontoptions = SILE.font.loadDefaults({})
+  local bsratio = bsratiocache[SILE.font._key(fontoptions)]
+  if not bsratio then
+    local face = SILE.font.cache(fontoptions, SILE.shaper.getFace)
+    local m = metrics.get_typographic_extents(face)
+    bsratio = m.descender / (m.ascender + m.descender)
+    bsratiocache[SILE.font._key(fontoptions)] = bsratio
+  end
+  return bsratio
+end
+
 --- @export
 return {
   getFileExtension = getFileExtension,
@@ -89,4 +107,5 @@ return {
   hasClass = hasClass,
   hasRawHandler = hasRawHandler,
   hasEmbedHandler = hasEmbedHandler,
+  computeBaselineRatio = computeBaselineRatio,
 }
