@@ -552,23 +552,17 @@ function Renderer:mark (node)
 end
 
 function Renderer:insert (node)
+  local options = node.attr or {}
   local content = self:render_children(node)
-  local out = { "⟨", content, "⟩" }
-  if node.attr then
-    -- Add a div when containing attributes
-    return createCommand("markdown:internal:span", node.attr, out, node_pos(node))
-  end
-  return out
+  djotast.insert_attribute(options, "class", "inserted")
+  return createCommand("markdown:internal:span", options, content, node_pos(node))
 end
 
 function Renderer:delete (node)
+  local options = node.attr or {}
   local content = self:render_children(node)
-  local out = { "{", content, "}" }
-  if node.attr then
-    -- Add a div when containing attributes
-    return createCommand("markdown:internal:span", node.attr, out, node_pos(node))
-  end
-  return out
+  djotast.insert_attribute(options, "class", "deleted")
+  return createCommand("markdown:internal:span", options, content, node_pos(node))
 end
 
 local function extractAttrValue (attr, key)

@@ -148,6 +148,7 @@ function package:_init (_)
   -- Other conditional packages
   if self.isResilient then
     self:loadPackage("resilient.epigraph")
+    self:loadPackage("resilient.defn")
   end
 end
 
@@ -395,16 +396,45 @@ Please consider using a resilient-compatible class!]])
       cascade:call("font", { features = "+smcp" })
     end
     if hasClass(options, "mark") then
-      cascade:call("markdown:fallback:mark") -- FIXME Better that before... but be more generic and style-aware
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-mark",
+        alt = "markdown:fallback:mark",
+        scope = "inline"
+      })
     end
     if hasClass(options, "strike") then
-      cascade:call("strikethrough")
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-strikethrough",
+        alt = "strikethrough",
+        scope = "inline"
+      })
     end
     if hasClass(options, "underline") then
-      cascade:call("underline")
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-underline",
+        alt = "underline",
+        scope = "inline"
+      })
+    end
+    if hasClass(options, "inserted") then
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-insertion",
+        alt = "underline",
+        scope = "inline"
+      })
+    end
+    if hasClass(options, "deleted") then
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-deletion",
+        alt = "strikethrough",
+        scope = "inline"
+      })
     end
     if options["custom-style"] then
-      cascade:call("markdown:custom-style:hook", { name = options["custom-style"], scope = "inline" })
+      cascade:call("markdown:custom-style:hook", {
+        name = options["custom-style"],
+        scope = "inline"
+      })
     end
     if hasClass(options, "nobreak") then
       cascade:call("hbox")
@@ -543,6 +573,8 @@ Please consider using a resilient-compatible class!]])
     -- So we might have a better version provided by a user-class or package.
     -- Otherwise, use our own fallback (with hard-coded choices too, but a least
     -- it does some proper nesting)
+    -- NOTE: The above applies to SILE 0.14.x.
+    -- SILE 0.15 is expected to provide a blockquote environment.
     if not self.hasCommandSupport.blockquote then
       SILE.call("markdown:fallback:blockquote", {}, content)
     else
@@ -848,7 +880,7 @@ Please consider using a resilient-compatible class!]])
         end
       )
     else
-      SU.debug("markdown", "Feature detection: No liner, using a simpler fallback for mark")
+      SU.debug("markdown.commands", "Feature detection: no liner, using a simpler fallback for mark")
       -- Liners are introduced in SILE 0.15.
       -- Resilient (with the silex compatibility layer) has them too for SILE 0.14.
       -- For now, also support older versions of SILE when used in a non-resilient context.
@@ -876,34 +908,39 @@ Please consider using a resilient-compatible class!]])
   -- C. Customizable hooks
 
   self:registerCommand("markdown:custom-style:hook", function (options, content)
-    -- Default implementation for the custom-style hook:
-    -- If we are in the context of a resilient-compatible class and there's
-    -- an existing style going by that name, use it.
-    -- Otherwise, tf there is a corresponding SILE command, we invoke it.
-    -- otherwise, we just ignore the style and process the content.
-    -- It allows us, e.g. to already
-    --  - Use resilient styles in proper context
+    -- Default/standard implementation for the custom-style hook:
+    -- 1. If we are in the context of a resilient-compatible class and there's
+    -- an existing style going by that name, we apply it.
+    -- 2. Otherwise, if there is a corresponding SILE command, going by the
+    -- optional "alt" command name or if unspecified, the style name itself,
+    -- we invoke it.
+    -- 3. Otherwise, we just silently ignore the style and process the content.
+    --
+    -- It allows us to;
+    --  - Use resilient styling paradigm if applicable
+    --  - Use some alternate fallback command if provided
     --  - Use some interesting commands, such as "custom-style=raggedleft".
     -- Package or class designers MAY override this hook to support any other
     -- styling mechanism they may have or want.
-    -- The available options are the custom-style "name" and a "scope" which
-    -- can be "inline" (for inline character-level styling) or "block" (for
-    -- block paragraph-level styling).
+    -- The available options are the custom-style "name", an optional "alt"
+    -- command name, and a "scope" which can be "inline" (for inline
+    -- character-level styling) or "block" (for block paragraph-level styling).
     local name = SU.required(options, "name", "markdown custom style hook")
+    local scope = SU.required(options, "scope", "markdown custom style hook")
+    local alt = options.alt or name
+
     if self.hasStyleSupport[name] then
-      SU.debug("markdown", "Feature detection: Applying actual custom style:", name)
-      if options.scope == "block" then
+      if scope == "block" then
         SILE.call("style:apply:paragraph", { name = name }, content)
       else
         SILE.call("style:apply", { name = name }, content)
       end
-    elseif self.hasCommandSupport[name] then
-      SU.debug("markdown", "Feature detection: Applying command for custom style:", name)
-      SILE.call(name, {}, content)
+    elseif self.hasCommandSupport[alt] then
+      SILE.call(alt, {}, content)
     else
-      SU.debug("markdown", "Feature detection: Ignoring unknown custom style:", name)
+      SU.debug("markdown.commands", "Feature detection: ignoring unknown custom style:", name)
       SILE.process(content)
-      if options.scope == "block" then
+      if scope == "block" then
         SILE.call("par")
       end
     end

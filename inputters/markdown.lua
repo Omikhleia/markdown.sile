@@ -94,7 +94,6 @@ local function SileAstWriter (writerOps, renderOps)
   writer.paragraph = simpleCommandWrapper("markdown:internal:paragraph")
   writer.code = simpleCommandWrapper("code")
   writer.emphasis = simpleCommandWrapper("em")
-  writer.strikeout = simpleCommandWrapper("strikethrough")
   writer.subscript = simpleCommandWrapper("textsubscript")
   writer.superscript = simpleCommandWrapper("textsuperscript")
   writer.blockquote = simpleCommandWrapper("markdown:internal:blockquote")
@@ -154,6 +153,10 @@ local function SileAstWriter (writerOps, renderOps)
 
   writer.span = function (content, attr)
     return createCommand("markdown:internal:span" , attr, content)
+  end
+
+  writer.strikeout = function (content)
+    return createCommand("markdown:internal:span" , { class = "strike" }, content)
   end
 
   writer.div = function (content, attr)

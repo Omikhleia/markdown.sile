@@ -52,7 +52,7 @@ end
 ---@param pack  string   The package name.
 function package:loadOptPackage (pack)
   local ok, _ = pcall(function () return self:loadPackage(pack) end)
-  SU.debug("markdown", "Optional package "..pack.. (ok and " loaded" or " not loaded"))
+  SU.debug("markdown.commands", "Optional package "..pack.. (ok and " loaded" or " not loaded"))
 end
 
 --- Feature detection, so we can see e.g. with self.hasPackageSupport.xxx if
@@ -74,19 +74,19 @@ function package:_init (_)
 
   -- Check if document class is a resilient class or derived from one
   self.isResilient = isResilientClass(self.class)
-  SU.debug("markdown", "Feature detection:",
+  SU.debug("markdown.commands", "Feature detection:",
     self.isResilient and "used in a resilient class" or "used in a non-resilient class")
 
   self.hasPackageSupport = self:_createSupportProxy(function (_, name)
     local pack = self.class.packages[name]
-    SU.debug("markdown", "Feature detection: package", name,
+    SU.debug("markdown.commands", "Feature detection: package", name,
       pack and "supported" or "not supported")
     return pack
   end)
 
   self.styles = self.hasPackageSupport["resilient.styles"]
   if self.styles then
-    SU.debug("markdown", "Feature detection: hooking our custom styles")
+    SU.debug("markdown.commands", "Feature detection: registering custom styles")
     self:registerStyles()
   end
 
@@ -95,7 +95,7 @@ function package:_init (_)
     -- SILE was refactor to have loadPackage() etc. methods, a lot of boilerplate
     -- if at the end we still need to tap into low-level internals.
     local cmd = SILE.Commands[name]
-    SU.debug("markdown", "Feature detection: command", name,
+    SU.debug("markdown.commands", "Feature detection: command", name,
       cmd and "supported" or "not supported")
     return cmd
   end)
@@ -109,7 +109,7 @@ function package:_init (_)
       -- non-existing style, so is not very handy here.
       -- But it's a chicken and egg problem, between resilient and us.
       and SILE.scratch.styles.specs[name] -- HACK
-    SU.debug("markdown", "Feature detection: style", name,
+    SU.debug("markdown.commands", "Feature detection: style", name,
       style and "supported" or "not supported")
     return style
   end)
