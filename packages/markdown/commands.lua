@@ -423,6 +423,13 @@ Please consider using a resilient-compatible class!]])
     elseif ext == "dot" then
       options.format = "dot"
       SILE.call("embed", options)
+    elseif ext == "csv" then
+      if not (self.hasPackageSupport.piecharts or self.hasPackageSupport.piechart) then -- HACK Some early versions of piecharts have the wrong internal name
+        SU.error("No piecharts package available to render CSV data ".. uri)
+      end
+      options.src = nil
+      options.csvfile = uri
+      SILE.call("piechart", options)
     else
       SILE.call("img", options)
     end
