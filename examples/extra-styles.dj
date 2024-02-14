@@ -1,0 +1,50 @@
+```=sile
+% Quick and dirty definition of new custom styles
+% using some "resilient" styling feature.
+%
+\define[command=customframe]{\center{\roughbox[bordercolor=#59b24c,
+  fillcolor=220,padding=15pt, enlarge=true]{\parbox[width=90%lw, minimize=true]{\process}}}}
+\define[command=customblockframe]{\center{\framebox[bordercolor=#7393b3,
+  shadow=true,
+  fillcolor=250,
+  padding=4pt,
+  shadowcolor=220]{\parbox[width=90%lw]{\process}}}}
+```
+
+```=sile-lua
+-- Tapping into the internal scratch variable of the resilient.styles
+-- package is not a good practice.
+SILE.scratch.styles.alignments["fancy-framed"] = "customframe"
+local class = SILE.documentState.documentClass
+class:registerStyle("FramedPara", {}, {
+  paragraph = {
+    before = { skip = "medskip" },
+    after = { skip = "medskip" },
+    align = "fancy-framed"
+  }
+})
+
+SILE.scratch.styles.alignments["shadow-framed"] = "customblockframe"
+local class = SILE.documentState.documentClass
+class:registerStyle("CodeBlock", {}, {
+  paragraph = {
+    before = { skip = "smallskip" },
+    after = { skip = "smallskip" },
+    align = "shadow-framed"
+  }
+})
+
+local class = SILE.documentState.documentClass
+class:registerCommand("Ean13", function (_, content)
+  local code = content[1]
+  -- Markdown parser may interpret a dash between digits as smart typography for en-dash.
+  -- Let's remove those.
+  code = code:gsub("–","")
+  SILE.call("ean13", { code = code })
+end)
+
+class:registerCommand("Initial", function (_, content)
+  local letter = content[1]
+  SILE.call("dropcap", { lines = 3, family = "Zallman Caps", join = true }, { letter })
+end)
+```

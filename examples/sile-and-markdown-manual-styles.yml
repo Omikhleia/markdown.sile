@@ -1,4 +1,35 @@
 
+defn-term-Custom:
+  inherit: "defn-base"
+  origin: "resilient.defn"
+  style:
+    font:
+      features: "+smcp"
+    paragraph:
+      after:
+        vbreak: false
+      before:
+        skip: "smallskip"
+
+defn-desc-Custom:
+  inherit: "defn-desc"
+  style:
+    paragraph:
+      after:
+        skip: "smallskip"
+      before:
+        vbreak: false
+
+CodeBlock:
+  origin: "resilient.book"
+  style:
+    paragraph:
+      after:
+        skip: "smallskip"
+      align: "shadow-framed"
+      before:
+        skip: "smallskip"
+
 CoverCredit:
   style:
     font:
@@ -16,7 +47,7 @@ FramedPara:
     paragraph:
       after:
         skip: "medskip"
-      align: "framed"
+      align: "fancy-framed"
       before:
         skip: "medskip"
 

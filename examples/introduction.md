@@ -39,7 +39,7 @@ The following package collections are not strictly required, but they are recomm
 When installed, they provide additional features:
 
  - The [**couyards.sile**](https://github.com/Omikhleia/couyards.sile) collection provides additional support for fancy thematic breaks.
- - The [**piecharts**](https://github.com/Omikhleia/piecharts.sile) collection provides support for rendering pie charts from CSV data.
+ - The [**piecharts.sile**](https://github.com/Omikhleia/piecharts.sile) collection provides support for rendering pie charts from CSV data.
 
 To install them, use the following commands:
 

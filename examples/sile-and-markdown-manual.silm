@@ -48,6 +48,7 @@ sile:
     - resilient.poetry
 chapters:
   - toc.dj
+  - extra-styles.dj
   - introduction.md
   - sile-and-markdown.md
   - sile-and-markdown-bonus.sil
