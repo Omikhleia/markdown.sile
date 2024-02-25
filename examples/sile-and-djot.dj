@@ -16,8 +16,8 @@ Therefore, it's no longer a "side feature" of this collection, and our manual no
 The very chapter you are currently reading is written in Djot.
 The syntax of the language is fairly well described in its own design document.
 However, the Djot specification is a early-stage project, and will likely evolve.
-This manual is serves as reference for the current implementation of the Djot converter in this package collection, going through all the features.
-At places, it also focuses on the specifics of this converter, and the extensions provided by it.
+This manual serves as reference for the current implementation of the Djot converter in this package collection, going through all the features.
+At places, it also focuses on the specifics of this converter, and the extensions it provides.
 
 {% THIS TEXT SHOULD NOT APPEAR IN THE OUTPUT, IT IS A DJOT COMMENT %}
 

@@ -1,12 +1,14 @@
 # SILE and Markdown
 
-::: {custom-style=raggedleft}
-"Markdown is intended to be as easy-to-read and easy-to-write as is feasible."^[From the
-original [Markdown syntax specification](https://daringfireball.net/projects/markdown/syntax).]
-:::
+```djot
+{% We switch to Djot because we have cool epigraphs %}
 
-While the original Markdown format was indeed quite simple, it quickly became a landmark for
-documentation, especially technical. Several variants then emerged. Amongst other solutions, the Pandoc
+> "Markdown is intended to be as easy-to-read and easy-to-write as is feasible."
+^ From the original [Markdown syntax specification](https://daringfireball.net/projects/markdown/syntax).
+```
+
+[W]{custom-style=Initial}[hile]{.smallcaps} the original Markdown format was indeed quite simple, it quickly became a landmark for documentation, especially technical.
+Several variants then emerged. Amongst other solutions, the Pandoc
 converter started supporting a nice set of interesting extensions for lists, footnotes, tables,
 etc.^[See [IETF RFC 7764, section 3.3](https://datatracker.ietf.org/doc/html/rfc7764#section-3.3).]
 ---So that nowadays, Markdown, enriched with these extensions, may be quite appealing to writers and
@@ -15,34 +17,11 @@ authors alike.
 Within SILE’s aim to produce beautiful printed documents, it's a pretty reasonable assumption that
 such writers and authors may want to use this fine typesetter with their Markdown content, without
 having to learn the SIL language and its specifics (but not, either, fully excluding it for some
-advanced capabilities). Guess what, the very chapter you are currently reading is written in Markdown!
+advanced capabilities). Guess what, the very chapter you are currently reading is written in Markdown.
 
 [comment]: # (THIS TEXT SHOULD NOT APPEAR IN THE OUTPUT. It is actually the most platform independent comment in Markdown.)
 
-## The native markdown package
 
-Once you have loaded the `\autodoc:package{markdown}`{=sile} package,
-the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading a Markdown file[^other-ways].
-The speedy Markdown parsing relies on John MacFarlane's excellent **lunamark** Lua library.
-
-[^other-ways]: The astute reader already knows, from reading the SILE manual, that there are other ways
-(e.g. with command-line options) to tell SILE how to process a file in some format --- so we just stick
-to the basics here.
-
-```
-\use[module=packages.markdown]
-\include[src=somefile.md]
-```
-
-Embedding raw Markdown content from within a SIL document is also possible:
-
-```
-\begin[type=markdown]{raw}
-Some **Markdown** content
-\end{raw}
-```
-
-See also "[Configuration](#configuration)" further below.
 
 ### Basic typesetting {#basic-typesetting}
 

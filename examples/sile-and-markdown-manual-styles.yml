@@ -41,6 +41,15 @@ CoverCredit:
       before:
         skip: "bigskip"
 
+CustomDroppedInitial:
+  origin: "resilient.book"
+  style:
+    font:
+      family: "Zallman Caps"
+    color: "#66a0b3"
+    special:
+      lines: 3
+
 FramedPara:
   origin: "resilient.book"
   style:

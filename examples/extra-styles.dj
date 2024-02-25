@@ -4,7 +4,7 @@
 %
 \define[command=customframe]{\center{\roughbox[bordercolor=#59b24c,
   fillcolor=220,padding=15pt, enlarge=true]{\parbox[width=90%lw, minimize=true]{\process}}}}
-\define[command=customblockframe]{\center{\framebox[bordercolor=#7393b3,
+\define[command=customblockframe]{\center{\framebox[bordercolor=#66a0b3,
   shadow=true,
   fillcolor=250,
   padding=4pt,
@@ -44,7 +44,16 @@ class:registerCommand("Ean13", function (_, content)
 end)
 
 class:registerCommand("Initial", function (_, content)
+  if type(content) ~= "table" then SU.error("Expected a table content in dropcap environment") end
+  if #content ~= 1 then SU.error("Expected a single letter in dropcap environment") end
   local letter = content[1]
-  SILE.call("dropcap", { lines = 3, family = "Zallman Caps", join = true }, { letter })
+
+  -- discardable style
+  local dropcapSty = class.styles and class.styles:resolveStyle("CustomDroppedInitial", true) or {}
+  local family = dropcapSty.font and dropcapSty.font.family or "Zallman Caps"
+  local lines = dropcapSty.special and dropcapSty.special.lines or 3
+  local color = dropcapSty.color
+
+  SILE.call("dropcap", { lines = lines, family = family, color = color, join = true }, { letter })
 end)
 ```

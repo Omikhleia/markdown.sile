@@ -126,31 +126,31 @@ Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
 
 This is but an overview. For more details, please refer to the provided example Markdown document, which also serves as documentation, showcase and reference guide.
 
-- Standard Markdown and Djot typesetting (italic, bold, code, etc.)
+- Standard Markdown and Djot typesetting (emphases, strong emphasis, code, etc.)
 - Smart typography (quotes, apostrophes, ellipsis, dashes, etc.) with Markdown extensions (prime marks)
-- Headers and header attributes
-- Horizontal dividers (a.k.a. horizontal rules, with provision for asterisms, dinkuses, pendants...)
-- Images (and image attributes, e.g. dimensions)
-- TeX-like math
-- Strikeout (a.k.a. deletions), etc.
-- Subscript and superscript
-- Footnotes (both regular and inline syntax support)
-- Fenced code blocks (with attributes)
-- Bracketed spans and fenced divs (with provisions for language change, custom styles, etc.)
-- Underlines
+- Hard line breaks and non-breaking spaces
+- Underline, strikethrough, highlight, deletion, insertion (with provisions for custom styling)
 - Small caps
+- Spans (with provisions for language change, custom styles, etc.)
+- Subscript and superscript
+- Images (and image attributes, e.g. dimensions)
 - Links (with special provisions for advanced cross-references)
+- Footnotes
+- TeX-like math
+- Headers and header attributes
+- Divs (with provisions for language change, custom styles, etc.)
 - Lists
   - Standard ordered lists and bulleted lists
   - Fancy lists
   - Task lists (GFM-like syntax)
   - Definition lists
-- Pipe tables (and table captions)
+- Horizontal dividers / thematic breaks (with provision for asterisms, dinkuses, pendants...)
+- Tables (and table captions)
+- Code blocks (with attributes)
 - Line blocks (with enhanced provision for poetry)
-- Hard line breaks
-- Raw attributes (escaping to inline SILE or Lua scripting)
+- Raw inlines and raw blocks (escaping to SILE, in SIL language or Lua scripting)
 - Raw inline HTML convenience subset in Markdown
-- Advanced use of symbols in Djot (variable substitution and templating)
+- Advanced use of symbols in Djot (variable substitution ,and templating)
 - Advanced configuration (e.g. Markdown variants, headings shifting, etc.)
 
 ## Use with the resilient collection
