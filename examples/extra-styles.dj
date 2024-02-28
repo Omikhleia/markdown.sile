@@ -2,7 +2,7 @@
 % Quick and dirty definition of new custom styles
 % using some "resilient" styling feature.
 %
-\define[command=customframe]{\center{\roughbox[bordercolor=#59b24c,
+\define[command=customframe]{\center{\roughbox[bordercolor=#66a0b3,
   fillcolor=220,padding=15pt, enlarge=true]{\parbox[width=90%lw, minimize=true]{\process}}}}
 \define[command=customblockframe]{\center{\framebox[bordercolor=#66a0b3,
   shadow=true,

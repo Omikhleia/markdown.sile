@@ -60,6 +60,17 @@ FramedPara:
       before:
         skip: "medskip"
 
+Difference:
+  style:
+    font:
+      family: "Libertinus Sans"
+      size: "0.95em"
+    paragraph:
+      after:
+        skip: "smallskip"
+      before:
+        skip: "smallskip"
+
 blockquote:
   origin: "resilient.book"
   style:

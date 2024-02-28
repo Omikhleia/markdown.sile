@@ -288,14 +288,14 @@ Yet, it might be useful for proper names, etc.
 {#djot-image}
 ### Images
 
-![This man is still Gutenberg.](./gutenberg.jpg){#djot-gutenberg width="3cm"}
+![This man is Gutenberg.](./gutenberg.jpg){#djot-gutenberg width="3cm"}
 
 This is obtained with the following syntax:
 
 {custom-style=CodeBlock}
 :::
 ```
-![This man is still Gutenberg.](./gutenberg.jpg){width="3cm"}
+![This man is Gutenberg.](./gutenberg.jpg){width="3cm"}
 ```
 :::
 
@@ -439,7 +439,8 @@ Thus, the above example was obtained from the following input:
 {custom-style=CodeBlock}
 :::
 ```
-The section on "[](#djot-tables){.title}", that is [](#djot-tables){.section},
+The section on "[](#djot-tables){.title}",
+that is [] (#djot-tables){.section},
 is on page [](#djot-tables){.page}.
 ```
 :::
@@ -562,7 +563,7 @@ A single newline is treated as a space.
 ### Headings
 
 A heading starts with a sequence of one or more `#` characters, followed by whitespace.
-The number of # characters defines the heading level.
+The number of `#` characters defines the heading level.
 The heading text following that sequence is parsed as inline content.
 
 For example, this very section is a level three heading.
@@ -845,7 +846,7 @@ A bullet list item that begins with `[ ]`, `[X]`, or `[x]` followed by a space i
  - [x] Checked item
 
 {#djot-footnotes}
-### Footnotes
+### Footnote references
 
 Footnotes work.[^djot-fnt]
 Moreover, Djot allows attaching attributes to the footnote reference.
@@ -952,7 +953,7 @@ The `render` attribute can be set to `false` to prevent this behavior, and enfor
 : Mardown and Djot code blocks
 
   Code blocks marked as being in Markdown or Djot are interpreted.
-  For Markdown, attributes are passed to the converter, allowing to possibly use different compatibility options (for Markdown especially, see §[](#configuration)).
+  For Markdown, attributes are passed to the converter, allowing to possibly use different compatibility options (for Markdown especially, see §[](#markdown-configuration)).
   This feature allows switching between those languages, would there be something one does not support yet.
 
   At the time of writing, for instance, Djot does not support "line blocks".
@@ -1393,8 +1394,7 @@ Therefore, we recommend that you call template files containing conditional cont
 {#djot-configuration}
 ## Configuration
 
-The calling context (a wrapper document in SIL syntax, a resilient "master document", etc.)
-can pass additional options to tune the behavior of the converter.
+The calling context (a wrapper document in SIL syntax, a resilient "master document", etc.) can pass additional options to tune the behavior of the converter.
 
 As state above (§[](#djot-metadata-symbols) "[](#djot-metadata-symbols){.title}"), any option starting with `meta:` is passed to the converter (with this prefix removed), and is then available as a symbol.
 
