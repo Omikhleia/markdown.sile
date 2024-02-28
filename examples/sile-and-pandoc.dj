@@ -1,27 +1,49 @@
 # Alternative route: SILE and Pandoc
 
-Pandoc is a free-software document converter, created by the same John MacFarlane who provided the *lunamark* and *djot* libraries which empower SILE’s native Markdown and Djot package.
+> "If you need to convert files from one markup format into another, Pandoc is your swiss-army knife."
+^ From the [Pandoc website](https://pandoc.org/).
+
+[P]{custom-style=Initial}[andoc]{.smallcaps} is a free-software document converter, created by the same John MacFarlane who initiated the *lunamark* and *djot* libraries which empower our native Djot and Mardown packages.
 The latter, though, do not offer as many options and extensions as Pandoc does, for advanced typesetting.
 
-In the event where the native solution would fall short for you ---e.g. would you need some extension of feature it doesn't yet support--- you may want to use Pandoc directly for converting your document to an output suitable for SILE.
+In the event where the native solution would fall short for you --- _e.g._ would you need some extension or feature it doesn't yet support --- you may want to use Pandoc directly for converting your document to an output suitable for SILE.
 
-The following solutions are still experimental proof-of-concepts, but you may give them a chance, and help us fill the gaps.
+The following solution is still an experimental proof-of-concept, but you may give it a chance, and help us fill the gaps.
+
+## Prerequisites
+
+Obviously, you need to have the Pandoc software installed on your system.
+You also need to have the LuaJSON module installed and available to your SILE environment.
+As of 2024, we recommend using the development version of the module, due to some issues with the current release version.
+
+{custom-style=CodeBlock}
+:::
+```bash
+luarocks install --dev luajson
+```
+:::
 
 ## Using Pandoc's AST with the pandocast package
 
-The experimental `\autodoc:package{pandocast}`{=sile} package allows you to use Pandoc’s JSON AST as an input format for documents.
+The experimental *pandocast* package allows you to use Pandoc’s JSON AST as an input format for documents.
 You can obtain an AST output from Pandoc for any supported source format. Keeping the focus on Markdown here:
 
-```
+{custom-style=CodeBlock}
+:::
+```bash
 pandoc -t json somefile.md -f markdown -o somefile.pandoc
 ```
+:::
 
-Once the package is loaded, the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading and processing such a Pandoc AST file, assuming the `.pandoc` extension or specifying the `format=pandocast` parameter:
+Once the package is loaded, the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading and processing such a Pandoc AST file from a document in SIL syntax, assuming the `.pandoc` extension or specifying the `format=pandocast` parameter:
 
+{custom-style=CodeBlock}
+:::
 ```
 \use[module=packages.pandocast]
 \include[src=somefile.pandoc]
 ```
+:::
 
 This package supports the same advanced features as the native Markdown solution, e.g. the ability to use custom styles, to pass native content through to SILE, etc.
 
@@ -30,20 +52,14 @@ The `shift_headings` option is also available, as with the Markdown and Djot sol
 There is a small _caveat_, though: one must use a version of Pandoc which generates an AST compatible with our input handler ("inputter").
 While the Pandoc AST is somewhat stable, it may change when new features are introduced in the software.
 
-## Using a Pandoc "custom writer" in Lua
+## Advanced tables with pandocast
 
-Pandoc also supports "custom writers" developed in Lua[^pandoc-writer].
+While our native packages accept so-called "pipe tables" only, Pandoc supports the standard "simple tables" from original Markdown, and also extends Markdown with several other methods for declaring tables.
+Would you have a document containing such tables, then *pandocast* should be able to render them. Above, we just described that package briefly.
+It's now showcase time!
 
-[^pandoc-writer]: <https://pandoc.org/custom-writers.html>
+Obviously, it is mostly a question of input syntax, and the converter shouldn't actually have to bother, since the hard work parsing these tables is done by Pandoc itself, generating a generic JSON AST representation.[^pandoc-ast-caution]
 
-This custom writer API is fairly recent and might change.
-Actually, besides a "Classic style" API (deprecated), there's now also a "New style" API...
-While such custom writers may have some rough edges, the idea is quite appealing nevertheless. 
-After all, SILE is mostly written in Lua, so the skills are there in the community.
-
-Again, there is no official solution using this conversion path, but some pretty neat experimental results have been achieved[^omi-writer].
-That custom writer targets a specific (non-standard) class and a bunch of specific packages, which might not have been ported to the latest version of SILE...
-This said, you can also certainly help pushing the idea forward!
-
-[^omi-writer]: <https://github.com/Omikhleia/omikhleia-sile-packages/blob/main/examples/markdown-sample.pdf>
-
+[^pandoc-ast-caution]: Some Pandoc AST structures address advanced table features from other document formats than Markdown.
+While such documents can be converted to a Pandoc JSON AST, our package might not support them well.
+Its main focus is on Markdown parity with Pandoc.

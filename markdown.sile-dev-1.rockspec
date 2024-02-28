@@ -31,6 +31,7 @@ build = {
       ["sile.inputters.pandocast"]        = "inputters/pandocast.lua",
       ["sile.inputters.djot"]             = "inputters/djot.lua",
       ["sile.packages.markdown"]          = "packages/markdown/init.lua",
+      ["sile.packages.markdown.cmbase"]   = "packages/markdown/cmbase.lua",
       ["sile.packages.markdown.commands"] = "packages/markdown/commands.lua",
       ["sile.packages.markdown.utils"]    = "packages/markdown/utils.lua",
       ["sile.packages.pandocast"]         = "packages/pandocast/init.lua",

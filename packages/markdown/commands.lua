@@ -1,4 +1,4 @@
---- Common commands for Markdown support in SILE, when there is no
+--- Common commands for Markdown and Djot support in SILE, when there is no
 -- direct mapping to existing commands or packages.
 --
 -- Split in a standalone package so that it can be reused and
@@ -18,7 +18,7 @@ local createCommand, createStructuredCommand,
         = SU.ast.createCommand, SU.ast.createStructuredCommand,
           SU.ast.removeFromTree, SU.ast.subContent
 
-local base = require("packages.base")
+local base = require("packages.markdown.cmbase")
 
 local package = pl.class(base)
 package._name = "markdown.commands"
@@ -48,24 +48,6 @@ local CommandCascade = pl.class({
     SILE.process(self:tree(content))
   end,
 })
-
-local UsualSectioning = { "part", "chapter", "section", "subsection", "subsubsection" }
-local function getSectioningCommand (level)
-  local index = level + 1
-  if index > 0 and index <= #UsualSectioning then
-    -- Check we actually have those commands (e.g. some classes might not
-    -- have subsubsections.)
-    if SILE.Commands[UsualSectioning[index]] then
-      return UsualSectioning[index]
-    end
-    SU.warn("Unknown command \\"..UsualSectioning[index].." (fallback to a default generic header)")
-    -- Default to something anyway.
-    return "markdown:fallback:header"
-  end
-  -- Also default to something anyway, but different message
-  SU.warn("No support found for heading level "..level.." (fallback to a default generic header)")
-  return "markdown:fallback:header"
-end
 
 local function hasLinkContent(tree)
   if type(tree) == "table" then
@@ -136,45 +118,8 @@ local function wrapLinkContent (options, content)
   return content
 end
 
-function package:loadPackageAlt(resilientpack, legacypack)
-  if not self.class.packages[resilientpack] then
-    -- In resilient context, try enforcing the use of resilient variants,
-    -- assuming its compatible with SILE's legacy implementation (command-wise),
-    -- so that we benefit from its extended features and its styling.
-    if self.isResilient then
-      self:loadPackage(resilientpack)
-    else
-      self:loadPackage(legacypack)
-    end
-  end
-end
-
--- For feature detection.
--- NOTE: The previous implementation was clever;
---   local ok, ResilientBase = pcall(require, 'classes.resilient.base')
---   return ok and self.class:is_a(ResilientBase)
--- However this loads the class, which loads all the silex extensions, even if
--- the class is not used...
--- Enforcing the silex extensions is not what we wanted.
--- So we are back to a more naive implementation, checking the class hierarchy
--- by name.
--- This is lame and knows too much about internals, but heh.
-local function isResilientClass(cl)
-  while cl do
-    if cl._name == "resilient.base" then
-      return true
-    end
-    cl = cl._base
-  end
-  return false
-end
-
 function package:_init (_)
   base._init(self)
-
-  -- Check if document class is a resilient class or derived from one
-  self.isResilient = isResilientClass(self.class)
-  SU.debug("markdown", self.isResilient and "Used in a resilient class" or "Used in a non-resilient class")
 
   -- Only load low-level packages (= utilities)
   -- The class should be responsible for loading the appropriate higher-level
@@ -193,20 +138,36 @@ function package:_init (_)
   self:loadPackage("url")
 
   -- Do those at the end so the resilient versions may possibly override things.
-  self:loadPackageAlt("resilient.lists", "lists")
-  self:loadPackageAlt("resilient.verbatim", "verbatim")
+  self:loadAltPackage("resilient.lists", "lists")
+  self:loadAltPackage("resilient.verbatim", "verbatim")
 
   -- Optional packages
-  pcall(function () return self:loadPackage("couyards") end)
+  self:loadOptPackage("couyards")
+  self:loadOptPackage("piecharts")
 
   -- Other conditional packages
   if self.isResilient then
     self:loadPackage("resilient.epigraph")
+    self:loadPackage("resilient.defn")
   end
 end
 
-function package:hasCouyards ()
-  return self.class.packages["couyards"]
+local UsualSectioning = { "part", "chapter", "section", "subsection", "subsubsection" }
+function package:_getSectioningCommand (level)
+  local index = level + 1
+  if index > 0 and index <= #UsualSectioning then
+    -- Check we actually have those commands (e.g. some classes might not
+    -- have subsubsections.)
+    if self.hasCommandSupport[UsualSectioning[index]] then
+      return UsualSectioning[index]
+    end
+    SU.warn("Unknown command \\"..UsualSectioning[index].." (fallback to a default generic header)")
+    -- Default to something anyway.
+    return "markdown:fallback:header"
+  end
+  -- Also default to something anyway, but different message
+  SU.warn("No support found for heading level "..level.." (fallback to a default generic header)")
+  return "markdown:fallback:header"
 end
 
 function package.declareSettings (_)
@@ -274,10 +235,10 @@ function package:registerCommands ()
           SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
-    elseif hasClass(options, "fullrule") and self:hasCouyards() then
+    elseif hasClass(options, "fullrule") then
       -- Full line
       SILE.call("fullrule", { thickness = "0.4pt" })
-    elseif hasClass(options, "pendant") and self:hasCouyards() then
+    elseif hasClass(options, "pendant") and self.hasPackageSupport.couyards then
       -- Pendant, with more options available than in Markdown
       local opts = {
         type = SU.cast("integer", options.type or 6),
@@ -321,7 +282,7 @@ function package:registerCommands ()
           SILE.call("hrule", { width = "33%lw", height = "0.4pt" })
         end)
       end)
-    elseif options.separator == "- - - -" and self:hasCouyards() then
+    elseif options.separator == "- - - -" and self.hasPackageSupport.couyards then
       -- Pendant (fixed choice = the one I regularly use)
       SILE.call("smallskip")
       SILE.call("couyard", { type = 6, width = "default" })
@@ -335,7 +296,7 @@ function package:registerCommands ()
 
   self:registerCommand("markdown:internal:header", function (options, content)
     local level = SU.required(options, "level", "header")
-    local command = getSectioningCommand(SU.cast("integer", level))
+    local command = self:_getSectioningCommand(SU.cast("integer", level))
     -- Pass all attributes to underlying sectioning command, and interpret
     -- .unnumbered and .notoc pseudo-classes as alternatives to numbering=false
     -- and toc=false.
@@ -398,7 +359,7 @@ Please consider using a resilient-compatible class!]])
       -- If the class or loaded packages provide a poetry environment and the div contains
       -- a lineblock structure only, then use the poetry environment instead.
       -- (tricky) This assumes a lot of knowledge about the AST...
-      if SILE.Commands["poetry"] and #content == 1 and content[1].command == "markdown:internal:lineblock" then
+      if self.hasCommandSupport.poetry and #content == 1 and content[1].command == "markdown:internal:lineblock" then
         content[1].command = "poetry"
         content[1].options = content[1].options or {}
         content[1].options.first = SU.boolean(options.first, false)
@@ -435,16 +396,45 @@ Please consider using a resilient-compatible class!]])
       cascade:call("font", { features = "+smcp" })
     end
     if hasClass(options, "mark") then
-      cascade:call("color", { color = "red" }) -- FIXME TODO We'd need real support
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-mark",
+        alt = "markdown:fallback:mark",
+        scope = "inline"
+      })
     end
     if hasClass(options, "strike") then
-      cascade:call("strikethrough")
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-strikethrough",
+        alt = "strikethrough",
+        scope = "inline"
+      })
     end
     if hasClass(options, "underline") then
-      cascade:call("underline")
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-underline",
+        alt = "underline",
+        scope = "inline"
+      })
+    end
+    if hasClass(options, "inserted") then
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-insertion",
+        alt = "underline",
+        scope = "inline"
+      })
+    end
+    if hasClass(options, "deleted") then
+      cascade:call("markdown:custom-style:hook", {
+        name = "md-deletion",
+        alt = "strikethrough",
+        scope = "inline"
+      })
     end
     if options["custom-style"] then
-      cascade:call("markdown:custom-style:hook", { name = options["custom-style"], scope = "inline" })
+      cascade:call("markdown:custom-style:hook", {
+        name = options["custom-style"],
+        scope = "inline"
+      })
     end
     if hasClass(options, "nobreak") then
       cascade:call("hbox")
@@ -463,6 +453,13 @@ Please consider using a resilient-compatible class!]])
     elseif ext == "dot" then
       options.format = "dot"
       SILE.call("embed", options)
+    elseif ext == "csv" then
+      if not (self.hasPackageSupport.piecharts or self.hasPackageSupport.piechart) then -- HACK Some early versions of piecharts have the wrong internal name
+        SU.error("No piecharts package available to render CSV data ".. uri)
+      end
+      options.src = nil
+      options.csvfile = uri
+      SILE.call("piechart", options)
     else
       SILE.call("img", options)
     end
@@ -502,13 +499,13 @@ Please consider using a resilient-compatible class!]])
   end, "Link in Markdown (internal)")
 
   self:registerCommand("markdown:internal:footnote", function (options, content)
-    if not SILE.Commands["footnote"] then
+    if not self.hasCommandSupport.footnote then
       -- The reasons for NOT loading a package for this high-level structure
       -- is that the class or other packages may provide their own implementation
       -- (e.g. formatted differently, changed to endnotes, etc.).
       -- So we only do it as a fallback if mising, to degrade gracefully.
       SU.warn("Trying to enforce fallback for unavailable \\footnote command")
-      self.class:loadPackage("footnotes")
+      self:loadAltPackage("resilient.footnotes", "footnotes")
     end
     if options.id then
       content = {
@@ -576,7 +573,9 @@ Please consider using a resilient-compatible class!]])
     -- So we might have a better version provided by a user-class or package.
     -- Otherwise, use our own fallback (with hard-coded choices too, but a least
     -- it does some proper nesting)
-    if not SILE.Commands["blockquote"] then
+    -- NOTE: The above applies to SILE 0.14.x.
+    -- SILE 0.15 is expected to provide a blockquote environment.
+    if not self.hasCommandSupport.blockquote then
       SILE.call("markdown:fallback:blockquote", {}, content)
     else
       SILE.call("blockquote", {}, content)
@@ -588,7 +587,7 @@ Please consider using a resilient-compatible class!]])
     -- environment if they want to do so (possibly with more features,
     -- e.g. managing list of tables, numbering and cross-references etc.),
     -- while minimally providing a default fallback solution.
-    if not SILE.Commands["captioned-table"] then
+    if not self.hasCommandSupport["captioned-table"] then
       SILE.call("markdown:fallback:captioned-table", {}, content)
     else
       local tableopts = {}
@@ -607,7 +606,7 @@ Please consider using a resilient-compatible class!]])
     -- environment if they want to do so (possibly with more features,
     -- e.g. managing list of tables, numbering and cross-references etc.),
     -- while minimally providing a default fallback solution.
-    if not SILE.Commands["captioned-figure"] then
+    if not self.hasCommandSupport["captioned-figure"] then
       SILE.call("markdown:fallback:captioned-figure", {}, content)
     else
       local figopts = {}
@@ -621,52 +620,65 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Captioned figure in Markdown (internal)")
 
+  -- Code blocks
+
+  self:registerCommand("markdown:internal:lua-highlighter", function (options, content)
+    -- Naive syntax highlighting for Lua, until we have a more general solution
+    local tree = {}
+    if options.id then
+      tree[#tree+1] = createCommand("label", { marker = options.id })
+    end
+    local toks = pl.lexer.lua(content[1], {})
+    for tag, v in toks do
+      local out = tostring(v)
+      if tag == "string" then
+        -- rebuild string quoting...
+        out = out:match('"') and ("'"..out.."'") or ('"'..out..'"')
+      end
+      if naiveLuaCodeTheme[tag] then
+        local cascade = CommandCascade()
+        if naiveLuaCodeTheme[tag].color then
+          cascade:call("color", { color = naiveLuaCodeTheme[tag].color })
+        end
+        if naiveLuaCodeTheme[tag].bold then
+          cascade:call("strong", {})
+        end
+        if naiveLuaCodeTheme[tag].italic then
+          cascade:call("em", {})
+        end
+        tree[#tree+1] = cascade:tree({ out })
+      else
+        tree[#tree+1] = SU.utf8charfromcodepoint("U+200B")..out -- HACK with ZWSP to trick the typesetter respecting standalone linebreaks
+      end
+    end
+    SILE.call("verbatim", {}, tree)
+  end, "Lua code block naive syntax highlighting in Markdown or Djot (internal)")
+
   self:registerCommand("markdown:internal:codeblock", function (options, content)
     local render = SU.boolean(options.render, true)
-    if render and hasClass(options, "dot") then
-      local handler = SILE.rawHandlers["embed"]
-      if not handler then
-        -- Shouldn't occur since we loaded the embedders package
-        SU.error("No inline handler for image embedding")
-      end
-      options.format = options.class
-      handler(options, content)
-    elseif render and hasClass(options, "djot") then
-      SILE.processString(SU.contentToString(content), "djot", nil, options)
-    elseif render and hasClass(options, "markdown") then
-      SILE.processString(SU.contentToString(content), "markdown", nil, options)
-    elseif hasClass(options, "lua") then
-      -- Naive syntax highlighting for Lua, until we have a more general solution
-      local tree = {}
-      if options.id then
-        tree[#tree+1] = createCommand("label", { marker = options.id })
-      end
-      local toks = pl.lexer.lua(content[1], {})
-      for tag, v in toks do
-        local out = tostring(v)
-        if tag == "string" then
-          -- rebuild string quoting...
-          out = out:match('"') and ("'"..out.."'") or ('"'..out..'"')
-        end
-        if naiveLuaCodeTheme[tag] then
-          local cascade = CommandCascade()
-          if naiveLuaCodeTheme[tag].color then
-            cascade:call("color", { color = naiveLuaCodeTheme[tag].color })
-          end
-          if naiveLuaCodeTheme[tag].bold then
-            cascade:call("strong", {})
-          end
-          if naiveLuaCodeTheme[tag].italic then
-            cascade:call("em", {})
-          end
-          tree[#tree+1] = cascade:tree({ out })
-        else
-          tree[#tree+1] = SU.utf8charfromcodepoint("U+200B")..out -- HACK with ZWSP to trick the typesetter respecting standalone linebreaks
+    local processed = false
+    if hasClass(options, "lua") then
+      -- Comes first as we don't want SILE raw handler to take over here.
+      -- (There's no such raw handler in the standard SILE distribution currently,
+      -- but let's be cautious.)
+      SILE.call("markdown:internal:lua-highlighter", options, content)
+      processed = true
+    elseif render then
+      local handler = utils.hasRawHandler(options)
+      if handler then
+        handler(options, content)
+        processed = true
+      else
+        local format, embed = utils.hasEmbedHandler(options)
+        if format then
+          options.format = format
+          embed(options, content)
+          processed = true
         end
       end
-      SILE.call("verbatim", {}, tree)
-    else
-      -- Just raw unstyled verbatim
+    end
+    if not processed then
+      -- Default case: just raw unstyled verbatim text
       SILE.call("verbatim", {},
         options.id and {
           createCommand("label", { marker = options.id }),
@@ -676,7 +688,7 @@ Please consider using a resilient-compatible class!]])
         }
       )
     end
-    SILE.call("smallskip")
+    SILE.call("par")
   end, "(Fenced) code block in Markdown (internal)")
 
   self:registerCommand("markdown:internal:lineblock", function (_, content)
@@ -721,7 +733,7 @@ Please consider using a resilient-compatible class!]])
     end
     local title = removeFromTree(content, "caption")
 
-    if SILE.Commands["epigraph"] then -- asssuming the implementation from resilient.epigraph.
+    if self.hasCommandSupport.epigraph then -- asssuming the implementation from resilient.epigraph.
       if title then
         -- Trick: Put the extract title back as "\source"
         title.command = "source"
@@ -737,11 +749,11 @@ Please consider using a resilient-compatible class!]])
   end, "Captioned blockquote in Djot (internal)")
 
   self:registerCommand("markdown:internal:toc", function (options, _)
-    if not SILE.Commands["tableofcontents"] then
+    if not self.hasCommandSupport.tableofcontents then
       SU.warn("No table of contents command available (skipped)")
       return
     end
-    local tocHeaderCmd = SILE.Commands["tableofcontents:header"]
+    local tocHeaderCmd = self.hasCommandSupport["tableofcontents:header"]
     if tocHeaderCmd then
       -- HACK (opinionated)
       -- By design, resilient.tableofcontents does not output a header.
@@ -758,7 +770,7 @@ Please consider using a resilient-compatible class!]])
     -- Makes it easier for class/packages to provide their own definition
     -- environment if they want to do so (possibly with more features),
     -- while minimally providing a default fallback solution.
-    if not SILE.Commands["defn"] then
+    if not self.hasCommandSupport.defn then
       SILE.call("markdown:fallback:defn", {}, content)
     else
       SILE.call("defn", options, content)
@@ -851,40 +863,84 @@ Please consider using a resilient-compatible class!]])
     SILE.call("smallskip")
   end, "A fallback command for Markdown to insert a captioned figure")
 
+  self:registerCommand("markdown:fallback:mark", function (_, content)
+    local leading = SILE.measurement("1bs"):tonumber()
+    local bsratio = utils.computeBaselineRatio()
+    if SILE.typesetter.liner then
+      SILE.typesetter:liner("markdown:fallback:mark", content,
+        function (box, typesetter, line)
+          local outputWidth = SU.rationWidth(box.width, box.width, line.ratio)
+          local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
+          local D = SU.max(box.depth:tonumber(), bsratio * leading)
+          local X = typesetter.frame.state.cursorX
+          SILE.outputter:pushColor(SILE.color("yellow"))
+          SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
+          SILE.outputter:popColor()
+          box:outputContent(typesetter, line)
+        end
+      )
+    else
+      SU.debug("markdown.commands", "Feature detection: no liner, using a simpler fallback for mark")
+      -- Liners are introduced in SILE 0.15.
+      -- Resilient (with the silex compatibility layer) has them too for SILE 0.14.
+      -- For now, also support older versions of SILE when used in a non-resilient context.
+      -- This is not as good, since an hbox can't be broken across lines.
+      local hbox, hlist = SILE.typesetter:makeHbox(content)
+      SILE.typesetter:pushHbox({
+        width = hbox.width,
+        height = hbox.height,
+        depth = hbox.depth,
+        outputYourself = function (box, typesetter, line)
+          local outputWidth = SU.rationWidth(box.width, box.width, line.ratio)
+          local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
+          local D = SU.max(box.depth:tonumber(), bsratio * leading)
+          local X = typesetter.frame.state.cursorX
+          SILE.outputter:pushColor(SILE.color("yellow"))
+          SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
+          SILE.outputter:popColor()
+          hbox:outputYourself(typesetter, line)
+        end
+      })
+      SILE.typesetter:pushHlist(hlist)
+    end
+  end)
+
   -- C. Customizable hooks
 
   self:registerCommand("markdown:custom-style:hook", function (options, content)
-    -- Default implementation for the custom-style hook:
-    -- If we are in the context of a resilient-compatible class and there's
-    -- an existing style going by that name, use it.
-    -- Otherwise, tf there is a corresponding SILE command, we invoke it.
-    -- otherwise, we just ignore the style and process the content.
-    -- It allows us, e.g. to already
-    --  - Use resilient styles in proper context
+    -- Default/standard implementation for the custom-style hook:
+    -- 1. If we are in the context of a resilient-compatible class and there's
+    -- an existing style going by that name, we apply it.
+    -- 2. Otherwise, if there is a corresponding SILE command, going by the
+    -- optional "alt" command name or if unspecified, the style name itself,
+    -- we invoke it.
+    -- 3. Otherwise, we just silently ignore the style and process the content.
+    --
+    -- It allows us to;
+    --  - Use resilient styling paradigm if applicable
+    --  - Use some alternate fallback command if provided
     --  - Use some interesting commands, such as "custom-style=raggedleft".
     -- Package or class designers MAY override this hook to support any other
     -- styling mechanism they may have or want.
-    -- The available options are the custom-style "name" and a "scope" which
-    -- can be "inline" (for inline character-level styling) or "block" (for
-    -- block paragraph-level styling).
+    -- The available options are the custom-style "name", an optional "alt"
+    -- command name, and a "scope" which can be "inline" (for inline
+    -- character-level styling) or "block" (for block paragraph-level styling).
     local name = SU.required(options, "name", "markdown custom style hook")
-    if self.isResilient
-      and self.class.packages["resilient.styles"]
-        -- HACK TODO we'd need a self.class.packages["resilient.styles"]:hasStyle(name)
-        -- to avoid tapping into internal structures.
-        -- self.class.packages["resilient.styles"]:resolveStyle(name, true) returns
-        -- {} for a (discardable) non-existing style, so is not very handy here.
-        and SILE.scratch.styles.specs[name] then
-      if options.scope == "block" then
+    local scope = SU.required(options, "scope", "markdown custom style hook")
+    local alt = options.alt or name
+
+    if self.hasStyleSupport[name] then
+      if scope == "block" then
         SILE.call("style:apply:paragraph", { name = name }, content)
       else
         SILE.call("style:apply", { name = name }, content)
       end
-    elseif SILE.Commands[name] then
-      SILE.call(name, {}, content)
+    elseif self.hasCommandSupport[alt] then
+      SILE.call(alt, {}, content)
     else
+      SU.debug("markdown.commands", "Feature detection: ignoring unknown custom style:", name)
       SILE.process(content)
-      if options.scope == "block" then
+      if scope == "block" then
         SILE.call("par")
       end
     end
@@ -893,7 +949,7 @@ Please consider using a resilient-compatible class!]])
 end
 
 package.documentation = [[\begin{document}
-A helper package for Markdown processing, providing common hooks and fallback commands.
+A helper package for Markdown and Djot processing, providing common hooks and fallback commands.
 
 It is not intended to be used alone.
 \end{document}]]

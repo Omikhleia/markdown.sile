@@ -1,99 +1,679 @@
-# Beyond Markdown: SILE and Djot
+# SILE and Djot
 
-{custom-style=raggedleft}
-"Djot (/dʒɑt/) is a light markup syntax."[^djot-desc]
+> "Djot (/dʒɑt/) is a light markup syntax.
+> It derives most of its features from commonmark, but it fixes a few things
+> that make ommonmark's syntax complex and difficult to parse efficiently.
+> It is also much fuller-featured (...)"
+^ From the [Djot website](https://djot.net/).
 
-[^djot-desc]: From the [Djot website](https://djot.net/).
+D{custom-style=Initial}[jot]{.smallcaps} is a fairly recent markup syntax, proposed by John MacFarlane in 2022.
+It derives from (Common) Markdown, solving a lot of its complex syntax pitfalls, and also extending it on various aspects.
+Since mosts concepts are similar, it initially felt rather natural to include it in this collection, so that authors interested in Markdown could give it a try.
 
-Djot is a fairly recent markup syntax, proposed by John MacFarlane in 2022.
-It derives from (Common) Markdown, solving a lot of its complex syntax pitfalls,
-and also extending it on various aspects.
-Since mosts concepts are similar, it felt rather natural to include it too in this collection,
-so that authors interested in Markdown can give it a try.
+This author has been using Djot in several projects, and it has become his preferred markup language.
+Therefore, it's no longer a "side feature" of this collection, and our manual now starts with it.
 
-The very chapter you are currently reading is written in Djot. As the syntax of the
-language is fairly well described in its design document, we are not going to repeat it
-here. The chapter is therefore a bit dull, mainly reproducing the same things we
-achieved for Markdown earlier. At places, however, it focuses of the specifics of the rendering
-engine.
+The very chapter you are currently reading is written in Djot.
+The syntax of the language is fairly well described in its own design document.
+However, the Djot specification is a early-stage project, and will likely evolve.
+This manual serves as reference for the current implementation of the Djot converter in this package collection, going through all the features.
+At places, it also focuses on the specifics of this converter, and the extensions it provides.
 
 {% THIS TEXT SHOULD NOT APPEAR IN THE OUTPUT, IT IS A DJOT COMMENT %}
 
-{custom-style=FramedPara}
-Please note that this is an early implementation and that things may change in
-future versions.
+## Core concepts
 
-## The native djot package
+In a Djot document, most of the primary content is written as ordinary text, just typed as you would in any other document.
+The "light markup" syntax, mostly based on punctuation characters, is employed to denote special elements.
 
-Once you have loaded the `\autodoc:package{djot}`{=sile} package,
-the `\autodoc:command{\include[src=<file>]}`{=sile} command supports reading a Djot file.
-The native parsing relies on John MacFarlane's *djot* Lua library.
+The core concepts in Djot mirror those of Markdown, featuring inline and block elements for text formatting and document structuring, along with attributes to provide additional information or instructions for these elements.
+
+: Ordinary text
+
+  Anything that isn't given a special meaning in the following sections is parsed as literal text.
+
+: Escaped characters
+
+  All ASCII punctuation characters (even those that have no special meaning in Djot) may be "backslash-escaped."
+  Thus, `\*` is parsed and rendered as a literal \* character.
+  Backslashes before characters other than ASCII punctuation characters are just treated as literal backslashes, except before a newline, and a space (or a tab) character.
+  We will get back to this later.
+
+: Inline elements
+
+  Inline elements are meant to be used within paragraphs or other block elements to enhance or modify specific portions of text.
+  They typically affect the formatting or styling.
+  Examples of inline elements include emphasis, links, images, and spans.
+
+: Block-level elements
+
+  Block elements, on the other hand, create distinct blocks or sections within the document.
+  These elements typically span across multiple lines and can contain other inline or block elements within them.
+  Examples of block elements include: headings, paragraphs, lists, quotes, and divs.
+
+: Attributes
+
+  Attributes are additional properties or metadata that can be associated with certain elements, allowing for more fine-grained control over the appearance and behavior of elements.
 
 
-```
-\use[module=packages.djot]
-\include[src=somefile.dj]
-```
+![Djot concepts at a glance.](./djot-concept-simplified.svg){width="75%lw"}
 
-Embedding raw Djot content from within a SIL document is also possible:
 
-```
-\begin[type=djot]{raw}
-Some *Djot* content
-\end{raw}
-```
+## Attributes
 
-{#basic-djot-typesetting}
-### Basic typesetting 
+Actually, let's start with attributes, as they have the same general syntax for both inline and block elements.
 
-As of formatting, _italic_, *bold*, and `code` all work as expected.
+Attributes are put inside curly braces.
+On inline elements, attributes are placed immediately after the element they are attached to, with no intervening whitespace.
+They may contain line breaks, and may be "stacked," in which case they will be combined.
 
-Hard line breaks...\
+To attach attributes to a block-level element, put the attributes on the line immediately before the block.
+Block attributes have the same syntax as inline attributes, but they must fit on one line. Repeated attribute specifiers can also be used, and the attributes will accumulate.
+
+Inside the curly braces, the following syntax is possible:
+
+ - `#foo` specifies an identifier, for referencing purposes.
+
+   An element may have only one identifier; if multiple identifiers are given, the last one is used.
+
+ - `.foo` specifies a class, for styling purposes.
+
+   Multiple classes may be given in this way; they will be combined.
+
+ - `key="value"` or `key=value` specifies a key-value attribute.
+
+   Quotes are not needed when the value consists entirely of ASCII alphanumeric characters or `_` or `:` or `-`. Backslash escapes may be used inside quoted values.
+
+ - `?foo` and `!foo` specify a condition.
+
+    This is an extension specific to this converter, see §[](#djot-conditional-attributes).
+
+## Inline elements
+
+### Spaces
+
+Djot treats multiple spaces as a single space.
+
+A backslash before a space is parsed as a non-breaking space, a space that will not be used as a line break point.
+This converter interprets it as a justifiable interword-space --- that is, a variable-width space for the purpose of justification.
+It can be made fixed by adding the `.fixed` attribute just after the space.
+In that case, it still has the same width as a regular interword-space, but it does not stretch or shrink.
+
+
+### Line breaks
+
+Line breaks in inline content are treated as “soft” breaks.
+In other words, this converter semantically interprets them as mere spaces.
+
+To get a hard line break, use a backslash at the end of a line. Hard line breaks...\
 ... are supported.
 
-Smart typography is a standard feature. Three dashes (`---`) in an
-inline text sequence are converted to an em-dash (---), two dashes (`--`)
-to an en-dash useful for ranges (ex., "it's at pages 12--14"), and three dots
-(`...`) to an ellipsis (...). Smart quotes and apostrophes are also automatically
-handled.
+{custom-style=CodeBlock}
+:::
+```
+Hard line breaks...\
+... are supported.
+```
+:::
 
-Superscripts and subscripts are available : H~2~O is a liquid, 2^10^ is 1024.
+Any backslash before a newline (or before spaces or tabs followed by a newline) is parsed as a hard line break.
+Spaces and tab characters before the backslash are ignored in this case.
+
+
+### Smart punctuation
+
+Smart typography is a standard feature in Djot.
+
+#### Dashes and ellipsis
+
+Three dashes (`---`) in an inline text sequence are converted to an em-dash (---), two dashes (`--`) to an en-dash useful for ranges (ex., "it's at pages 12--14"), and three dots
+(`...`) to an ellipsis (...).
+
+#### Smart quotes
+
+Smart quotes and apostrophes are also automatically handled.
+Straight double quotes (`"`) and single quotes (`'`) are converted into appropriate quotes.
+The Djot specification states they are replaced by _curly_ quotes, but this converter goes further and takes into account the current language when converting
+straight double and single quotation marks to the appropriate typographic variant, see §[](#djot-language-changes).
+
+Djot is pretty good about figuring out from context which direction of quote is needed.
+However, its heuristics can be overridden by using curly braces to mark a quote as an opener `{'` or a closer `'}`: '}Tis Socrates' season to be jolly!
+
+{custom-style=CodeBlock}
+:::
+```
+'}Tis Socrates' season to be jolly!
+```
+:::
+
+If you _really_ want a straight quote, use a backslash-escape (`\"` or `\'`).
+
+
+### Emphasis
+
+Regular _emphasis_ is delimited by `_` characters.
+Strong *emphasis* is delimited by `*` characters.
+This `_` or `*` can open emphasis only if it is not directly followed by whitespace.
+It can close emphasis only if it is not directly preceded by whitespace, and only if there are some characters besides the delimiter character between the opener and the closer.
+
+Curly braces may be used to force interpretation of a `_` or `*` either as an opener or as a closer.{_ This is emphasized, despite the spaces! _}
+
+{custom-style=CodeBlock}
+:::
+```
+{_ This is emphasized, despite the spaces! _}
+```
+:::
+
+Emphasis can be nested.
+For regular emphasis, this is interpreted as per usual typography conventions, adequately switching between italics and upright fonts.
+_This is _an emphasis inside_ an emphasis._
+
+{custom-style=CodeBlock}
+:::
+```
+_This is _an emphasis inside_ an emphasis._
+```
+:::
+
+
+### Insertions & deletions
+
+To mark inline text as inserted, use `{+` and `+}`.
+To mark it as deleted, use `{-` and `-}`.
+The `{` and `}` brackets are mandatory.
+Thus:
+
+ - {+insertion+} is `{+insertion+}`
+ - {-deletion-} is `{-deletion-}`
+
+For this converter, these are equivalent to spans with `.inserted` and `.deleted` pseudo-classes respectively (see §[](#djot-spans) for details and styling).
+
+
+### Highlighted content
+
+Inline content between `{= and =}` is treated as highlighted (or "marked").
+The `{` and `}` brackets are mandatory.
+
+You thus get an {=highlight=} with `{=highlight=}`
+
+For this converter, this is equivalent to a span with a `.mark` pseudo-class (see §[](#djot-spans) for details and styling).
+
+
+### Superscripts & subscripts
+
+Superscript is delimited by `^` characters, subscript by `~`.
+Curly braces may be used (resp. `{^...^}` and `{~...~}`), but are not required.
+Thus, H~2~O is a liquid, and 2^10^ is 1024.
+
+{custom-style=CodeBlock}
+:::
+```
+Thus, H~2~O is a liquid, and 2^10^ is 1024.
+```
+:::
+
 As Djot allows attaching arbitrary attributes to the elements, it's worth noting that
-we notably support a `fake` boolean attribute here.[^djot-textsubsuper]
+we notably support a `fake` boolean attribute here.
+Albeit not very useful in practice, it controls whether fake or native superscripts or subscripts are used.[^djot-textsubsuper]
+You might notice a small difference between 2^10^{fake=false} and 2^10^{fake=true}.
 
-[^djot-textsubsuper]: Controlling whether fake or native superscripts or subscripts are used.
-Refer to the `\autodoc:package{textsubsuper}`{=sile} package for details.
+{custom-style=CodeBlock}
+:::
+```
+... difference between 2^10^{fake=false} and 2^10^{fake=true}.
+```
+:::
 
-Other nice features include:
+There is another, likely more important, implication.
+This converter assumes that the content of a superscript or subscript consists of text, as it tries to use font features or text scaling techniques to render it.
 
- - {-deletions-} with `{-deletions-}`
- - {+insertions+} with `{+insertions+}`
- - {=highlight=} with `{=highlight=}`
+[^djot-textsubsuper]: Refer to the *textsubsuper* package for details.
+  Note that this is also available as a setting, so normally you would not have to rely on this attribute in your documents, unless you use an assortment of fonts where the default behavior is not satisfactory...
+
+
+{#djot-spans}
+### Generic inline containers (spans)
+
+Text in square brackets that is not a link or image and is followed immediately by an attribute is treated as a generic span.
+
+Djot accepts attributes on any element, so what follows also applies to any other inline element, the spans being a generalization.[^djot-spans-generalization]
+
+[^djot-spans-generalization]: When this converter encounters attributes on an element, most of the time it actually wraps the latter in an implicit span.
+
+This converter recognizes a few specific attributes on spans:
+
+ - Identifiers for referencing purposes
+ - The `custom-style` attribute, see §[](#djot-custom-styles)
+ - The `lang` attribute, see §[](#djot-language-changes)
+
+#### Basic styling
+
+This converter also recognizes the following pseudo-classes on spans:
+
+ - [Small Caps]{.smallcaps}, as `[Small Caps]{.smallcaps}`
  - [underlines]{.underline} with `[underlines]{.underline}`
  - [struck out]{.strike} with `[struck out]{.strike}`
- - [Small Caps]{.smallcaps}, as `[Small Caps]{.smallcaps}`
+ - [insertions]{.inserted} with `[insertions]{.inserted}`
+ - [deletions]{.deleted} with `[deletions]{.deleted}`
+ - [highlighted]{.mark} with `[highlighted]{.mark}`
 
-### Standard features
+The three last ones are equivalent to the `{+...+}` and `{-...-}` syntaxes, and the `{=...=}` syntax, respectively.
+In other term, these Djot inline elements are mere shortcuts for the corresponding spans.
 
-Let's go quickly over these features, just to ensure the package does what it says,
-with a good parity with what we earlier described for Markdown.
+Moreover, if used within in a *resilient* class, the converter uses the `md-underline`, `md-strikethrough`, `md-insertion`, `md-deletion` and `md-mark` styles, respectively, if they are defined in your style file.
+Another way to put it is that the converter then does the same thing as a `{custom-style="..."}` attribute (see §[](#djot-custom-styles)).
+You can style and fine-tune these elements as you wish, and even use them for other purposes than their original intent.[^djot-spans-hook]
 
-#### Lists
+[^djot-spans-hook]: This is one of the reasons for keeping insertions and deletion distinct from underlines and strikethroughs, as they may have different semantics in some contexts, though their default rendering may be the same.
 
-Unordered lists (a.k.a. itemized or bulleted lists) are obviously supported, or
-we would not have been able to use them in the previous sections.
+#### Smarter typography
 
-Ordered lists are supported as well.
-The starting number is honored, and you have the flexibility to use
-digits, roman numbers or letters (in upper or lower case).
-Djot also recognizes several delimiter styles.
+On inline content, the `.decimal` pseudo-class attribute instructs the converter to consider numbers in the content as decimal numbers, formatted with suitable decimal mark and digit grouping according to the usage in the current language.
+This allows, say, 1984 to be rendered as "[1984]{.decimal} years ago" in English, or "[1984 années]{.decimal lang=fr}" in French, with appropriate separators.
 
- b. This list uses lowercase letters and starts at 2. Er... at "b", that is.
+{custom-style=CodeBlock}
+:::
+```
+... rendered as "[1984]{.decimal} years ago" in English,
+or "[1984 années]{.decimal lang=fr}" in French ...
+```
+:::
 
-     i) Roman number...
-     ii) ... followed by a right parenthesis rather than a period.
+The `.nobreak` pseudo-class attribute ensures that line-breaking will not be applied there.
+Use it wisely around small pieces of text, or you might end up with more serious justification issues!
+Yet, it might be useful for proper names, etc.
 
-By the way,
+
+{#djot-image}
+### Images
+
+![This man is Gutenberg.](./gutenberg.jpg){#djot-gutenberg width="3cm"}
+
+This is obtained with the following syntax:
+
+{custom-style=CodeBlock}
+:::
+```
+![This man is Gutenberg.](./gutenberg.jpg){width="3cm"}
+```
+:::
+
+Attributes are optional, and are passed through to the underlying SILE package.
+You can notably specify the required image width and/or height, as done just above, by appending the `{width=... height=...}` attributes --- Note that any unit system supported by SILE is accepted.[^djot-img-attributes]
+
+There are actually two kinds of image syntax: (direct) inline images and (indirect) reference images.
+Above, we used the former kind.
+The reference images are defined elsewhere in the document, and are referenced by their label:
+
+{custom-style=CodeBlock}
+:::
+```
+![Good old gutenberg][gutenberg]
+...
+{width="3cm"}
+[gutenberg]: ./gutenberg.jpg
+```
+:::
+
+Note that attributes are specified before the reference label (considered as a block element).
+Direct (inline) link's attributes override reference's attributes.
+
+[^djot-img-attributes]: The converter does not check the validity of the attributes, and it is the responsibility of the underlying package to do so.
+
+{#djot-captioned-images}
+#### Implicit captioned figures
+
+An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph, will be rendered as a figure with a caption, as actually seen above.
+Otherwise, the caption is ignored.
+
+If your document class or previously loaded packages provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to take care of the caption, i.e. to extract and display it appropriately).
+Specifically, if the *resilient* book class is used, the caption will be numbered by default, and added to the list of figures. Specify `.unnumbered`, and `.notoc` respectively, if you do not want it.
+Otherwise, the converter uses its own fallback method.
+
+#### Extended image types
+
+Besides regular image files, a few specific file extensions are also recognized and processed appropriately by this converter.
+Notably ![](./examples/manicule.svg){height="1.3ex"} SVG is supported too (`.svg`), as demonstrated.
+This inline "manicule" is obtained with:
+
+{custom-style=CodeBlock}
+:::
+```
+... ![](./examples/manicule.svg){height="1.3ex"} is supported ...
+```
+:::
+
+Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images, when the *embedders.sile* collection is properly configured.
+
+![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+
+This image is obtained with the following syntax.
+
+{custom-style=CodeBlock}
+:::
+```
+![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+```
+:::
+
+CSV files are also supported, when the *piecharts.sile* optional collection is properly installed (see §[](#recommended-additional-packages)), and are rendered as pie charts.
+
+![A pie chart.](./data-pie.csv){height="8em" cutoff="0.07"}
+
+This chart is obtained with the following syntax.
+
+{custom-style=CodeBlock}
+:::
+```
+![A pie chart.](./data-pie.csv){height="8em" cutoff="0.07"}
+```
+:::
+
+
+### Links and cross-references
+
+Here is a link to [the SILE website](https://sile-typesetter.org/), and here is an internal link to the "[Images](#djot-image)" section.
+
+{custom-style=CodeBlock}
+:::
+```
+... a link to [the SILE website](https://sile-typesetter.org/)
+... an internal link to the "[Images](#djot-image)" section.
+```
+:::
+
+As seen in the example, links can be local (referring to an identifier) or external (for instance, referring to a URL).
+
+You can use attributes on links:
+the [SILE website](https://sile-typesetter.org/){.underline}.[^djot-link-attributes]
+
+{custom-style=CodeBlock}
+:::
+```
+... the [SILE website](https://sile-typesetter.org/){.underline}.
+```
+:::
+
+[^djot-link-attributes]: Within a **resilient** class, we'd possibly rather recommend using a style to color links, etc.
+
+There are actually two kinds of links, inline links and reference links.
+Both start with the link text (which may contain arbitrary inline formatting) inside `[`...`]` delimiters.
+
+Inline links then contain the link destination (URL) in parentheses, as shown above.
+There should be no space between the `]` at the end of the link text and the open `(` defining the link destination.
+
+Reference links use a reference label in square brackets, instead of a destination in parentheses.
+This is another link to [the SILE website][sile].
+
+{custom-style=CodeBlock}
+:::
+```
+Another link to [the SILE website][sile].
+...
+[sile]: https://sile-typesetter.org/
+```
+:::
+
+[sile]: https://sile-typesetter.org/
+
+The reference label should be defined somewhere in the document.
+If the label is empty, then the link text will be taken to be the reference label as well as the link text.
+
+{#djot-cross-references}
+#### Cross-references
+
+Djot, like Markdown, does not define a proper way to insert cross-references of the kind you would see in a book, as in the following example.
+
+> The section on "[](#djot-tables){.title}",
+> that is [](#djot-tables){.section},
+> is on page [](#djot-tables){.page}.
+
+This converter takes a bold decision, though unlikely to break anything unexpected.
+Empty local links (that is, without inline display content) are interpreted as cross-references.
+By default, they are resolved to the closest numbering item, whatever that might be in the hierarchical structure of your document.
+A pseudo-class attribute may be used to override the default behavior and specify which type
+of reference is expected (page number, section number or title text).
+Thus, the above example was obtained from the following input:
+
+{custom-style=CodeBlock}
+:::
+```
+The section on "[](#djot-tables){.title}",
+that is [] (#djot-tables){.section},
+is on page [](#djot-tables){.page}.
+```
+:::
+
+Besides heading levels, it also works for various elements where you can define an identifier.
+For instance we had some centered text in section [](#djot-centered).
+With appropriate class and package support,[^djot-sec-label-support] you may even refer to Gutenberg as "figure [](#djot-gutenberg)", or to some poetry verse mentioning the Sun ("Soleil"), in [](#sun){.section}, as "verse [](#sun)".
+
+[^djot-sec-label-support]: Typically, it works with the *resilient* collection of classes and packages. It won't work with non-supporting class and packages, using the fallback implementation for captioned elements, poetry, etc.
+
+#### Automatic links
+
+A URL or email address that is enclosed in angle brackets (`<`...`>`) is rendered as a link.
+The content between pointy braces is treated literally (backslash-escapes may not be used).
+
+Here is a link to the SILE website, <https://sile-typesetter.org/>.
+
+{custom-style=CodeBlock}
+:::
+```
+... to the SILE website, <https://sile-typesetter.org/>.
+```
+:::
+
+
+### Verbatim text
+
+Verbatim content begins with a string of consecutive backtick characters (`` ` ``) and ends with an equal-lengthed string of consecutive backtick characters.
+This is mostly used for `code` --- obtained with `` `code` `` (enjoy the inception).
+
+Material between the backticks is treated as verbatim text (backslash escapes don't work there).
+If the content starts or ends with a backtick character, a single space is removed between the opening or closing backticks and the content.
+If the text to be parsed as inline ends before a closing backtick string is encountered, the verbatim text extends to the end.
+
+
+### Maths
+
+To include TeX-like math, put the math in a verbatim span and prefix it with `$` (for inline math) or `$$` (for display math).
+For instance, the following code produces $`e^{i\pi}=-1`.
+
+{custom-style=CodeBlock}
+:::
+```
+... the following code produces $`e^{i\pi}=-1`.
+```
+:::
+
+There is an important constraint, though: you have to restrict yourself to the syntax subset supported by SILE. This being said, some nice fomulas may be achieved.
+$$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})`
+
+
+{custom-style=CodeBlock}
+:::
+```
+... may be achieved.
+$$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})`
+```
+:::
+
+### Footnote calls
+
+A footnote call[^djot-some-fn] is marked with `^` and the reference label in square brackets.
+See §[](#djot-footnotes) for the syntax of the footnote itself.
+
+{custom-style=CodeBlock}
+:::
+```
+A footnote call[^djot-some-fn] is marked...
+```
+:::
+
+[^djot-some-fn]: An example footnote.
+
+
+{#djot-symbols}
+### Symbols
+
+Surrounding a word with `:` signs creates a “symbol.”
+The Djot specification leaves the interpretation of such symbols to the rendering engine.
+This converter uses them in specific ways, as detailed in §[](#djot-advanced-topics).
+
+
+{#djot-raw-inlines}
+### Raw inlines
+
+Raw inline content in any format may be included using a verbatim span followed by `{=format}`.
+This content is intended to be passed through verbatim when rendering the designated format, but ignored otherwise.
+
+This converter supports a `{=sile}` annotation, to pass through its content in SIL language. Let's do something fun`\dotfill`{=sile}!
+
+{custom-style=CodeBlock}
+:::
+```
+Let's do something fun`\dotfill`{=sile}!
+```
+:::
+
+It also supports `{=sile-lua}` to pass Lua code. Let's try it here
+`SILE.call("hrule", {height="1ex", width="1ex"})`{=sile-lua}
+
+{custom-style=CodeBlock}
+:::
+```
+Let's try it here
+`SILE.call("hrule", {height="1ex", width="1ex"})`{=sile-lua}
+```
+:::
+
+
+## Block elements
+
+### Paragraphs
+
+A paragraph is a sequence of non-blank lines that does not meet the condition for being one of the other block-level elements.
+
+A paragraph ends with a blank line or the end of the document.
+The textual content is parsed as a sequence of inline elements.
+A single newline is treated as a space.
+
+### Headings
+
+A heading starts with a sequence of one or more `#` characters, followed by whitespace.
+The number of `#` characters defines the heading level.
+The heading text following that sequence is parsed as inline content.
+
+For example, this very section is a level three heading.
+It was therefore obtained with:
+
+{custom-style=CodeBlock}
+:::
+```
+### Headings
+```
+:::
+
+The heading text may spill over onto following lines, which may also be preceded by the same number of `#` characters (but these can also be left off).
+
+The heading ends when a blank line (or the end of the document or enclosing container) is encountered.
+
+This converter accepts the following pseudo-classes on heading attributes:
+
+ - `.unnumbered` suppresses numbering of the heading.
+ - `.notoc` suppresses the heading from appearing in the table of contents.
+
+The heading attributes, obviously, also accept an identifier, for referencing purposes.
+Here is an example illustrating the use of these attributes:
+
+{custom-style=CodeBlock}
+:::
+```
+{#djot-unnumbered-heading .unnumbered .notoc}
+#### Other attributes
+```
+:::
+
+{#djot-unnumbered-heading .unnumbered .notoc}
+#### Other attributes
+
+Other attributes are passed through to the underlying heading implementation, which might do something with them.[^djot-heading-level-mapping]
+
+[^djot-heading-level-mapping]: The converter assumes it can map heading levels to SILE commands `part`, `chapter`, `section`, `subsection`, `subsubsection`.
+It uses a very basic fallback if these are not found (or if the sectioning level gets past that point).
+The implication, therefore, is that the document class or other packages have to provide the relevant implementations.
+Also note that parts are supported by the *resilient* book class as a level 0 heading, and are therefore only available when header shifting is applied (see §[](#djot-configuration)).
+
+### Block quotes
+
+A block quote is a sequence of lines, each of which begins with `>`, followed either by a space or by the end of the line.
+The contents of the block quote are parsed as block-level content.
+
+#### Regular quotes
+
+{custom-style=CodeBlock}
+:::
+```
+> This is block quote.
+>
+> > Such quotes can be nested.
+```
+:::
+
+> This is block quote.
+>
+> > Such quotes can be nested.
+
+If your document class or previously loaded packages provide a `blockquote` environment, it will be used.
+Otherwise, the converter uses its own fallback method, with hard-coded styling.
+
+#### Attributed quotes (epigraphs)
+
+{ rule="0.4pt" }
+> The Library is a sphere whose exact centre is any one of its
+> hexagons and whose circumference is inaccessible.
+^ Jorge Luis [Borges]{.smallcaps}, "The Library of Babel"
+
+Standard Djot only honors captions on tables, and ignores them on other block elements.
+When using a *resilient* document class, however, a captioned block quote is rendered as an "epigraph", with the caption content used as its "source" (in a broad sense).
+The caption is introduced with a `^` character, and can contain inline elements.
+For instance, the above quote was obtained with:
+
+{custom-style=CodeBlock}
+:::
+```
+{ rule="0.4pt" }
+> The Library is a sphere whose exact centre is any one of its
+> hexagons and whose circumference is inaccessible.
+^ Jorge Luis [Borges]{.smallcaps}, "The Library of Babel"
+```
+:::
+
+Attributes are passed through to an implicit "div" (so as to honor the language, a link target identifier, etc.) and eventually to the underlying epigraph environment.
+Any option supported by the *resilient.epigraph* package may thus be used.
+
+Be aware that this behavior is currently an extension.
+Other Djot converters will therefore likely skip the caption.
+
+### Lists
+
+A list item consists of a list marker followed by a space (or a newline) followed by one or more lines, indented relative to the list marker.
+
+{custom-style=CodeBlock}
+:::
+```
+1. Nesting...
+ 
+    ... works as intended.
+ 
+     - Fruits
+ 
+        - Apple
+```
+:::
+
 
  1. Nesting...
 
@@ -103,125 +683,241 @@ By the way,
 
         - Apple
 
-Task lists following the GitHub-Flavored Markdown (GFM) format are supported too.
+
+#### Unordered lists
+
+Unordered lists (a.k.a. itemized or bulleted lists) are introduced by a bullet list marker, either `-`, `+`, or `*`.
+With this converter, the list marker is not significant, and the supporting package is responsible for rendering nested lists with the appropriate symbol.
+
+{custom-style=CodeBlock}
+:::
+```
+ - This is a bullet list.
+ 
+   - It can be nested.
+ 
+     - And nested again.
+ ```
+:::
+
+ - This is a bullet list.
+
+   - It can be nested.
+
+     - And nested again.
+
+
+#### Ordered lists
+
+Djot supports several types of ordered lists.
+
+---
+
+1. Decimal-enumerated, followed by period.
+
+1) Decimal-enumerated, followed by parenthesis.
+
+(1) Decimal-enumerated, enclosed in parentheses.
+
+a. Lower-alpha-enumerated, followed by period.
+
+a) Lower-alpha-enumerated, followed by parenthesis.
+
+(a) Lower-alpha-enumerated, enclosed in parentheses.
+
+A. Upper-alpha-enumerated, followed by period.
+
+A) Upper-alpha-enumerated, followed by parenthesis.
+
+(A) Upper-alpha-enumerated, enclosed in parentheses.
+
+i. Lower-roman-enumerated, followed by period.
+
+i) Lower-roman-enumerated, followed by parenthesis.
+
+(i) Lower-roman-enumerated, enclosed in parentheses.
+
+I. Upper-roman-enumerated, followed by period.
+
+I) Upper-roman-enumerated, followed by parenthesis.
+
+(I) Upper-roman-enumerated, enclosed in parentheses.
+
+---
+
+In a given type of list, you do not have to number the items in order by yourself, as Djot automatically increments the number for you.
+Your starting number, however, is honored, would you want to start at a different number than 1 (in any numbering scheme).
+
+{custom-style=CodeBlock}
+:::
+```
+1. Item
+1. Item
+1. Item
+```
+:::
+
+1. Item
+1. Item
+1. Item
+
+{custom-style=CodeBlock}
+:::
+```
+ b. This list starts at "b"
+ 
+     iii) This list starts a "iii" in roman numerals.
+     i) Next item is thus "iv".
+ 
+ a. The next item here is "c".
+```
+:::
+
+  b. This list starts at "b"
+
+      iii) This list starts a "iii" in roman numerals.
+      i) Next item is thus "iv".
+
+  a. The next item here is "c".
+
+#### Definition lists
+
+In a definition list item, the first line or lines after the `:` marker is parsed as inline content and taken to be the term defined.
+Any further blocks included in the item are assumed to be the definition.
+
+{custom-style=CodeBlock}
+:::
+```
+: apples
+ 
+  Good for making applesauce.
+ 
+: citrus
+ 
+  Like oranges but yellow.
+```
+:::
+
+
+: apples
+
+  Good for making applesauce.
+
+: citrus
+
+  Like oranges but yellow.
+
+Block attributes are passed to the underlying definition environment.
+When not using a supporting class or package, the converter uses its own fallback method, with hard-coded styling (e.g. the term is typeset in boldface).
+When using the *resilient* classes, the converter uses the *resilient.defn* environment, and the `variant` option may thus be used to switch to an alternate style.[^djot-defn-variant]
+For the purpose of illustration, let's say you have a "Custom" variant with an _ad hoc_ style.
+
+{custom-style=CodeBlock}
+:::
+```
+{variant=Custom}
+: Djot
+ 
+  A light markup syntax.
+```
+:::
+
+{variant=Custom}
+: Djot
+
+  A light markup syntax.
+
+[^djot-defn-variant]: Within *resilient*, you can already fully style the default definition list.
+The `variant` option is intended to switch to a different style, when you need more than one for different purposes in the same document.
+
+#### Task lists
+
+A bullet list item that begins with `[ ]`, `[X]`, or `[x]` followed by a space is a task list item, either unchecked (`[ ]`) or checked (`[X]` or `[x]`).
+
+{custom-style=CodeBlock}
+:::
+```
+ - [ ] Unchecked item
+ - [x] Checked item
+```
+:::
 
  - [ ] Unchecked item
  - [x] Checked item
 
-Definition lists are also decently supported. Note the syntax differs from Pandoc-style Markdown.
-
- : apples
-
-   Good for making applesauce.
-
- : citrus
-
-   Like oranges but yellow.
-
-Djot attributes are passed to the underlying definition environment.[^djot-resilient-defn]
-
-[^djot-resilient-defn]: With the *resilient.defn* environment, the `variant` option may thus be used to switch to an alternate style.
-
-#### Block quotes
-
-Block quotes work.
-
-> This is block quote.
->
-> > They can be nested.
-
-#### Footnotes
+{#djot-footnotes}
+### Footnote references
 
 Footnotes work.[^djot-fnt]
 Moreover, Djot allows attaching attributes to the footnote reference.
 This offers us some additional flexibility.
 Here is therefore a possibly different footnote.[^djot-fun-note] It is obtained with:
 
+{custom-style=CodeBlock}
+:::
 ```
 ... different footnote[^djot-fun-note]...
-
+ 
 {mark="†"}
 [^djot-fun-note]: If using...
 ```
+:::
 
 It can even be referenced in the flow of text: see note [](#djot-fun-note).
 
 [^djot-fnt]: This is yet another regular footnote.
 
 {mark="†"}
-[^djot-fun-note]: If using a resilient class, this note should be marked with an _obelus_ ("dagger").
-Cross-references are detailed later in this chapter.
+[^djot-fun-note]: If using a resilient document class, this note should be marked with an _obelus_ ("dagger").
+For cross-references, see §[](#djot-cross-references).
 For linking purpose, this converter uses the footnote reference identifier by default, but it can of course be overridden via the attribute syntax.
 Other attributes are passed through to the underlying footnote implementation.
 
-#### Languages
-
-Language changes within the text are supported, on either blocks or inline
-elements.
-
-{lang=fr}
-> Cette citation est en français!
-
-Or inline in text: ["Encore du français!"]{lang=fr}
-
-As can be seen, the current language is taken into account when converting
-straight double and single quotation marks to the appropriate typographic variant.
-
-#### Custom styles
-
-The converter also supports the `{custom-style="..."}` attribute.
-
-{#centered-djot custom-style="center"}
-This is SILE and Djot at their best{custom-style="strong"}, really!
-
-#### Images
-
-![This man is still Gutenberg.](./gutenberg.jpg){#djot-gutenberg width=3cm}
-
-![xxx](./manicule.svg){height="0.6bs"} Everything seen for Markdown also applies here.
-
-#### Maths
-
-Inline TeX-like math works, as in $`e^{i\pi}=-1`.
-Display math also works:
-$$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})`
 
 {#djot-tables}
-#### Tables
+### Tables
 
-Djot supports the "pipe table" syntax, with its own way for marking the (optional)
-caption.[^djot-numbered-caption]
+Djot supports the "pipe table" syntax, with its own way for marking the optional caption.
 
 | Right | Left | Default | Center |
 |------:|:-----|---------|:------:|
 |  12   |  12  |    12   |    12  |
 |  123  |  123 |   123   |   123  |
-
 ^ Demonstration of a pipe table.
 
-[^djot-numbered-caption]: When using the **resilient** classes, the caption will be numbered by
-default, and added to the list of tables. Specify `.unnumbered`, and `.notoc` respectively, as
-table attributes, if you do not want it.
+{custom-style=CodeBlock}
+:::
+```
+| Right | Left | Default | Center |
+|------:|:-----|---------|:------:|
+|  12   |  12  |    12   |    12  |
+|  123  |  123 |   123   |   123  |
+^ Demonstration of a pipe table.
+```
+:::
 
-#### Basic links
 
-Here is a link to [the SILE website](https://sile-typesetter.org/), and
-here is an internal link to the "[Basic typesetting](#basic-djot-typesetting)" section.
+When using the *resilient* classes, the caption will be numbered by default, and added to the list of tables.
+Specify `.unnumbered`, and `.notoc` respectively, as table attributes, if you do not want it.
 
-#### Cross-references
+### Code blocks
 
-The converter uses the same "tricks" as with Markdown, interpretating links without display
-content as cross-references, and specific pseudo-class attributes to indicate which type of
-reference is requested.
+A code block is enclosed in a "fence," starting with a line of three or more consecutive backticks and ending with a line of backticks equal in length to the opening line.
+The opening line may contain a format string, which is passed through to the converter.
+In this version, this is equivalent to specifying a pseudo-class attribute in a block attribute.
+(So a `xxx` format string after the opening fence and a `.xxx` class specifier in a block attribute are currently equivalent.)
 
-The section on "[](#djot-tables){ .title }", that is [](#djot-tables){ .section },
-is on page [](#djot-tables){ .page }. Figure\ [](#djot-gutenberg) shows Gutenberg; the Sun ("Soleil")
-is mentioned in §[](#sun){.section}, verse [](#sun).
+The content of the code block is passed through to the converter, which is responsible for interpreting it.
+In most cases, the content is rendered as verbatim text, with some exceptions detailed below, for "recognized" formats.
 
-#### Code blocks
+#### Lua code blocks
 
-Code blocks work:
+Code blocks marked as being in the Lua language are rendered as verbatim text, with syntax highlighting.
+For instance, the following code block...
 
+{custom-style=CodeBlock}
+:::
+````
 ```lua
 function fib (n)
   -- Fibonacci numbers
@@ -229,61 +925,185 @@ function fib (n)
   return fib(n - 2) + fib(n - 1)
 end
 ```
-
-Code blocks marked as being in the Graphviz DOT language are rendered as images.
-
-{width="3.5cm" layout=twopi}
-```dot
-graph {
-  node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
-  a -- { b d };
-  b -- { c e };
-  c -- { f g h i };
-  e -- { j k l m n o };
-}
-```
-
-{render=false width=5cm layout=twopi}
-```dot
-graph {
-  node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
-  a -- { b d };
-  b -- { c e };
-  c -- { f g h i };
-  e -- { j k l m n o };
-}
-```
-
-Code blocks marked as being in Markdown or Djot are interpreted too (again, unless
-the `render` attribute is set to false).
-For Markdown, attributes are passed to the converter, allowing to possibly use different compatibility options (see "[Configuration](#configuration)").
-This feature allows switching between those languages, would there be something one does not support yet.
-At the time of writing, for instance, Djot does not support "line blocks".
-
-This very chapter being written in Djot, let's just switch to Markdown and type some poetry.
-
-```markdown
-::: {.poetry}
-| I took up the runes,
-|  screaming I took them,
-| then I fell back from there.
+````
 :::
+
+... is rendered as:
+
+{custom-style=CodeBlock}
+:::
+```lua
+function fib (n)
+  -- Fibonacci numbers
+  if n < 2 then return 1 end
+  return fib(n - 2) + fib(n - 1)
+end
 ```
+:::
+^ An example of a syntax-highlighted Lua code snippet.
 
-#### Raw blocks
 
-```=sile
-This \em{entire} sentence is typeset in a \em{raw block}, in SIL language.
+This is a very naive approach to syntax-highlighting, until the converter possibly supports a more general solution.
+
+#### Rendered code blocks
+
+If the converter knows how to render the content of a code block, it will do so by default.
+The `render` attribute can be set to `false` to prevent this behavior, and enforce the content to be rendered as raw verbatim text.
+
+: Mardown and Djot code blocks
+
+  Code blocks marked as being in Markdown or Djot are interpreted.
+  For Markdown, attributes are passed to the converter, allowing to possibly use different compatibility options (for Markdown especially, see §[](#markdown-configuration)).
+  This feature allows switching between those languages, would there be something one does not support yet.
+
+  At the time of writing, for instance, Djot does not support "line blocks".
+  This chapter being written in Djot, let's just switch to Markdown and type some poetry.
+
+  ```markdown
+  ::: {.poetry}
+  | I took up the runes,
+  |  screaming I took them,
+  | then I fell back from there.
+  :::
+  ```
+
+  This was obtained with:
+
+  {custom-style=CodeBlock}
+  ::::
+  ````
+  ```markdown
+  ::: {.poetry}
+  | I took up the runes,
+  |  screaming I took them,
+  | then I fell back from there.
+  :::
+  ```
+  ````
+  ::::
+
+: Other rendered code blocks
+
+  Other formats may be recognized, provided the converter knows how to handle them.
+  Internally, this relies on two extensible mechanisms:
+
+  - SILE "raw" handlers, which may be declared by other packages.
+  - Renderers for text formats that can be converted to an image, as supported by the *embedders.sile* module, provided the necessary software is installed on your host system. (See §[](#recommended-additional-software) for more details.)
+
+  : Graphviz DOT graphs
+
+    Thus, if you properly installed the *embedders.sile* collection and its software dependencies, then code blocks marked as being in the Graphviz DOT language are rendered as images.
+    Attributes are passed to the underlying processor.
+    For instance, the image below is produced with `{.dot width="3.5cm" layout=twopi}`.
+
+    :::
+    {width="3.5cm" layout=twopi}
+    ```dot
+    graph {
+      node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
+      a -- { b d };
+      b -- { c e };
+      c -- { f g h i };
+      e -- { j k l m n o };
+    }
+    ```
+    :::
+    ^ An example of a rendered DOT graph.
+
+    The original DOT description used in the code block is shown hereafter.
+
+    {custom-style=CodeBlock}
+    :::
+    {render=false width=5cm layout=twopi}
+    ```dot
+    graph {
+      node [fillcolor="lightskyblue:darkcyan" style=filled
+            gradientangle=270]
+      a -- { b d };
+      b -- { c e };
+      c -- { f g h i };
+      e -- { j k l m n o };
+    }
+    ```
+    :::
+
+  : Pie charts
+
+    Likewise, if you installed the optional *piecharts.sile* collection, then code blocks marked as "piechart" are automatically rendered, with all other attributes are passed to the underlying processor.
+    Consider the following code block, consisting in a CSV table...
+
+    {custom-style=CodeBlock}
+    :::
+    ````
+    {height=8em}
+    ```piechart
+    Player,Score
+    Mario,55
+    Luigi,23
+    Peach,12
+    Bowser,10
+    ```
+    ````
+    :::
+
+    ... then, provided a proper setup, it is rendered as:
+
+    :::
+    {height=8em}
+    ```piechart
+    Player,Score
+    Mario,55
+    Luigi,23
+    Peach,12
+    Bowser,10
+    ```
+    :::
+    ^ An example of a rendered pie chart.
+
+
+### Content container divisions (divs)
+
+A div begins with a line of three or more consecutive colons, optionally followed by white space and a class name (but nothing else). It ends with a line of consecutive colons at least as long as the opening fence, or with the end of the document or containing block.
+
+Djot accepts attributes on any element, so what follows also applies to any other block element, the divs being a generalization.[^djot-divs-generalization]
+
+[^djot-divs-generalization]: When this converter encounters attributes on some block elements (such as paragraphs and block quotes), most of the time it actually wraps the latter in an implicit div.
+
+This converter recognizes a few specific attributes on divs:
+
+ - Identifiers for referencing purposes
+ - The `custom-style` attribute, see §[](#djot-custom-styles)
+ - The `lang` attribute, see §[](#djot-language-changes)
+
+#### Generic captioned figures
+
+Standard Djot only honors captions on tables, and ignores them on other block elements.
+This converter, however, renders a div witb a caption as a "figure".
+
+:::
+_Some content here._
+:::
+^ An example of a div used as captioned figure.
+
+The caption is introduced with a `^` character, and can contain inline elements.
+For instance, the above quote was obtained with:
+
+{custom-style=CodeBlock}
+::::
 ```
-
-```=sile-lua
-SILE.call("em", {}, { 'This' })
-SILE.typesetter:typeset(" is called from Lua.")
+:::
+_Some content here._
+:::
+^ An example of a div used as captioned figure.
 ```
+::::
 
-Likewise, on inline code elements: `\em{idem.}`{=sile}
+Be aware that this behavior is currently an extension.
+Other Djot converters will therefore likely skip the caption.
 
-#### Horizontal dividers
+As for implicit captioned images, this feature relies on the document class or other packages to provide a `captioned-figure` environment. See §[](#djot-captioned-images), the same remarks apply here as well.
+
+### Horizontal dividers
 
 Since Djot allows attaching arbitrary attributes to any element, we do not need here
 to rely on an _ad hoc_ workaround, as we previously did with the native Markdown package,
@@ -339,22 +1159,150 @@ pseudo-class.
 
 [^djot-hrules]: The order in which they are listed above corresponds to their priority.
 
-#### Smarter typography
 
-On inline content, the `.decimal` pseudo-class attribute instructs the converter to consider numbers
-in the content as decimal numbers, formatted with suitable decimal mark and digit grouping according
-to the usage in the current language.
-This allows, say, 1984 to be rendered as "[1984]{ .decimal } years ago" in English,
-or "[1984 années]{ .decimal lang=fr }" in French, with appropriate separators.
+{#djot-raw-blocks}
+### Raw blocks
 
-The `.nobreak` pseudo-class attribute on inline content ensures that line-breaking will not be applied
-there. Use it wisely around small pieces of text or you might end up with more serious justification issues! Yet, it might be useful for proper names, etc.
+A code block marked as `=format` is interpreted as raw content and passed through verbatim to output in that format.
+As for raw inlines (§[](#djot-raw-inlines)), this converter supports the `=sile` and `=sile-lua` annotations.
+Other annotations are ignored, and the block content is skipped.
+
+Let's combine several of the extensibility techniques we have seen so far, and do something cool.
+
+```=sile
+\use[module=packages.barcodes.ean13]
+```
+
+```=sile-lua
+local class = SILE.documentState.documentClass
+class:registerCommand("MyEan13", function (_, content)
+  local code = SU.ast.contentToString(content)
+  code = code:gsub("[-–]","")
+  SILE.call("ean13", { scale="SC0", code = code })
+end)
+```
+
+Why not "style" an EAN-13 ISBN as a nice barcode?
+
+[[978-2-9539896-6-3]{custom-style=MyEan13}]{custom-style=center}
+
+First, we ensure the *barcodes.ean13* packages is loaded.[^djot-ean13-assume]
+Let's use some SIL language for that.
+
+[^djot-ean13-assume]: The package is part of the *barcodes.sile* collection, and is not installed by default --- But the *resilient.sile* collection does include it, and this is what we are using here.
+
+{custom-style=CodeBlock}
+:::
+````
+```=sile
+\use[module=packages.barcodes.ean13]
+```
+````
+:::
+
+Then, we define a new SILE command to render the EAN-13 barcode.
+Let's do it in Lua, as we need some string manipulation.
+
+{custom-style=CodeBlock}
+:::
+````
+```=sile-lua
+local class = SILE.documentState.documentClass
+class:registerCommand("MyEan13", function (_, content)
+  local code = SU.ast.contentToString(content)
+  -- Remove dashes and (smart) en-dashes
+  code = code:gsub("[-–]","")
+  SILE.call("ean13", { scale="SC0", code = code })
+end)
+```
+````
+:::
+
+We can now use our new command as a custom style (see §[](#djot-custom-styles)).
+
+{custom-style=CodeBlock}
+:::
+```
+... [978-2-9539896-6-3]{custom-style=MyEan13}
+```
+:::
+
+Other converters will likely ignore the style, and the ISBN will be displayed as-is, so this technique degrades gracefully.
+
+
+{#djot-advanced-topics}
+## Advanced topics
+
+{#djot-language-changes}
+### Languages
+
+Language changes within the text are supported, on either blocks or inline
+elements.
+It relies on the `lang` key-value attribute, where the value is a BCP47 language code.
+It is not much visible below, obviously, but the language setting affects the hyphenation and other properties.
+In the case of French, for instance, you can see the special thin space before the exclamation point, the use of appropriate quotation marks, and the internal spacing around quoted text:
+
+{lang=fr}
+> Cette citation est en français!
+
+Or inline in text: ["Encore du français!"]{lang=fr}
+
+This was obtained with:
+
+{custom-style=CodeBlock}
+:::
+```
+::: {lang=fr}
+> Cette citation est en français!
+:::
+ 
+Or inline in text: ["Encore du français!"]{lang=fr}
+```
+:::
+
+As can be seen, the current language is taken into account when converting
+paired straight double and single quotation marks to the appropriate typographic variant:
+["English"]{lang=en} / ["Deutsch"]{lang=de} / ["français"]{lang=fr} / ["dansk"]{lang=da} / ["русский"]{lang=ru};
+['English']{lang=en} / ['Deutsch']{lang=de} / ['français']{lang=fr} / ['dansk']{lang=da} / ['русский']{lang=ru}.[^djot-smart-quotes]
+
+[^djot-smart-quotes]: For most languages, `"` and `'` correspond to the primary and secondary quotations marks, respectively.
+In some languages, they are used the other way round, but obviously the user's input is respected in those cases (e.g. respectively ["Ghàidhlig"]{lang=cy} and ['Ghàidhlig']{lang=cy}).
+
+{#djot-custom-styles}
+### Custom styles
+
+The converter also supports the `{custom-style="..."}` attribute.
+It is inspired by the syntax proposed by Pandoc for Markdown, in its *docx* writer, to specify a specific, possibly user-defined, custom style name (in that case, a Word style, obviously).
+
+Here, if such a named style exists, it is applied. Erm. What does it mean?
+Well, in the default implementation, if used within in a *resilient* class and there is a corresponding style, the converter uses it.
+Otherwise, if there is a corresponding SILE command by that name, the converter invokes it.
+Otherwise, it just ignores the style and processes the content as-is.
+Even if you do not use a resilient-compatible class, it thus allows you to use some interesting SILE features.
+For instance, here is some block of text marked as "center", with some inline text marked as "strong".
+
+{#djot-centered custom-style="center"}
+This is SILE and Djot at their best{custom-style="strong"}!
+
+This was obtained with:
+
+{custom-style="CodeBlock"}
+:::
+```
+{#djot-centered custom-style="center"}
+This is SILE and Djot at their best{custom-style="strong"}!
+```
+:::
+
+That's a fairly contrived way to obtain a bold text, but you get the underlying general idea.
+This is one of the ways to use SILE commands in Djot.
+While you could invoke _any_ SILE command with this feature, we recommend, though, to restrict it to styling.
+Another more powerful way to leverage Djot with SILE’s full processing capabilities, and benefit from the best of both worlds, is to use the "raw" annotations, described in §[](#djot-raw-inlines) and §[](#djot-raw-blocks).
+
 
 ### Templates and variable substitution
 
 [^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
-[^:disclaimer:]: _Big disclaimer:_ This interpretation of symbols is not standard.
-  We might have to reconsider it as Djot evolves.
 
 Let's now pretend that you are writing an essay about some fictitious :pumpernickel:.
 
@@ -366,7 +1314,7 @@ But your problem is that this long name will appear a lot of times.
 Repeating it is tedious and error-prone.
 Would you appreciate defining it as a replaceable variable going by a much simpler name?
 
-Well, Djot has the notion of a "symbol", a keyword surrounded by colon signs.
+Well, Djot has the notion of a "symbol", a keyword surrounded by colon signs (§[](#djot-symbols)).
 Although it was initially provisioned for "emojis", the default interpretation is now left to the rendering engine.
 
 This converter for SILE is focussed on producing print-quality books, where so-called emojis play little part.
@@ -375,17 +1323,18 @@ Back to our initial question, what if you could just type `:pumpernickel:` and h
 
 Since it's possible to have unused footnote definitions, let's craft one as shown hereafter, with its reference identifier being the same as our targeted variable.
 
+{custom-style=CodeBlock}
+:::
 ```
 [^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
 ```
+:::
 
 When encountering a symbol, this converter looks for such a footnote and expands its content.
 It works with inline elements as shown above, but also with full blocks, provided the symbol is the only element in a paragraph of its own.
 
 Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain symbols, which will get replaced too.
 
-{custom-style=FramedPara}
-:disclaimer:
 
 [^djot-pseudo-footnotes]: You may still use them as regular footnotes.
 Whether this is a good idea is another question...
@@ -401,7 +1350,7 @@ This converter also comes with a few symbols predefined.
 The above variable substitution mechanism has precedence over these symbols, allowing you to possibly override them.
 
 {#djot-metadata-symbols}
-### Templates and contextual metadata
+### Contextual metadata
 
 Some options passed to the converter (see "[](#djot-configuration){.title}") are also available as symbols.
 
@@ -411,32 +1360,8 @@ Let's check how it expands: _:title:._
 
 Again, the variable substitution mechanism also has precedence over these symbols.
 
-## Syntax extensions
 
-### Attributed quotes (epigraphs)
-
-{ rule="0.4pt" }
-> The Library is a sphere whose exact centre is any one of its
-> hexagons and whose circumference is inaccessible.
-^ Jorge Luis [Borges]{.smallcaps}, "The Library of Babel"
-
-Standard Djot only honors captions on tables, and ignores them on other block elements.
-When using a **resilient** document class, however, a captioned block quote is rendered as an "epigraph", with the caption content used as its "source" (in a broad sense).
-For instance, the above quote was obtained with:
-
-```
-{ rule="0.4pt" }
-> The Library is a sphere whose exact centre is any one of its
-> hexagons and whose circumference is inaccessible.
-^ Jorge Luis [Borges]{.smallcaps}, "The Library of Babel"
-```
-
-Attributes are passed through to an implicit "div" (so as to honor the language, a link target identifier, etc.) and eventually to the underlying epigraph environment.
-Any option supported by the `\autodoc:package{resilient.epigraph}`{=sile} package may thus be used.
-
-Be aware that this behavior is currently an extension.
-Other Djot converters will therefore likely skip the caption.
-
+{#djot-conditional-attributes}
 ### Conditionals
 
 While the interpretation of symbols presented above is not a standard, the Djot specification leaves it to the rendering engine.
@@ -469,21 +1394,27 @@ Therefore, we recommend that you call template files containing conditional cont
 {#djot-configuration}
 ## Configuration
 
-You can pass additional options to the `\autodoc:command{\include}`{=sile} command or the `\autodoc:environment[check=false]{raw}`{=sile} environment to tune the behavior of the converter.
+The calling context (a wrapper document in SIL syntax, a resilient "master document", etc.) can pass additional options to tune the behavior of the converter.
 
-The `shift_headings` option can take an integer value and causes headers in included or embedded raw content to be offset (that is, shifted by the given amount).
-For instance:
+As state above (§[](#djot-metadata-symbols) "[](#djot-metadata-symbols){.title}"), any option starting with `meta:` is passed to the converter (with this prefix removed), and is then available as a symbol.
 
+In addition, the `shift_headings` option can take an integer value and causes headers in included or embedded raw content to be offset (that is, shifted by the given amount).
+
+In SIL documents, you can pass such options to the `\include` command or the `raw` environment.
+For instance, you can include a Djot file with shifted headings like this:
+
+{custom-style=CodeBlock}
+:::
 ```
 \include[src=somefile.dj, shift_headings=1]
 ```
+:::
 
-For document classes supporting it, this feature also allows you to access levels above the default scheme, such as "parts".
+For document classes supporting it (in particular, the *resilient* book class), this feature also allows you to access levels above the default scheme, such as "parts".
 
+{custom-style=CodeBlock}
+:::
 ```
 \include[src=somefile.dj, shift_headings=-1]
 ```
-
-Any other option starting with `meta:` is passed to the converter (with this prefix removed).
-See "[](#djot-metadata-symbols){.title}" above.
-
+:::

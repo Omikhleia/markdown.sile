@@ -427,11 +427,6 @@ function Renderer:Emph (inlines)
   local content = self:render(inlines)
   return createCommand("em", {}, content)
 end
--- Underline [Inline]
-function Renderer:Underline (inlines)
-  local content = self:render(inlines)
-  return createCommand("underline", {}, content)
-end
 
 -- Strong [Inline]
 function Renderer:Strong (inlines)
@@ -439,10 +434,16 @@ function Renderer:Strong (inlines)
   return createCommand("strong", {}, content)
 end
 
+-- Underline [Inline]
+function Renderer:Underline (inlines)
+  local content = self:render(inlines)
+  return createCommand("markdown:internal:span", { class = "underline" }, content)
+end
+
 -- Strikeout [Inline]
 function Renderer:Strikeout (inlines)
   local content = self:render(inlines)
-  return createCommand("strikethrough", {}, content)
+  return createCommand("markdown:internal:span" , { class = "strike" }, content)
 end
 
 -- Superscript [Inline]
@@ -460,7 +461,7 @@ end
 -- SmallCaps [Inline]
 function Renderer:SmallCaps (inlines)
   local content = self:render(inlines)
-  return createCommand("font", { features = "+smcp" }, content)
+  return createCommand("markdown:internal:span", { class = "smallcaps" }, content)
 end
 
 -- Quoted QuoteType [Inline]

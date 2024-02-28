@@ -1,4 +1,35 @@
 
+defn-term-Custom:
+  inherit: "defn-base"
+  origin: "resilient.defn"
+  style:
+    font:
+      features: "+smcp"
+    paragraph:
+      after:
+        vbreak: false
+      before:
+        skip: "smallskip"
+
+defn-desc-Custom:
+  inherit: "defn-desc"
+  style:
+    paragraph:
+      after:
+        skip: "smallskip"
+      before:
+        vbreak: false
+
+CodeBlock:
+  origin: "resilient.book"
+  style:
+    paragraph:
+      after:
+        skip: "smallskip"
+      align: "shadow-framed"
+      before:
+        skip: "smallskip"
+
 CoverCredit:
   style:
     font:
@@ -10,15 +41,35 @@ CoverCredit:
       before:
         skip: "bigskip"
 
+CustomDroppedInitial:
+  origin: "resilient.book"
+  style:
+    font:
+      family: "Zallman Caps"
+    color: "#66a0b3"
+    special:
+      lines: 3
+
 FramedPara:
   origin: "resilient.book"
   style:
     paragraph:
       after:
         skip: "medskip"
-      align: "framed"
+      align: "fancy-framed"
       before:
         skip: "medskip"
+
+Difference:
+  style:
+    font:
+      family: "Libertinus Sans"
+      size: "0.95em"
+    paragraph:
+      after:
+        skip: "smallskip"
+      before:
+        skip: "smallskip"
 
 blockquote:
   origin: "resilient.book"
