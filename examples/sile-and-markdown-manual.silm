@@ -12,7 +12,7 @@ metadata:
   publisher: Omikhleia
   pubdate: 2024-03-01
   url: https://github.com/Omikhleia/markdown.sile
-  copyright: © 2021–2024, Didier Willis.
+  copyright: © 2022–2024, Didier Willis.
   legal: |
     This material may be distributed only subject to the terms and conditions
     set forth in the  Creative Commons Attribution, Share-Alike License,
@@ -50,6 +50,7 @@ chapters:
   - toc.dj
   - extra-styles.dj
   - introduction.dj
+  - lightweight-markup.dj
   - sile-and-djot.dj
   - sile-and-markdown.md
   - sile-and-pandoc.dj

@@ -170,8 +170,7 @@ Some *Djot* content
 ## Credits
 
 We owe a lot to John MacFarlane, for the *djot* and *lunamark* Lua libraries which empower this collection of packages.
-
-Additional thanks to:
+Additional thanks go to:
 
 - Simon Cozens, _et al._ concerned, for the early attempts at using *lunamark* with SILE.
 - Vít Novotný, for the good work on lunamark, and the impressive [*witiko/markdown*](https://github.com/Witiko/markdown) package for (La)TeX---a great source of inspiration and a goal of excellence.
