@@ -155,13 +155,10 @@ This is but an overview. For more details, please refer to the provided example 
 
 ## Use with the resilient collection
 
-To unleash the full potential of this package set, we recommend that
-you also install our [resilient](https://github.com/Omikhleia/resilient.sile)
-collection of classes and packages.
+To unleash the full potential of this package set, we recommend that you also install our [resilient](https://github.com/Omikhleia/resilient.sile) collection of classes and packages.
 
 Then, you can automatically benefit from a few advanced features.
-Conversion from command-line just requires to load a resilient class, and optionally
-the poetry package. For instance:
+Conversion from command-line just requires to load a resilient class, and optionally the poetry package. For instance:
 
 ```shell
 sile -c resilient.book -u inputters.markdown -u packages.resilient.poetry somefile.md
@@ -169,23 +166,20 @@ sile -c resilient.book -u inputters.markdown -u packages.resilient.poetry somefi
 
 (And likewise for the Pandoc AST or Djot processing.)
 
-A resilient style file is also generated. It can be modified to change many styling
-decisions and adapt the output at convenience.
+A resilient style file is also generated.
+It can be modified to change many styling decisions and adapt the output at convenience.
 
 ## License
 
 All SILE-related code and samples in this repository are released under the MIT License, (c) 2022-2023 Omikhleia.
 
-A vendored (subset) of the [lunamark](https://github.com/jgm/lunamark) Lua parsing library is
-distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
-the MIT license, (c) 2009 John MacFarlane, _et al._
+A vendored (subset) of the [lunamark](https://github.com/jgm/lunamark) Lua parsing library is distributed alongside.
+All corresponding files (in the `lua-libraries` folder) are released under the MIT license, (c) 2009 John MacFarlane, _et al._
 
-A vendored (subset) of the [djot.lua](https://github.com/jgm/djot.lua) Lua parsing library is
-distributed alongside. All corresponding files (in the `lua-libraries` folder) are released under
-the MIT license, (c) 2022 John MacFarlane.
+A vendored (subset) of the [djot.lua](https://github.com/jgm/djot.lua) Lua parsing library is distributed alongside.
+All corresponding files (in the `lua-libraries` folder) are released under the MIT license, (c) 2022 John MacFarlane.
 
-Before you ask, it is expected the vendored code will be replaced by proper dependencies,
-when these packages all reach a stable state.
+Before you ask, it is expected the vendored code will be replaced by proper dependencies, when these packages all reach a stable state.
 
 ## Credits
 
@@ -194,4 +188,4 @@ Additional thanks to:
 - Simon Cozens, _et al._ concerned, for the early attempts at using lunamark with SILE.
 - Vít Novotný, for the good work on lunamark, and the impressive [witiko/markdown](https://github.com/Witiko/markdown) package for (La)TeX - a great source of inspiration and a goal of excellence.
 - Caleb Maclennan, for his early work on a Pandoc-to-SILE converter which, though on different grounds, indirectly gave me the idea of the “pandocast” alternative approach.
-- John MacFarlane, for the Djot and Markdown libraries which empowers this module.
+- John MacFarlane, for the Djot and Markdown libraries which empower this module.
