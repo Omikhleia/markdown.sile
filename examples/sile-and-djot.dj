@@ -265,7 +265,7 @@ Moreover, if used within in a *resilient* class, the converter uses the `md-unde
 Another way to put it is that the converter then does the same thing as a `{custom-style="..."}` attribute (see §[](#djot-custom-styles)).
 You can style and fine-tune these elements as you wish, and even use them for other purposes than their original intent.[^djot-spans-hook]
 
-[^djot-spans-hook]: This is one of the reasons for keeping insertions and deletion distinct from underlines and strikethroughs, as they may have different semantics in some contexts, though their default rendering may be the same.
+[^djot-spans-hook]: This is one of the reasons for keeping insertions and deletions distinct from underlines and strikethroughs, as they may have different semantics in some contexts, though their default rendering may be the same.
 
 #### Smarter typography
 
@@ -1078,7 +1078,7 @@ This converter recognizes a few specific attributes on divs:
 #### Generic captioned figures
 
 Standard Djot only honors captions on tables, and ignores them on other block elements.
-This converter, however, renders a div witb a caption as a "figure".
+This converter, however, renders a div with a caption as a "figure".
 
 :::
 _Some content here._
@@ -1086,7 +1086,7 @@ _Some content here._
 ^ An example of a div used as captioned figure.
 
 The caption is introduced with a `^` character, and can contain inline elements.
-For instance, the above quote was obtained with:
+For instance, the above "figure" was obtained with:
 
 {custom-style=CodeBlock}
 ::::
@@ -1396,7 +1396,7 @@ Therefore, we recommend that you call template files containing conditional cont
 
 The calling context (a wrapper document in SIL syntax, a resilient "master document", etc.) can pass additional options to tune the behavior of the converter.
 
-As state above (§[](#djot-metadata-symbols) "[](#djot-metadata-symbols){.title}"), any option starting with `meta:` is passed to the converter (with this prefix removed), and is then available as a symbol.
+As stated above (§[](#djot-metadata-symbols) "[](#djot-metadata-symbols){.title}"), any option starting with `meta:` is passed to the converter (with this prefix removed), and is then available as a symbol.
 
 In addition, the `shift_headings` option can take an integer value and causes headers in included or embedded raw content to be offset (that is, shifted by the given amount).
 
