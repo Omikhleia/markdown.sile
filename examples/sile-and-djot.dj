@@ -56,7 +56,7 @@ The core concepts in Djot mirror those of Markdown, featuring inline and block e
   Attributes are additional properties or metadata that can be associated with certain elements, allowing for more fine-grained control over the appearance and behavior of elements.
 
 
-![Djot concepts at a glance.](./djot-concept-simplified.svg){width="75%lw"}
+![Djot concepts at a glance.](./djot-concept-simplified.svg){width="75%"}
 
 
 ## Attributes
@@ -346,14 +346,14 @@ This inline "manicule" is obtained with:
 
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images, when the *embedders.sile* collection is properly configured.
 
-![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 
 This image is obtained with the following syntax.
 
 {custom-style=CodeBlock}
 :::
 ```
-![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 ```
 :::
 

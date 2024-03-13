@@ -323,13 +323,13 @@ This inline "manicule" is obtained with:
 
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images, when the **embedders.sile** collection is properly configured.
 
-![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 
 This image is obtained with the following syntax.
 
 ::: {custom-style=CodeBlock}
 ```
-![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 ```
 :::
 
