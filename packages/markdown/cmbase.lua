@@ -115,6 +115,23 @@ function package:_init (_)
   end)
 end
 
+function package:registerCommand(name, func, help, pack)
+  local tweakCommandWithKnownOptions = function (options, content)
+    options = options or {}
+    -- Tweak known options to be compatible with SILE units.
+    -- width and height in percentage are replaced by line and frame relative
+    -- units, respectively.
+    if options.width and type(options.width) == "string" then
+      options.width = options.width:gsub("%%$", "%%lw")
+    end
+    if options.height and type(options.height) == "string" then
+      options.height = options.height:gsub("%%$", "%%fh")
+    end
+    return func(options, content)
+  end
+  base.registerCommand(self, name, tweakCommandWithKnownOptions, help, pack)
+end
+
 --- Register a style (as in resilient packages).
 function package:registerStyle (name, opts, styledef)
   return self.styles:defineStyle(name, opts, styledef, self._name)

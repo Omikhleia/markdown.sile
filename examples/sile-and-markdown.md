@@ -283,7 +283,7 @@ Here is an image: ![](./gutenberg.jpg){width=1.5cm}
 :::
 
 Attributes are optional, and are passed through to the underlying SILE package.
-You can notably specify the required image width and/or height, as done just above, by appending the `{width=... height=...}` attributes --- Note that any unit system supported by SILE is accepted.
+You can notably specify the required image width and/or height, as done just above, by appending the `{width=... height=...}` attributes --- Note that any unit system supported by SILE is accepted, as well as percentages (see §[](#final-notes-units)).
 
 ::: {custom-style=Difference}
 ![](./examples/manicule.svg){height=1.3ex} **Main differences with Djot**
@@ -323,13 +323,13 @@ This inline "manicule" is obtained with:
 
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images, when the **embedders.sile** collection is properly configured.
 
-![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 
 This image is obtained with the following syntax.
 
 ::: {custom-style=CodeBlock}
 ```
-![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 ```
 :::
 

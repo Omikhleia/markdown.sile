@@ -52,7 +52,7 @@ Other possibilities exist (such as setting \autodoc:parameter{format=markdown} o
 \autodoc:command{\include} command, if the file extension cannot be one of the supported variants, etc.).
 Refer to the SILE manual for more details on inputters and their usage.
 
-Embedding raw Markdown content from within a SILE document is also possible:
+Embedding raw Markdown content from within a document in SIL markup is also possible:
 
 \begin{verbatim}
 \\begin[type=markdown]\{raw\}

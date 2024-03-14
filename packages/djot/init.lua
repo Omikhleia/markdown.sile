@@ -53,7 +53,7 @@ Other possibilities exist (such as setting \autodoc:parameter{format=djot} on th
 \autodoc:command{\include} command, if the file extension cannot be one of the supported variants, etc.).
 Refer to the SILE manual for more details on inputters and their usage.
 
-Embedding raw Djot content from within a SILE document is also possible:
+Embedding raw Djot content from within a document in SIL markup is also possible:
 
 \begin{verbatim}
 \\begin[type=djot]\{raw\}

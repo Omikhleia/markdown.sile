@@ -56,7 +56,7 @@ The core concepts in Djot mirror those of Markdown, featuring inline and block e
   Attributes are additional properties or metadata that can be associated with certain elements, allowing for more fine-grained control over the appearance and behavior of elements.
 
 
-![Djot concepts at a glance.](./djot-concept-simplified.svg){width="75%lw"}
+![Djot concepts at a glance.](./djot-concept-simplified.svg){width="75%"}
 
 
 ## Attributes
@@ -300,8 +300,7 @@ This is obtained with the following syntax:
 :::
 
 Attributes are optional, and are passed through to the underlying SILE package.
-You can notably specify the required image width and/or height, as done just above, by appending the `{width=... height=...}` attributes --- Note that any unit system supported by SILE is accepted.[^djot-img-attributes]
-
+You can notably specify the required image width and/or height, as done just above, by appending the `{width=... height=...}` attributes --- Note that any unit system supported by SILE is accepted, as well as percentages (see §[](#final-notes-units)).
 There are actually two kinds of image syntax: (direct) inline images and (indirect) reference images.
 Above, we used the former kind.
 The reference images are defined elsewhere in the document, and are referenced by their label:
@@ -318,8 +317,6 @@ The reference images are defined elsewhere in the document, and are referenced b
 
 Note that attributes are specified before the reference label (considered as a block element).
 Direct (inline) link's attributes override reference's attributes.
-
-[^djot-img-attributes]: The converter does not check the validity of the attributes, and it is the responsibility of the underlying package to do so.
 
 {#djot-captioned-images}
 #### Implicit captioned figures
@@ -346,14 +343,14 @@ This inline "manicule" is obtained with:
 
 Files in Graphviz DOT graph language (`.dot`) are supported and rendered as images, when the *embedders.sile* collection is properly configured.
 
-![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 
 This image is obtained with the following syntax.
 
 {custom-style=CodeBlock}
 :::
 ```
-![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%lw"}
+![The *markdown.sile* ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 ```
 :::
 
