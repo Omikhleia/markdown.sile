@@ -120,7 +120,9 @@ To generate the PDF documentation from the sources, you may then use the followi
 sile -u inputters.silm examples/sile-and-markdown-manual.silm
 ```
 
-Needed fonts are Libertinus Serif, Symbola and Zallman Caps.
+Needed fonts are Libertinus Serif, Libertinus Sans, Hack, Symbola and Zallman Caps.
+
+Graphviz is also required, and its `dot` command must be available in the system path, for the generation of in-documentation diagrams.
 
 ## Supported features
 
