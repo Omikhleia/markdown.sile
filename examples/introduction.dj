@@ -3,11 +3,11 @@
 [T]{custom-style=Initial}[his]{.smallcaps} collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting system provides a complete redesign of its former native Markdown support.
 Most of the content you are reading right now is written in either Djot or Markdown, and processed using the converters offered by this collection:
 
- - *markdown* inputter and package: native Markdown support,
  - *djot* inputter and package: native Djot support,
+ - *markdown* inputter and package: native Markdown support,
  - *pandocast* package: native support of Pandoc JSON AST files.
 
-For casual readers, this collection notably aims at easily converting Markdown or Djot documents to print-quality PDFs.
+For casual readers, this collection notably aims at easily converting Djot or Markdown documents to print-quality PDFs.
 
 With Djot and Markdown being made first-class citizens in SILE, you can now write your documents in these lightweight markup languages.
 There is actually more than one solution to achieve great results in that direction:
@@ -61,7 +61,7 @@ luarocks install piecharts.sile
 ```
 :::
 
-Also recommended is the *resilient.sile* collection, which provides a set of classes and packages for a more advanced usage.
+Also recommended is the [*resilient.sile*](https://github.com/Omikhleia/resilient.sile) collection, which provides a set of classes and packages for a more advanced usage.
 It is described below in §[](#usage-with-the-resilient-collection).
 Note that it takes care of installing the above collections as well, so you don't have to install them separately if you go the "resilient" way.
 

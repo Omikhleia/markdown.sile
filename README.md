@@ -7,11 +7,11 @@
 
 This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting system provides a complete redesign of its former native Markdown support, with a great set of Pandoc-like extensions and plenty of extra goodies.
 
-- **markdown** inputter and package: native support of Markdown files.
 - **djot** inputter and package: native support of Djot files.
+- **markdown** inputter and package: native support of Markdown files.
 - **pandocast** inputter and package: native support of Pandoc JSON AST files.
 
-For casual readers, this collection notably aims at easily converting Markdown or Djot documents to print-quality PDFs.
+For casual readers, this collection notably aims at easily converting Djot or Markdown documents to print-quality PDFs.
 
 ## Installation
 
