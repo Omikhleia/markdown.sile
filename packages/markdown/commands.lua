@@ -9,6 +9,7 @@
 --
 require("silex.lang") -- Compatibility layer
 require("silex.ast")  -- Compatibility layer
+require("silex.types") -- Compatibility layer
 
 local utils = require("packages.markdown.utils")
 local hasClass = utils.hasClass
@@ -708,7 +709,7 @@ Please consider using a resilient-compatible class!]])
     -- NOTE: The following doesn't work: SILE.call("math", {}, content)
     -- Let's go for a lower-level AST construct instead.
     SILE.process({
-      createCommand("math", { mode = mode }, SU.contentToString(content))
+      createCommand("math", { mode = mode }, SU.ast.contentToString(content))
     })
   end)
 
@@ -783,11 +784,11 @@ Please consider using a resilient-compatible class!]])
     SILE.call("smallskip")
     SILE.typesetter:leaveHmode()
     SILE.settings:temporarily(function ()
-      local indent = SILE.measurement("2em"):absolute()
-      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
-      local rskip = SILE.settings:get("document.rskip") or SILE.nodefactory.glue()
-      SILE.settings:set("document.lskip", SILE.nodefactory.glue(lskip.width + indent))
-      SILE.settings:set("document.rskip", SILE.nodefactory.glue(rskip.width + indent))
+      local indent = SILE.types.measurement("2em"):absolute()
+      local lskip = SILE.settings:get("document.lskip") or SILE.types.node.glue()
+      local rskip = SILE.settings:get("document.rskip") or SILE.types.node.glue()
+      SILE.settings:set("document.lskip", SILE.types.node.glue(lskip.width + indent))
+      SILE.settings:set("document.rskip", SILE.types.node.glue(rskip.width + indent))
       SILE.settings:set("font.size", SILE.settings:get("font.size") * 0.95)
       SILE.process(content)
       SILE.typesetter:leaveHmode()
@@ -835,9 +836,9 @@ Please consider using a resilient-compatible class!]])
     SILE.call("strong", {}, term)
     SILE.call("novbreak")
     SILE.settings:temporarily(function ()
-      local indent = SILE.measurement("2em"):absolute()
-      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
-      SILE.settings:set("document.lskip", SILE.nodefactory.glue(lskip.width + indent))
+      local indent = SILE.types.measurement("2em"):absolute()
+      local lskip = SILE.settings:get("document.lskip") or SILE.types.node.glue()
+      SILE.settings:set("document.lskip", SILE.types.node.glue(lskip.width + indent))
       SILE.process(desc)
       SILE.typesetter:leaveHmode()
     end)
@@ -864,7 +865,7 @@ Please consider using a resilient-compatible class!]])
   end, "A fallback command for Markdown to insert a captioned figure")
 
   self:registerCommand("markdown:fallback:mark", function (_, content)
-    local leading = SILE.measurement("1bs"):tonumber()
+    local leading = SILE.types.measurement("1bs"):tonumber()
     local bsratio = utils.computeBaselineRatio()
     if SILE.typesetter.liner then
       SILE.typesetter:liner("markdown:fallback:mark", content,
@@ -873,7 +874,7 @@ Please consider using a resilient-compatible class!]])
           local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
           local D = SU.max(box.depth:tonumber(), bsratio * leading)
           local X = typesetter.frame.state.cursorX
-          SILE.outputter:pushColor(SILE.color("yellow"))
+          SILE.outputter:pushColor(SILE.types.color("yellow"))
           SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
           SILE.outputter:popColor()
           box:outputContent(typesetter, line)
@@ -895,7 +896,7 @@ Please consider using a resilient-compatible class!]])
           local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
           local D = SU.max(box.depth:tonumber(), bsratio * leading)
           local X = typesetter.frame.state.cursorX
-          SILE.outputter:pushColor(SILE.color("yellow"))
+          SILE.outputter:pushColor(SILE.types.color("yellow"))
           SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
           SILE.outputter:popColor()
           hbox:outputYourself(typesetter, line)
