@@ -4,7 +4,6 @@
 --- Utility functions for lunamark.
 
 local M = {}
-local cosmo = require("cosmo")
 local rep  = string.rep
 local lpeg = require("lpeg")
 local Cs, P, S, lpegmatch = lpeg.Cs, lpeg.P, lpeg.S, lpeg.match
@@ -49,6 +48,7 @@ end
 -- it will be treated as an array with one element.  If it is
 -- `nil`, it will be treated as an empty array.
 function M.sepby(arg)
+  local cosmo = require("cosmo") -- HACK OMIKHLEIA
   local a = arg[1]
   if not a then
     a = {}
