@@ -88,10 +88,9 @@ Some *Djot* content
 
 ### Pandoc AST alternative package
 
-_Prerequisites:_ The [LuaJSON](https://github.com/harningt/luajson) module must be installed and available to your SILE environment.
-This topic is not covered here.
+This experimental package allows to convert Pandoc JSON AST files directly to PDF documents.
 
-First, using the appropriate version of Pandoc, convert your file to a JSON AST:
+Using the appropriate version of Pandoc, convert your file to a JSON AST:
 
 ```shell
 pandoc -t json somefile.md -f markdown -o somefile.pandoc

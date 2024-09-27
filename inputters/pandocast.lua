@@ -6,7 +6,7 @@
 -- AST conversion relies on the Pandoc types specification:
 -- https://hackage.haskell.org/package/pandoc-types
 --
--- Using the LuaJSON library for parsing.
+-- Using the luajson (LPEG-based) or lunajson (pure Lua) library for parsing.
 -- Reusing the common commands initially made for the "markdown" inputter/package.
 --
 -- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
@@ -582,9 +582,16 @@ function inputter.appropriate (round, filename, doc)
 end
 
 function inputter:parse (doc)
+  -- Load JSON parser:
+  -- Luajson is LPEG-based, and lunajson is pure Lua without other
+  -- dependencies. Prioritize the former for if available, otherwise
+  -- fallback to lunajson, which we'll have in our dependencies.
   local has_json, json = pcall(require, "json.decode")
   if not has_json then
-    SU.error("The pandocast inputter requires LuaJSON's json.decode() to be available.")
+    has_json, json = pcall(require, "lunajson")
+    if not has_json then
+      SU.error("The pandocast inputter requires either luajson or lunajson to be available.")
+    end
   end
 
   local jsast = json.decode(doc)
