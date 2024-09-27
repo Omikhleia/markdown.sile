@@ -121,6 +121,20 @@ end
 
 function package:_init (_)
   base._init(self)
+  if not SILE.scratch._markdown_commands then
+    -- NOTE:
+    -- I don't like those scratch variables, but package reinstancing
+    -- may occur in SILE. I never liked it, but it still occurs in SILE 0.15.5
+    -- when silex-x is not present, so we have to deal with it.
+    -- For putative readers:
+    --    load the djot package, cause you want to use Djot.
+    --    load the markdown package, cause you want to use Markdown too.
+    -- Both load the markdown.commands package.
+    -- Guess what? The markdown.commands package is instanciated twice.
+    -- It's supposed to be a SILE feature...
+    SILE.scratch._markdown_commands = {}
+  end
+  self.predefinedSymbols = SILE.scratch._markdown_commands
 
   -- Only load low-level packages (= utilities)
   -- The class should be responsible for loading the appropriate higher-level
@@ -151,6 +165,40 @@ function package:_init (_)
     self:loadPackage("resilient.epigraph")
     self:loadPackage("resilient.defn")
   end
+
+  -- Register some predefined symbols
+  -- Later we'll have packages or classes possibly register their own
+  -- predefined symbols.
+  self:registerSymbol("_TOC_", true, function (options)
+    return {
+      createCommand("markdown:internal:toc", options),
+    }
+  end)
+  self:registerSymbol("_FANCYTOC_", true, function (options)
+    -- Of course, it requires having installed the fancytoc.sile module
+    -- We are not going to check that here, so I won't document it.
+    return {
+      createCommand("use", { module = "packages.fancytoc" }),
+      createCommand("fancytableofcontents", options),
+    }
+  end)
+end
+
+-- Register a predefined symbol for use in Djot (as of now)
+-- The symbol is a leaf inline command that will be expanded when encountered.
+-- The symbol is registered with
+--  - a name
+--  - a boolean indicating if must be standalone (i.e. alone at block-level)
+--  - a function that will be called to render the symbol
+-- The function will receive as options the attributes set on the symbol,
+-- and must return a table of AST elements.
+-- Note that a span will also be created around an inline symbol if it has
+-- attributes, so styling can be applied to the symbol.
+function package:registerSymbol(name, standalone, render)
+  -- Multiple package reinstancing is may occur in SILE, see comment above
+  -- on scratch variables... So we do not warn if a symbol is already registered,
+  -- and just overwrite it silently.
+  self.predefinedSymbols[name] = { standalone = standalone, render = render }
 end
 
 local UsualSectioning = { "part", "chapter", "section", "subsection", "subsubsection" }
@@ -777,6 +825,36 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Definition item in Markdown (internal)")
 
+  self:registerCommand("markdown:internal:symbol", function (options, _)
+    local symbol = SU.required(options, "_symbol_", "symbol")
+    local standalone = SU.boolean(options._standalone_, false)
+    local content
+    local predefined = self.predefinedSymbols[symbol]
+    if predefined then
+      if predefined.standalone and not standalone then
+        SU.error("Cannot use " .. symbol .. " as inline content")
+      end
+      content = predefined.render(options)
+    elseif symbol:match("^U%+[0-9A-F]+$") then
+      content = {
+        createCommand("use", { module = "packages.unichar" }),
+        createCommand("unichar", {}, symbol)
+      }
+    else
+      SU.warn("Symbol '" .. symbol .. "' was not expanded (no corresponding metadata found)")
+      local text = ":" .. symbol .. ":"
+      content = { text }
+    end
+    options._symbol_ = nil
+    options._standalone_ = nil
+    if next(options) and not standalone then
+      -- Add a span for attributes
+      SILE.call("markdown:internal:span", options, content);
+    else
+      SILE.process(content)
+    end
+  end, "Symbol in Djot (internal)")
+
   -- B. Fallback commands
 
   self:registerCommand("markdown:fallback:blockquote", function (_, content)
@@ -952,6 +1030,8 @@ package.documentation = [[\begin{document}
 A helper package for Markdown and Djot processing, providing common hooks and fallback commands.
 
 It is not intended to be used alone.
+
+For class or package designers, it provides a method \code{registerSymbol} to define their own symbols, which can be used in the Djot syntax.
 \end{document}]]
 
 return package

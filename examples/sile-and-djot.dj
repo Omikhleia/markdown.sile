@@ -65,10 +65,11 @@ Actually, let's start with attributes, as they have the same general syntax for 
 
 Attributes are put inside curly braces.
 On inline elements, attributes are placed immediately after the element they are attached to, with no intervening whitespace.
-They may contain line breaks, and may be "stacked," in which case they will be combined.
+They may contain line breaks, and may be "stacked," in which case they are combined.
 
 To attach attributes to a block-level element, put the attributes on the line immediately before the block.
-Block attributes have the same syntax as inline attributes, but they must fit on one line. Repeated attribute specifiers can also be used, and the attributes will accumulate.
+Block attributes have the same syntax as inline attributes, but they must fit on one line.
+Repeated attribute specifiers can also be used, and the attributes accumulate.
 
 Inside the curly braces, the following syntax is possible:
 
@@ -78,7 +79,7 @@ Inside the curly braces, the following syntax is possible:
 
  - `.foo` specifies a class, for styling purposes.
 
-   Multiple classes may be given in this way; they will be combined.
+   Multiple classes may be given in this way.
 
  - `key="value"` or `key=value` specifies a key-value attribute.
 
@@ -303,7 +304,7 @@ Attributes are optional, and are passed through to the underlying SILE package.
 You can notably specify the required image width and/or height, as done just above, by appending the `{width=... height=...}` attributes --- Note that any unit system supported by SILE is accepted, as well as percentages (see §[](#final-notes-units)).
 There are actually two kinds of image syntax: (direct) inline images and (indirect) reference images.
 Above, we used the former kind.
-The reference images are defined elsewhere in the document, and are referenced by their label:
+The reference images are defined elsewhere in the document, referred to by their label.
 
 {custom-style=CodeBlock}
 :::
@@ -321,11 +322,11 @@ Direct (inline) link's attributes override reference's attributes.
 {#djot-captioned-images}
 #### Implicit captioned figures
 
-An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph, will be rendered as a figure with a caption, as actually seen above.
+An image with nonempty caption (i.e. "alternate" text), occurring alone by itself in a paragraph, is rendered as a figure with a caption, as actually seen above.
 Otherwise, the caption is ignored.
 
-If your document class or previously loaded packages provide a `captioned-figure` environment, it will be wrapped around the image (and it is then assumed to take care of the caption, i.e. to extract and display it appropriately).
-Specifically, if the *resilient* book class is used, the caption will be numbered by default, and added to the list of figures. Specify `.unnumbered`, and `.notoc` respectively, if you do not want it.
+If your document class or previously loaded packages provide a `captioned-figure` environment, it is wrapped around the image (and it is then assumed to take care of the caption, i.e. to extract and display it appropriately).
+Specifically, if the *resilient* book class is used, the caption is numbered by default, and added to the list of figures. Specify `.unnumbered`, and `.notoc` respectively, if you do not want it.
 Otherwise, the converter uses its own fallback method.
 
 #### Extended image types
@@ -415,7 +416,7 @@ Another link to [the SILE website][sile].
 [sile]: https://sile-typesetter.org/
 
 The reference label should be defined somewhere in the document.
-If the label is empty, then the link text will be taken to be the reference label as well as the link text.
+If the label is empty, then the link text is taken to be the reference label as well as the link text.
 
 {#djot-cross-references}
 #### Cross-references
@@ -431,7 +432,7 @@ Empty local links (that is, without inline display content) are interpreted as c
 By default, they are resolved to the closest numbering item, whatever that might be in the hierarchical structure of your document.
 A pseudo-class attribute may be used to override the default behavior and specify which type
 of reference is expected (page number, section number or title text).
-Thus, the above example was obtained from the following input:
+Thus, the above example was obtained with:
 
 {custom-style=CodeBlock}
 :::
@@ -626,7 +627,7 @@ The contents of the block quote are parsed as block-level content.
 >
 > > Such quotes can be nested.
 
-If your document class or previously loaded packages provide a `blockquote` environment, it will be used.
+If your document class or previously loaded packages provide a `blockquote` environment, it is used.
 Otherwise, the converter uses its own fallback method, with hard-coded styling.
 
 #### Attributed quotes (epigraphs)
@@ -896,7 +897,7 @@ Djot supports the "pipe table" syntax, with its own way for marking the optional
 :::
 
 
-When using the *resilient* classes, the caption will be numbered by default, and added to the list of tables.
+When using the *resilient* classes, the caption is numbered by default, and added to the list of tables.
 Specify `.unnumbered`, and `.notoc` respectively, as table attributes, if you do not want it.
 
 ### Code blocks
@@ -946,7 +947,7 @@ This is a very naive approach to syntax-highlighting, until the converter possib
 
 #### Rendered code blocks
 
-If the converter knows how to render the content of a code block, it will do so by default.
+If the converter knows how to render the content of a code block, it does so by default.
 The `render` attribute can be set to `false` to prevent this behavior, and enforce the content to be rendered as raw verbatim text.
 
 : Mardown and Djot code blocks
@@ -1027,7 +1028,7 @@ The `render` attribute can be set to `false` to prevent this behavior, and enfor
 
   : Pie charts
 
-    Likewise, if you installed the optional *piecharts.sile* collection, then code blocks marked as "piechart" are automatically rendered, with all other attributes are passed to the underlying processor.
+    Likewise, if you installed the optional *piecharts.sile* collection, then code blocks marked as "piechart" are automatically rendered, with all other attributes passed to the underlying processor.
     Consider the following code block, consisting in a CSV table...
 
     {custom-style=CodeBlock}
@@ -1331,7 +1332,7 @@ Since it's possible to have unused footnote definitions, let's craft one as show
 When encountering a symbol, this converter looks for such a footnote and expands its content.
 It works with inline elements as shown above, but also with full blocks, provided the symbol is the only element in a paragraph of its own.
 
-Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain symbols, which will get replaced too.
+Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain symbols, which get replaced too.
 
 
 [^djot-pseudo-footnotes]: You may still use them as regular footnotes.
@@ -1339,13 +1340,15 @@ Whether this is a good idea is another question...
 
 ### Predefined symbols
 
-This converter also comes with a few symbols predefined.
+This converter also comes with a few symbols predefined.[^djot-programmatic-symbols]
 
 - `:_TOC_:` must stand alone in its own paragraph. It inserts a table of contents.
    Attributes on the symbol are passed through, e.g. `:_TOC_:{depth=3}`.
 - `:U+xxxx:` (where `xxxx` is a hexadecimal value in upper case) is replaced by the corresponding Unicode character --- `:U+2122:` gives :U+2122:.
 
 The above variable substitution mechanism has precedence over these symbols, allowing you to possibly override them.
+
+[^djot-programmatic-symbols]: For 3d-party class and package designers, a Lua method is provided to add their own symbols.
 
 {#djot-metadata-symbols}
 ### Contextual metadata

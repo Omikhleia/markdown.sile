@@ -682,25 +682,6 @@ function Renderer.en_dash (_)
   return("–")
 end
 
-local predefinedSymbols = {
-  _TOC_ = {
-    standalone = true,
-    render = function (node)
-      return createCommand("markdown:internal:toc", node.attr)
-    end
-  },
-  _FANCYTOC_ = { -- of course, requires having installed the fancytoc.sile module
-                 -- We are not going to check that here, so I won't document it.
-    standalone = true,
-    render = function (node)
-      return {
-        createCommand("use", { module = "packages.fancytoc" }),
-        createCommand("fancytableofcontents", node.attr)
-      }
-    end
-  },
-}
-
 function Renderer:getUserDefinedSymbol (label, node_fake_metadata)
   local content
   if self.metadata[label] then -- use memoized
@@ -758,33 +739,11 @@ function Renderer:symbol (node)
       end
       return text
     end
-    -- Let's finally look for predefined symbols
-    local symbol = predefinedSymbols[node.alias]
-    if symbol then
-      if symbol.standalone and not node._standalone_ then
-        SU.error("Cannot use " .. label .." as inline content")
-      end
-      return symbol.render(node)
-    end
-    local pos = node_pos(node)
-    if node.alias:match("U%+[0-9A-F]+") then
-      local content = {
-        createCommand("use", { module = "packages.unichar" }),
-        createCommand("unichar", {}, node.alias, pos)
-      }
-      if node.attr then
-        -- Add a span for attributes
-        return createCommand("markdown:internal:span", node.attr, content, pos)
-      end
-      return content
-    end
-    SU.warn("Symbol '" .. node.alias .. "' was not expanded (no corresponding metadata found)")
-    local text = ":" .. node.alias .. ":"
-    if node.attr then
-      -- Add a span for attributes
-      return createCommand("markdown:internal:span", node.attr, text, pos)
-    end
-    return text
+    -- Not a metadata symbol, pass our internal properties and delegate
+    local options = node.attr or {}
+    options._symbol_ = node.alias
+    options._standalone_ = node._standalone_
+    return createCommand("markdown:internal:symbol", options, nil, node_pos(node))
   end
 end
 
