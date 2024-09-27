@@ -21,7 +21,7 @@ dependencies = {
    "labelrefs.sile >= 0.1.0",
    "ptable.sile >= 3.1.0",
    "smartquotes.sile >= 1.0.0",
-   "textsubsuper.sile >= 1.1.1",
+   "textsubsuper.sile >= 1.2.0",
    "silex.sile >= 0.6.0, < 1.0",
    "lunajson",
 }
