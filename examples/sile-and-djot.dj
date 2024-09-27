@@ -485,17 +485,22 @@ For instance, the following code produces $`e^{i\pi}=-1`.
 ```
 :::
 
-There is an important constraint, though: you have to restrict yourself to the syntax subset supported by SILE. This being said, some nice fomulas may be achieved.
+One important constraint: you must use the syntax subset supported by SILE.
+That said, you can still achieve some nice formulas:
 $$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})`
 
 
 {custom-style=CodeBlock}
 :::
 ```
-... may be achieved.
+... nice formulas:
 $$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})`
 ```
 :::
+
+Attributes are passed through to SILE.
+In display math mode, you can number equations using the default counter (`numbered=true`), a named counter (`counter=name`), or a custom value (`number=...`).
+$$`e^{i\phi} = \mi{cos} \phi + i \mi{sin} \phi`{numbered=true}
 
 ### Footnote calls
 
@@ -552,16 +557,17 @@ Let's try it here
 ### Paragraphs
 
 A paragraph is a sequence of non-blank lines that does not meet the condition for being one of the other block-level elements.
-
-A paragraph ends with a blank line or the end of the document.
+It ends with a blank line or the end of the document.
 The textual content is parsed as a sequence of inline elements.
 A single newline is treated as a space.
 
 ### Headings
 
 A heading starts with a sequence of one or more `#` characters, followed by whitespace.
+It ends when a blank line (or the end of the document or enclosing container) is encountered.
 The number of `#` characters defines the heading level.
-The heading text following that sequence is parsed as inline content.
+The heading text following that initial sequence is parsed as inline content.
+It may spill over onto following lines, which may also be preceded by the same number of `#` characters (but these can also be left off).
 
 For example, this very section is a level three heading.
 It was therefore obtained with:
@@ -573,9 +579,6 @@ It was therefore obtained with:
 ```
 :::
 
-The heading text may spill over onto following lines, which may also be preceded by the same number of `#` characters (but these can also be left off).
-
-The heading ends when a blank line (or the end of the document or enclosing container) is encountered.
 
 This converter accepts the following pseudo-classes on heading attributes:
 
@@ -650,7 +653,6 @@ For instance, the above quote was obtained with:
 
 Attributes are passed through to an implicit "div" (so as to honor the language, a link target identifier, etc.) and eventually to the underlying epigraph environment.
 Any option supported by the *resilient.epigraph* package may thus be used.
-
 Be aware that this behavior is currently an extension.
 Other Djot converters will therefore likely skip the caption.
 
@@ -949,12 +951,11 @@ The `render` attribute can be set to `false` to prevent this behavior, and enfor
 
 : Mardown and Djot code blocks
 
-  Code blocks marked as being in Markdown or Djot are interpreted.
-  For Markdown, attributes are passed to the converter, allowing to possibly use different compatibility options (for Markdown especially, see §[](#markdown-configuration)).
-  This feature allows switching between those languages, would there be something one does not support yet.
-
-  At the time of writing, for instance, Djot does not support "line blocks".
-  This chapter being written in Djot, let's just switch to Markdown and type some poetry.
+  Code blocks marked as Markdown or Djot are interpreted.
+  For Markdown, attributes are passed to the converter, enabling different compatibility options (see §see §[](#markdown-configuration)).
+  This feature allows switching between languages if one lacks support for something.
+  For example, Djot doesn't currently support "line blocks".
+  Since this chapter is written in Djot, let's switch to Markdown to write some poetry.
 
   ```markdown
   ::: {.poetry}

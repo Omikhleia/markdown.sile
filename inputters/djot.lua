@@ -789,11 +789,15 @@ function Renderer:symbol (node)
 end
 
 function Renderer:math (node)
+  local options = node.attr or {}
   local mode = "text"
+  -- Note that djot.lua sets the type of math in the class attribute.
+  -- Recent versions of Djot.js use a first-order AST node instead.
   if string.find(node.attr.class, "display") then
     mode = "display"
   end
-  return createCommand("markdown:internal:math", { mode = mode }, { node.s }, node_pos(node))
+  options.mode = mode
+  return createCommand("markdown:internal:math", options, { node.s }, node_pos(node))
 end
 
 -- SILE INPUTTER LOGIC

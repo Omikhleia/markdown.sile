@@ -705,11 +705,10 @@ Please consider using a resilient-compatible class!]])
   end, "Default line block in Markdown (internal)")
 
   self:registerCommand("markdown:internal:math", function (options, content)
-    local mode = options.mode or "text"
-    -- NOTE: The following doesn't work: SILE.call("math", {}, content)
+    -- NOTE: The following didnt't work: SILE.call("math", options, content)
     -- Let's go for a lower-level AST construct instead.
     SILE.process({
-      createCommand("math", { mode = mode }, SU.ast.contentToString(content))
+      createCommand("math", options, SU.ast.contentToString(content))
     })
   end)
 
