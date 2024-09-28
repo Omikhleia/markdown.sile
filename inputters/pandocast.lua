@@ -19,28 +19,31 @@ local createCommand, createStructuredCommand
         = SU.ast.createCommand, SU.ast.createStructuredCommand
 
 local Pandoc = {
-   API_VERSION = { 1, 22, 0 } -- Supported API version (semver)
+   MIN_API_VERSION = { 1, 22, 0 }, -- Minimal supported API version (semver)
+   CUR_API_VERSION = { 1, 23, 0 }  -- Current supported API version (semver)
 }
 
 local function checkAstSemver(version)
+  -- IMPLEMENTATON NOTE: Kept simple for now, and naive.
   -- We shouldn't care the patch level.
   -- The Pandoc AST may change upon "minor" updates, though.
+  -- We assume min and current versions have the same major version.
   local major, minor = table.unpack(version)
-  local expected_major, expected_minor = table.unpack(Pandoc.API_VERSION)
-  if not major or major ~= expected_major then
+  local min_major, min_minor = table.unpack(Pandoc.MIN_API_VERSION)
+  local _, cur_minor = table.unpack(Pandoc.CUR_API_VERSION)
+  if not major or major ~= min_major then
     SU.error("Unsupported Pandoc AST major version " .. major
-      .. ", only version " .. expected_major.. " is supported")
+      .. ", only version " .. min_major.. " is supported")
   end
-  if not minor or minor < expected_minor then
+  if not minor or minor < min_minor then
     SU.error("Unsupported Pandoc AST version " .. table.concat(version, ".")
-      .. ", needing at least " ..  table.concat(Pandoc.API_VERSION, "."))
+      .. ", needing at least " ..  table.concat(Pandoc.MIN_API_VERSION, "."))
   end
-  if minor ~= expected_minor then
+  if minor > cur_minor then
     -- Warn and pray.
-    -- IMPLEMENTATON NOTE: Kept simple for now.
     -- When this occurs, we may check to properly handle version updates
   SU.warn("Pandoc AST version " .. table.concat(version, ".")
-    .. ", is more recent than supported " ..  table.concat(Pandoc.API_VERSION, ".")
+    .. ", is more recent than supported " ..  table.concat(Pandoc.CUR_API_VERSION, ".")
     .. ", there could be issues.")
   end
 end
@@ -81,6 +84,7 @@ local HasMultipleArgs = {
   RawInline = true,
   RawBlock = true,
   Table = true,
+  Figure = true,
 }
 
 -- Parser AST-walking logic.
@@ -413,6 +417,43 @@ function Renderer:Table (_, caption, colspecs, thead, tbodies, tfoot)
     createCommand("caption", {}, self:render(caption[#caption]))
   }
   return createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
+end
+
+-- Figure Attr Caption [Block]
+-- Added in Pandoc types 1.23, and now used when "implicit_figures" is enabled.
+-- (This is the case by default in Pandoc >= 3.1)
+function Renderer:Figure (attributes, caption, blocks)
+  local options = pandocAttributes(attributes)
+  -- Caption (Maybe ShortCaption) [Block]
+  -- ShortCaption is either null or [Inline]
+  local captionContent = self:render(caption[#caption])
+  local content = self:render(blocks)
+
+  -- More weirdness than expected? Can't say, but it's surely an "ad-hoc" choice:
+  -- Considering Markdown: ![caption](image){#id .class key=value}
+  --  - The id is promulgated to the Figure
+  --  - Other classes and key-values are left on the Image
+  --  - The Image is wrapped in a Plain (so indeed into a block)
+  -- (Checked with Pandoc 3.4 on ![caption](image){#fig .doh width="1cm"})
+  -- It's hard to tell how our logic below would behave with non-Markdown
+  -- input, but let's say it's out of scope for now.
+  if options.id then
+    -- In our case, we move the id to the caption, which may be be the numbered
+    -- element for use in cross-references...
+    local id = options.id
+    options.id = nil
+    return createStructuredCommand("markdown:internal:captioned-figure", options, {
+      content,
+      createCommand("caption", {}, {
+        createCommand("label", { marker = id }),
+        captionContent
+      })
+    })
+  end
+  return createStructuredCommand("markdown:internal:captioned-figure", options, {
+    content,
+    createCommand("caption", {}, captionContent)
+  })
 end
 
 -- PANDOC AST INLINES
