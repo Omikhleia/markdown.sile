@@ -1317,7 +1317,7 @@ Well, Djot has the notion of a "symbol", a keyword surrounded by colon signs (§
 Although it was initially provisioned for "emojis", the default interpretation is now left to the rendering engine.
 
 This converter for SILE is focussed on producing print-quality books, where so-called emojis play little part.
-We are thefore going to use those symbols in a non-conventional way.
+We are therefore going to use those symbols in a non-conventional way.
 Back to our initial question, what if you could just type `:pumpernickel:` and have it automatically expanded?
 
 Since it's possible to have unused footnote definitions, let's craft one as shown hereafter, with its reference identifier being the same as our targeted variable.

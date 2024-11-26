@@ -271,10 +271,10 @@ local function SileAstWriter (writerOps, renderOps)
   --   The lunamark "AST" is made of "ropes":
   --     "A rope is an array whose elements may be ropes, strings, numbers,
   --     or functions."
-  --   The default implementation flattens that to a string, so we overrride it,
+  --   The default implementation flattens that to a string, so we override it,
   --   in order to extract the AST and convert it to the SILE AST.
   --
-  --   The methods that were overriden above actually started to introduce SILE
+  --   The methods that were overridden above actually started to introduce SILE
   --   AST command structures in place of some ropes. Therefore, we now walk
   --   these "extended" ropes merge the output, flattened to some degree, into
   --   a final SILE AST that we can process.

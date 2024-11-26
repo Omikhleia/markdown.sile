@@ -458,7 +458,7 @@ For instance, the following code produces $e^{i\pi}=-1$.
 ```
 :::
 
-There is an important constraint, though: you have to restrict yourself to the syntax subset supported by SILE. This being said, some nice fomulas may be achieved.
+There is an important constraint, though: you have to restrict yourself to the syntax subset supported by SILE. This being said, some nice formula may be achieved.
 $$\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \frac{1}{8k+5} − \frac{1}{8k+6})$$
 
 
@@ -492,7 +492,7 @@ A footnote call[^markdown-some-fn] is marked...
 [^markdown-some-fn]: An example footnote.
 
 Another Pandoc-inspired extension is the possibility to direct inline footnotes.
-They are introduced with directly with the caret `^`, immediatelly followed by the footnote content in square brackets, as in the following example.^[Direct footnote.]
+They are introduced with directly with the caret `^`, immediately followed by the footnote content in square brackets, as in the following example.^[Direct footnote.]
 
 ::: {custom-style=CodeBlock}
 ```
