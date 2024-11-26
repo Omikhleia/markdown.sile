@@ -24,7 +24,7 @@ local Pandoc = {
 }
 
 local function checkAstSemver(version)
-  -- IMPLEMENTATON NOTE: Kept simple for now, and naive.
+  -- IMPLEMENTATION NOTE: Kept simple for now, and naive.
   -- We shouldn't care the patch level.
   -- The Pandoc AST may change upon "minor" updates, though.
   -- We assume min and current versions have the same major version.

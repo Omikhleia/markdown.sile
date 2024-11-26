@@ -716,7 +716,7 @@ function Renderer:symbol (node)
 
   if node_fake_metadata then
     if #node_fake_metadata.c > 1 and not node._standalone_ then
-      SU.error("Cannot use multi-paragraph metatada "..label.." as inline content")
+      SU.error("Cannot use multi-paragraph metadata "..label.." as inline content")
     end
     local content = self:getUserDefinedSymbol(label, node_fake_metadata)
     if node.attr then

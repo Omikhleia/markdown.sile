@@ -2,7 +2,7 @@
 -- direct mapping to existing commands or packages.
 --
 -- Split in a standalone package so that it can be reused and
--- generalized somewhat independently from the undelying parsing code.
+-- generalized somewhat independently from the underlying parsing code.
 --
 -- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
 -- @module packages.markdown.commands
@@ -130,7 +130,7 @@ function package:_init (_)
     --    load the djot package, cause you want to use Djot.
     --    load the markdown package, cause you want to use Markdown too.
     -- Both load the markdown.commands package.
-    -- Guess what? The markdown.commands package is instanciated twice.
+    -- Guess what? The markdown.commands package is instantiated twice.
     -- It's supposed to be a SILE feature...
     SILE.scratch._markdown_commands = {}
   end
@@ -399,7 +399,7 @@ Please consider using a resilient-compatible class!]])
       cascade:call("language", { main = options.lang })
     end
     if options["custom-style"] then
-      -- The style (or the hook) is reponsible for paragraphing
+      -- The style (or the hook) is responsible for paragraphing
       cascade:call("markdown:custom-style:hook", { name = options["custom-style"], scope = "block" })
     else
       cascade:call("markdown:internal:paragraph")
@@ -520,7 +520,7 @@ Please consider using a resilient-compatible class!]])
       SILE.call("label", { marker = options.id })
     end
     if uri:sub(1,1) == "#" then
-      -- local hask link
+      -- local hash link
       local dest = uri:sub(2)
       if hasLinkContent(content) then
         content = wrapLinkContent(options, content)
@@ -552,7 +552,7 @@ Please consider using a resilient-compatible class!]])
       -- The reasons for NOT loading a package for this high-level structure
       -- is that the class or other packages may provide their own implementation
       -- (e.g. formatted differently, changed to endnotes, etc.).
-      -- So we only do it as a fallback if mising, to degrade gracefully.
+      -- So we only do it as a fallback if missing, to degrade gracefully.
       SU.warn("Trying to enforce fallback for unavailable \\footnote command")
       self:loadAltPackage("resilient.footnotes", "footnotes")
     end
@@ -753,7 +753,7 @@ Please consider using a resilient-compatible class!]])
   end, "Default line block in Markdown (internal)")
 
   self:registerCommand("markdown:internal:math", function (options, content)
-    -- NOTE: The following didnt't work: SILE.call("math", options, content)
+    -- NOTE: The following didn't work: SILE.call("math", options, content)
     -- Let's go for a lower-level AST construct instead.
     SILE.process({
       createCommand("math", options, SU.ast.contentToString(content))
@@ -781,7 +781,7 @@ Please consider using a resilient-compatible class!]])
     end
     local title = removeFromTree(content, "caption")
 
-    if self.hasCommandSupport.epigraph then -- asssuming the implementation from resilient.epigraph.
+    if self.hasCommandSupport.epigraph then -- assuming the implementation from resilient.epigraph.
       if title then
         -- Trick: Put the extract title back as "\source"
         title.command = "source"
