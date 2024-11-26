@@ -58,9 +58,12 @@ local function hasRawHandler (options)
 end
 
 --- Find the first embedder suitable for the given pseudo-class attributes.
----@param options table           Command options
+---@param options table           Command options with class attribute (nil or list of comma-separated classes)
 ---@return string|nil, function   Embedder name and handler function (if found)
 local function hasEmbedHandler (options)
+  if not options.class then
+    return nil
+  end
   local handler = SILE.rawHandlers["embed"]
   if not handler then
     -- Shouldn't occur since we loaded the embedders package
@@ -73,12 +76,17 @@ local function hasEmbedHandler (options)
   if not embedders then
     return nil
   end
-  for name, _ in pairs(SILE.scratch.embedders) do
-    if hasClass(options, name) then
+  local classes = pl.stringx.split(options.class, " ")
+  for _, name in ipairs(classes) do
+    SU.debug("markdown", "Checking for embedder", name)
+    if embedders[name] then
+      -- NOTE: Accessing the embedder table causes the entry to be loaded
+      -- if it exists and is not loaded yet.
       SU.debug("markdown", "Found an embedder for", name)
       return name, handler
     end
   end
+  SU.debug("markdown", "No embedder found")
   return nil
 end
 
