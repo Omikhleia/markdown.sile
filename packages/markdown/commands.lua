@@ -898,8 +898,8 @@ Please consider using a resilient-compatible class!]])
       }, function ()
         SILE.call("center", {}, caption)
       end)
+      SILE.call("smallskip")
     end
-    SILE.call("smallskip")
   end, "A fallback command for Markdown to insert a captioned table")
 
   self:registerCommand("markdown:fallback:defn", function (_, content)
