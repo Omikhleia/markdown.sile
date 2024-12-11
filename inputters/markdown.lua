@@ -218,15 +218,11 @@ local function SileAstWriter (writerOps, renderOps)
     end
     local ptable = createStructuredCommand("ptable", { header = true, cols = table.concat(cWidth, " ") }, ptableRows)
 
-    if not caption then
-      return ptable
-    end
-
-    local captioned = {
+    local wrapped = caption and {
       ptable,
       createCommand("caption", {}, caption)
-    }
-    return createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
+    } or { ptable }
+    return createStructuredCommand("markdown:internal:captioned-table", {}, wrapped)
   end
 
   writer.definitionlist = function (items, _) -- items, tight

@@ -320,14 +320,11 @@ function Renderer:table (node)
      header = SU.boolean(row.head, false),
   }, self:render_children(node), pos)
 
-  if not caption then
-    return ptable
-  end
-  local captioned = {
+  local wrapped = caption and {
     ptable,
     createCommand("caption", {}, caption, pos)
-  }
-  return createStructuredCommand("markdown:internal:captioned-table", options, captioned, pos)
+  } or { ptable }
+  return createStructuredCommand("markdown:internal:captioned-table", options, wrapped, pos)
 end
 
 function Renderer:row (node)

@@ -408,15 +408,13 @@ function Renderer:Table (_, caption, colspecs, thead, tbodies, tfoot)
   }, ptableRows)
 
   -- Caption (Maybe ShortCaption) [Block]
-  if not caption or #caption[#caption] == 0 then
-    -- No block or empty block = no caption...
-    return ptable
-  end
-  local captioned = {
+  -- No block or empty block = no caption..
+  local hasCaption = caption and #caption[#caption] > 0
+  local wrapped = hasCaption and {
     ptable,
     createCommand("caption", {}, self:render(caption[#caption]))
-  }
-  return createStructuredCommand("markdown:internal:captioned-table", {}, captioned)
+  } or { ptable }
+  return createStructuredCommand("markdown:internal:captioned-table", {}, wrapped)
 end
 
 -- Figure Attr Caption [Block]
