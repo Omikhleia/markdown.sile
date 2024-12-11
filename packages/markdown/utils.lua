@@ -3,6 +3,7 @@
 --
 require("silex.ast") -- Compatibility layer
 local createCommand = SU.ast.createCommand
+local createStructuredCommand = SU.ast.createStructuredCommand
 
 --- Some utility functions.
 -- @section utils
@@ -95,8 +96,8 @@ local bsratiocache = {}
 
 --- Compute the baseline ratio for the current font.
 --- This is a ratio of the descender to the theoretical height of the font.
---- @return   number   Descender ratio
-local computeBaselineRatio = function ()
+---@return number Descender ratio
+local function computeBaselineRatio ()
   local fontoptions = SILE.font.loadDefaults({})
   local bsratio = bsratiocache[SILE.font._key(fontoptions)]
   if not bsratio then
@@ -108,6 +109,33 @@ local computeBaselineRatio = function ()
   return bsratio
 end
 
+--- Naive citation reference parser.
+--- We only support a very simple syntax for now: "@key[, ]+[locator]"
+--- Where the unique locator consists of a name and a value separated by spaces.
+---@param str    string Citation string
+---@param pos    table  Position object
+---@return table  AST command
+local function naiveCitations (str, pos)
+  local refs = pl.stringx.split(str, ";")
+  pl.tablex.transform(function (ref)
+    local key, locator = ref:match("^[%s]*@([^%s,]+)[, ]*(.*)$")
+    if not key or key == "" then
+      SU.warn("Skipping citation reference '" .. ref .. "'")
+      return {}
+    end
+    if locator and locator ~= "" then
+      local locnname, locnvalue = locator:match("^([^%s]+)[%s]+(.+)$")
+      if locnname and locnvalue then
+        -- Remove trailing periods in locname if any
+        locnname = locnname:gsub("%.+$", "")
+        return createCommand("cite", { key = key, [locnname] = locnvalue })
+      end
+    end
+    return createCommand("cite", { key = key }, nil, pos)
+  end, refs)
+  return createStructuredCommand("markdown:internal:citations", {}, refs, pos)
+end
+
 --- @export
 return {
   getFileExtension = getFileExtension,
@@ -116,4 +144,5 @@ return {
   hasRawHandler = hasRawHandler,
   hasEmbedHandler = hasEmbedHandler,
   computeBaselineRatio = computeBaselineRatio,
+  naiveCitations = naiveCitations,
 }

@@ -153,6 +153,7 @@ This is but an overview. For more details, please refer to the provided example 
 - Raw inline HTML convenience subset in Markdown
 - Advanced use of symbols in Djot (variable substitution ,and templating)
 - Advanced configuration (e.g. Markdown variants, headings shifting, etc.)
+- Bibliography citations (when appropriate support is enabled)
 
 ## Use with the resilient collection
 

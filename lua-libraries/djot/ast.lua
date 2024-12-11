@@ -907,6 +907,10 @@ local function to_ast(parser, sourcepos)
         node.s = sub(subject, startpos + 1, endpos - 1)
       elseif tag == "footnote_reference" then
         node.s = sub(subject, startpos + 2, endpos - 1)
+      -- BEGIN EXTENSION DIDIER 20241214
+      elseif tag == "naive_citations" then
+        node.s = sub(subject, startpos + 1, endpos - 1)
+      -- END EXTENSION DIDIER
       elseif tag == "symbol" then
         node.alias = sub(subject, startpos + 1, endpos - 1)
       elseif tag == "raw_format" then

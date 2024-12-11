@@ -759,6 +759,11 @@ function Renderer:math (node)
   return createCommand("markdown:internal:math", options, { node.s }, node_pos(node))
 end
 
+function Renderer:naive_citations (node)
+  local pos = node_pos(node)
+  return utils.naiveCitations(node.s, pos)
+end
+
 -- SILE INPUTTER LOGIC
 
 local base = require("inputters.base")

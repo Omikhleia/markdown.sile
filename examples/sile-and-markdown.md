@@ -507,6 +507,24 @@ They are introduced with directly with the caret `^`, immediately followed by th
 
 :::
 
+### Bibliographic citations
+
+This implementation recognizes a simplified subset of the Pandoc citation syntax, aligned with what we also support in Djot.
+
+::: {custom-style=CodeBlock}
+```
+I wrote a whole book on mathematics with SILE [@sile:willis2024].
+... in a "master document" [@sile:willis2021, part 1].
+... _The SILE Book_ for more information [@sile, chapter 5].
+```
+:::
+
+I wrote whole book on mathematics with SILE [@sile:willis2024].
+
+How to load bibliographies and configure citation styles is beyond the scope of this manual.
+If you are using the resilient collection, the most natural way to do this in a "master document" [@sile:willis2021, part 1].
+Note that support for biblibraphies in SILE is an experimental feature, so you may also want to check _The SILE Book_ for more information [@sile, chapter 5].
+
 ### Symbols
 
 ::: {custom-style=Difference}
@@ -1054,7 +1072,8 @@ This converter recognizes a few specific attributes on divs:
 ### Horizontal dividers
 
 In standard Markdown, a line containing a row of three or more asterisks, dashes, or underscores (optionally separated by spaces) are supposed to produce a horizontal rule. 
-This converter however slightly deviates from that simple specification^[And also from Pandoc, therefore. Quite obviously, the `\autodoc:package{pandocast}`{=sile} package will also only show horizontal rules.],
+This converter however slightly deviates from that simple specification^[And also from Pandoc.
+Our `\autodoc:package{pandocast}`{=sile} package will only show horizontal rules.],
 for the mere reason that such a horizontal rule is seldom typographically sound in many contexts.
 
 Three asterisks produce a centered asterism.

@@ -515,13 +515,33 @@ function Renderer:Quoted (quotetype, inlines)
   return createCommand("singlequoted", {}, content)
 end
 
+local function _inlinesToStr (inlines)
+  local buffer = {}
+  for _, inline in ipairs(inlines) do
+    if inline.t == "Str" then
+      buffer[#buffer + 1] = inline.c
+    elseif inline.t == "Space" or inline.t == "SoftBreak" or inline.t == "LineBreak" then
+      buffer[#buffer + 1] = " "
+    else
+      SU.warn("Skipped inline element in Cite: " .. inline.t)
+    end
+  end
+  return table.concat(buffer)
+end
+
 -- Cite [Citation] [Inline]
---   Where a Citation is a dictionary
+--   Where a Citation is a dictionary:
+--     { citationId: Text, citationPrefix: [Inline], citationSuffix: [Inline],
+--       citationMode: CitationMode, citationNoteNum: Int, citationHash: Int }
+--   and CitationMode is a tag AuthorInText, SuppressAuthor or NormalCitation.
+-- We do not use the parse Citation, but rather the inlines directly,
+-- re-serializing them to string, so we can be aligned with what we do in
+-- the Markdown and Djot inputters.
 function Renderer:Cite (_, inlines)
-  -- TODO
-  -- We could possibly do better.
-  -- Just render the inlines and ignore the citations
-  return self:render(inlines)
+  local rawcites = _inlinesToStr(inlines)
+  -- Remove leading and trailing brackets (if any)
+  rawcites = rawcites:gsub("^%[", ""):gsub("%]$", "")
+  return utils.naiveCitations(rawcites)
 end
 
 -- Code Attr Text

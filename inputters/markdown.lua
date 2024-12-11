@@ -267,6 +267,10 @@ local function SileAstWriter (writerOps, renderOps)
     return createCommand("markdown:internal:math" , { mode = mode }, { text })
   end
 
+  writer.naive_citations = function (rawcites)
+    return utils.naiveCitations(rawcites)
+  end
+
   -- Final AST conversion logic.
   --   The lunamark "AST" is made of "ropes":
   --     "A rope is an array whose elements may be ropes, strings, numbers,
@@ -366,11 +370,15 @@ parsers.lineof = function (c)
 
 local function customSyntax (writer, options)
   return function (syntax)
+    -- Re-create the horizontal rule syntax to use our modified lineof
+    -- with a capture.
     syntax.HorizontalRule = (parsers.lineof(parsers.asterisk)
                             + parsers.lineof(parsers.dash)
                             + parsers.lineof(parsers.underscore)
                             ) / writer.hrule
 
+    -- Extend the smart typography syntax to recognize primes and double primes
+    -- after digits.
     if options.smart_primes then
       syntax.Smart = lpeg.P("\"") * lpeg.B(parsers.digit*1) / function ()
                         return "″" -- double primes
@@ -380,6 +388,10 @@ local function customSyntax (writer, options)
                       end
                    + syntax.Smart
     end
+    -- Override the citation syntax to use our own raw citations writer
+    syntax.Citations = lpeg.P("[")
+                     * lpeg.C(lpeg.P("@") *(lpeg.P(1) - lpeg.P("]"))^1)
+                     * lpeg.P("]")  / writer.naive_citations
     return syntax
   end
 end
@@ -430,6 +442,7 @@ function inputter:parse (doc)
     line_blocks = true,
     escaped_line_breaks = true,
     tex_math_dollars = true,
+    citations = true,
   }
   for k, v in pairs(self.options) do
     -- Allow overriding known options
