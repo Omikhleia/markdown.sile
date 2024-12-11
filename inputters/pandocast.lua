@@ -516,12 +516,22 @@ function Renderer:Quoted (quotetype, inlines)
 end
 
 -- Cite [Citation] [Inline]
---   Where a Citation is a dictionary
-function Renderer:Cite (_, inlines)
-  -- TODO
-  -- We could possibly do better.
-  -- Just render the inlines and ignore the citations
-  return self:render(inlines)
+--   Where a Citation is a dictionary:
+--     { citationId: Text, citationPrefix: [Inline], citationSuffix: [Inline],
+--       citationMode: CitationMode, citationNoteNum: Int, citationHash: Int }
+--   and CitationMode is a tag AuthorInText, SuppressAuthor or NormalCitation.
+-- We dont use the raw inlines.
+function Renderer:Cite (citations, _)
+  local buffer = {}
+  for _, cite in ipairs(citations) do
+    buffer[#buffer + 1] = createCommand("cite", {
+      key = cite.citationId,
+      mode = cite.citationMode.t,
+      prefix = #cite.citationPrefix > 0 and self:render(cite.citationPrefix) or nil,
+      suffix = #cite.citationSuffix > 0 and self:render(cite.citationSuffix) or nil,
+    })
+  end
+  return createStructuredCommand("markdown:internal:citations", {}, buffer)
 end
 
 -- Code Attr Text
