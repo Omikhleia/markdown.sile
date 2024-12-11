@@ -267,6 +267,20 @@ local function SileAstWriter (writerOps, renderOps)
     return createCommand("markdown:internal:math" , { mode = mode }, { text })
   end
 
+  writer.citations = function (text_cites, cites)
+    local buffer = {}
+    local ct = text_cites and 'AuthorInText' or 'NormalCitation'
+    for _, cite in ipairs(cites) do
+      buffer[#buffer + 1] = createCommand("cite", {
+        key = cite.name,
+        mode = cite.suppress_author and 'SuppressAuthor' or ct,
+        prefix = cite.prenote,
+        suffix = cite.postnote
+      })
+    end
+    return createStructuredCommand("markdown:internal:citations", {}, buffer)
+  end
+
   -- Final AST conversion logic.
   --   The lunamark "AST" is made of "ropes":
   --     "A rope is an array whose elements may be ropes, strings, numbers,
@@ -430,6 +444,7 @@ function inputter:parse (doc)
     line_blocks = true,
     escaped_line_breaks = true,
     tex_math_dollars = true,
+    citations = true,
   }
   for k, v in pairs(self.options) do
     -- Allow overriding known options

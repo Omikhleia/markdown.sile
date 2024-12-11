@@ -855,6 +855,14 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Symbol in Djot (internal)")
 
+  self:registerCommand("markdown:internal:citations", function (_, content)
+    pl.pretty.dump(content)
+    SU.warn("Citations are not yet supported")
+    -- We'd need to transform to text the citationSuffix at least, and parse for locators.
+    -- But then, what to call anyway for multiple citation keys?
+    -- See https://github.com/sile-typesetter/sile/issues/2196
+  end, "Citations (internal)")
+
   -- B. Fallback commands
 
   self:registerCommand("markdown:fallback:blockquote", function (_, content)
