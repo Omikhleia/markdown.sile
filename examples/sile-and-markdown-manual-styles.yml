@@ -1,25 +1,4 @@
 
-defn-term-Custom:
-  inherit: "defn-base"
-  origin: "resilient.defn"
-  style:
-    font:
-      features: "+smcp"
-    paragraph:
-      after:
-        vbreak: false
-      before:
-        skip: "smallskip"
-
-defn-desc-Custom:
-  inherit: "defn-desc"
-  style:
-    paragraph:
-      after:
-        skip: "smallskip"
-      before:
-        vbreak: false
-
 CodeBlock:
   origin: "resilient.book"
   style:
@@ -44,21 +23,11 @@ CoverCredit:
 CustomDroppedInitial:
   origin: "resilient.book"
   style:
+    color: "#66a0b3"
     font:
       family: "Zallman Caps"
-    color: "#66a0b3"
     special:
       lines: 3
-
-FramedPara:
-  origin: "resilient.book"
-  style:
-    paragraph:
-      after:
-        skip: "medskip"
-      align: "fancy-framed"
-      before:
-        skip: "medskip"
 
 Difference:
   style:
@@ -70,6 +39,16 @@ Difference:
         skip: "smallskip"
       before:
         skip: "smallskip"
+
+FramedPara:
+  origin: "resilient.book"
+  style:
+    paragraph:
+      after:
+        skip: "medskip"
+      align: "fancy-framed"
+      before:
+        skip: "medskip"
 
 blockquote:
   origin: "resilient.book"
@@ -103,6 +82,46 @@ bookmatter-copyright:
   style:
     paragraph:
       align: "noparindent"
+
+bookmatter-cover-author:
+  inherit: "bookmatter-coverpage"
+  origin: "resilient.bookmatters"
+  style:
+    font:
+      size: "16pt"
+    properties:
+      case: "upper"
+
+bookmatter-cover-publisher:
+  inherit: "bookmatter-coverpage"
+  origin: "resilient.bookmatters"
+  style:
+
+bookmatter-cover-subtitle:
+  inherit: "bookmatter-coverpage"
+  origin: "resilient.bookmatters"
+  style:
+    font:
+      size: "16pt"
+    paragraph:
+      after:
+        skip: "5%fh"
+
+bookmatter-cover-title:
+  inherit: "bookmatter-coverpage"
+  origin: "resilient.bookmatters"
+  style:
+    font:
+      size: "20pt"
+    paragraph:
+      after:
+        skip: "5%fh"
+      before:
+        skip: "30%fh"
+
+bookmatter-coverpage:
+  origin: "resilient.bookmatters"
+  style:
 
 bookmatter-halftitle:
   origin: "resilient.bookmatters"
@@ -179,12 +198,33 @@ defn-desc:
       before:
         vbreak: false
 
+defn-desc-Custom:
+  inherit: "defn-desc"
+  style:
+    paragraph:
+      after:
+        skip: "smallskip"
+      before:
+        vbreak: false
+
 defn-term:
   inherit: "defn-base"
   origin: "resilient.defn"
   style:
     font:
       weight: 700
+    paragraph:
+      after:
+        vbreak: false
+      before:
+        skip: "smallskip"
+
+defn-term-Custom:
+  inherit: "defn-base"
+  origin: "resilient.defn"
+  style:
+    font:
+      features: "+smcp"
     paragraph:
       after:
         vbreak: false
@@ -238,6 +278,16 @@ epigraph-text:
   style:
     paragraph:
       align: "justify"
+
+eqno:
+  origin: "resilient.book"
+  style:
+    numbering:
+      after:
+        text: ")"
+      before:
+        text: "("
+      display: "arabic"
 
 fancytoc-base:
   style:

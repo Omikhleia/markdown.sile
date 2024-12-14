@@ -501,7 +501,7 @@ $$`\pi=\sum_{k=0}^\infty\frac{1}{16^k}(\frac{4}{8k+1} − \frac{2}{8k+4} − \fr
 
 Attributes are passed through to SILE.
 In display math mode, you can number equations using the default counter (`numbered=true`), a named counter (`counter=name`), or a custom value (`number=...`).
-$$`e^{i\phi} = \mi{cos} \phi + i \mi{sin} \phi`{numbered=true}
+$$`e^{i\phi} = \cos \phi + i \sin \phi`{numbered=true}
 
 ### Footnote calls
 
@@ -517,6 +517,25 @@ A footnote call[^djot-some-fn] is marked...
 
 [^djot-some-fn]: An example footnote.
 
+### Bibliographic citations
+
+Djot does not officially support citations at the moment.
+This implementation, however, recognizes a simplified subset of the Pandoc citation syntax.
+
+{custom-style=CodeBlock}
+:::
+```
+I wrote a whole book on mathematics with SILE [@sile:willis2024].
+... in a "master document" [@sile:willis2021, part 1].
+... _The SILE Book_ for more information [@sile, chapter 5].
+```
+:::
+
+I wrote whole book on mathematics with SILE [@sile:willis2024].
+
+How to load bibliographies and configure citation styles is beyond the scope of this manual.
+If you are using the resilient collection, the most natural way to do this in a "master document" [@sile:willis2021, part 1].
+Note that support for biblibraphies in SILE is an experimental feature, so you may also want to check _The SILE Book_ for more information [@sile, chapter 5].
 
 {#djot-symbols}
 ### Symbols
@@ -809,8 +828,8 @@ Any further blocks included in the item are assumed to be the definition.
 
 Block attributes are passed to the underlying definition environment.
 When not using a supporting class or package, the converter uses its own fallback method, with hard-coded styling (e.g. the term is typeset in boldface).
-When using the *resilient* classes, the converter uses the *resilient.defn* environment, and the `variant` option may thus be used to switch to an alternate style.[^djot-defn-variant]
-For the purpose of illustration, let's say you have a "Custom" variant with an _ad hoc_ style.
+When using the *resilient* classes, the *resilient.defn* environment is loaded, and the `variant` option may thus be used to switch to an alternate style.[^djot-defn-variant]
+As an example, let's say you have a "Custom" variant with an _ad hoc_ style.
 
 {custom-style=CodeBlock}
 :::
@@ -996,7 +1015,7 @@ The `render` attribute can be set to `false` to prevent this behavior, and enfor
     For instance, the image below is produced with `{.dot width="3.5cm" layout=twopi}`.
 
     :::
-    {width="3.5cm" layout=twopi}
+    {width="3cm" layout=twopi}
     ```dot
     graph {
       node [fillcolor="lightskyblue:darkcyan" style=filled gradientangle=270]
@@ -1009,7 +1028,7 @@ The `render` attribute can be set to `false` to prevent this behavior, and enfor
     :::
     ^ An example of a rendered DOT graph.
 
-    The original DOT description used in the code block is shown hereafter.
+    The original DOT description is shown hereafter.
 
     {custom-style=CodeBlock}
     :::
@@ -1239,7 +1258,7 @@ Language changes within the text are supported, on either blocks or inline
 elements.
 It relies on the `lang` key-value attribute, where the value is a BCP47 language code.
 It is not much visible below, obviously, but the language setting affects the hyphenation and other properties.
-In the case of French, for instance, you can see the special thin space before the exclamation point, the use of appropriate quotation marks, and the internal spacing around quoted text:
+In the case of French, for instance, you can see the thin space before the exclamation point, the use of appropriate quotation marks, and the internal spacing around quoted text:
 
 {lang=fr}
 > Cette citation est en français!
@@ -1331,7 +1350,6 @@ Since it's possible to have unused footnote definitions, let's craft one as show
 
 When encountering a symbol, this converter looks for such a footnote and expands its content.
 It works with inline elements as shown above, but also with full blocks, provided the symbol is the only element in a paragraph of its own.
-
 Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain symbols, which get replaced too.
 
 
