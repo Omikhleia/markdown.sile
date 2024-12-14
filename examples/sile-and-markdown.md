@@ -514,7 +514,7 @@ This implementation recognizes a simplified subset of the Pandoc citation syntax
 ::: {custom-style=CodeBlock}
 ```
 I wrote a whole book on mathematics with SILE [@sile:willis2024].
-... in a "master document" [@sile:willis2021, part 1].
+... a "master document" [@sile:willis2021, part 1].
 ... _The SILE Book_ for more information [@sile, chapter 5].
 ```
 :::
@@ -522,7 +522,7 @@ I wrote a whole book on mathematics with SILE [@sile:willis2024].
 I wrote whole book on mathematics with SILE [@sile:willis2024].
 
 How to load bibliographies and configure citation styles is beyond the scope of this manual.
-If you are using the resilient collection, the most natural way to do this in a "master document" [@sile:willis2021, part 1].
+If you are using the resilient collection, the most natural way to do this is a "master document" [@sile:willis2021, part 1].
 Note that support for biblibraphies in SILE is an experimental feature, so you may also want to check _The SILE Book_ for more information [@sile, chapter 5].
 
 ### Symbols
