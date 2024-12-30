@@ -199,7 +199,7 @@ function Renderer:blockquote (node)
       createCommand("caption", {}, caption)
     }, pos)
   else
-    out = createCommand("markdown:internal:blockquote", {}, content, pos)
+    out = createCommand("markdown:internal:blockquote", node.attr or {}, content, pos)
   end
   if node.attr then
     -- Add a div when containing attributes
