@@ -618,18 +618,19 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Raw native block in Markdown (internal)")
 
-  self:registerCommand("markdown:internal:blockquote", function (_, content)
-    -- Would be nice NOT having to do this, but SILE's plain class only has a "quote"
-    -- environment that doesn't really nest, and hard-codes all its values, skips, etc.
+  self:registerCommand("markdown:internal:blockquote", function (options, content)
+    -- NOTE: The comment below applies to SILE 0.14.x.
+    -- SILE's plain class only has a "quote" environment that doesn't really nest, and
+    -- hard-codes all its values, skips, etc.
     -- So we might have a better version provided by a user-class or package.
     -- Otherwise, use our own fallback (with hard-coded choices too, but a least
     -- it does some proper nesting)
-    -- NOTE: The above applies to SILE 0.14.x.
-    -- SILE 0.15 is expected to provide a blockquote environment.
+    -- SILE 0.15.0 provides a blockquote environment, so eventually this fallback
+    -- will be removed when we officially drop support for SILE 0.14.x.
     if not self.hasCommandSupport.blockquote then
-      SILE.call("markdown:fallback:blockquote", {}, content)
+      SILE.call("markdown:fallback:blockquote", options, content)
     else
-      SILE.call("blockquote", {}, content)
+      SILE.call("blockquote", options, content)
     end
   end, "Block quote in Markdown (internal)")
 
