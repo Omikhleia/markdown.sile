@@ -623,7 +623,6 @@ Other attributes are passed through to the underlying heading implementation, wh
 
 [^djot-heading-level-mapping]: The converter assumes it can map heading levels to SILE commands `part`, `chapter`, `section`, `subsection`, `subsubsection`.
 It uses a very basic fallback if these are not found (or if the sectioning level gets past that point).
-The implication, therefore, is that the document class or other packages have to provide the relevant implementations.
 Also note that parts are supported by the *resilient* book class as a level 0 heading, and are therefore only available when header shifting is applied (see §[](#djot-configuration)).
 
 ### Block quotes
@@ -647,6 +646,7 @@ The contents of the block quote are parsed as block-level content.
 > > Such quotes can be nested.
 
 If your document class or previously loaded packages provide a `blockquote` environment, it is used.
+When using the *resilient* classes, styles are used, and the `variant` option may be used to switch to an alternate style.
 Otherwise, the converter uses its own fallback method, with hard-coded styling.
 
 #### Attributed quotes (epigraphs)
@@ -896,7 +896,7 @@ Other attributes are passed through to the underlying footnote implementation.
 {#djot-tables}
 ### Tables
 
-Djot supports the "pipe table" syntax, with its own way for marking the optional caption.
+Djot supports the "pipe table" syntax, with an optional caption.
 
 | Right | Left | Default | Center |
 |------:|:-----|---------|:------:|
