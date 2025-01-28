@@ -4,7 +4,7 @@
 -- Split in a standalone package so that it can be reused and
 -- generalized somewhat independently from the underlying parsing code.
 --
--- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
+-- @copyright License: MIT (c) 2022-2025 Omikhleia, Didier Willis
 -- @module packages.markdown.commands
 --
 require("silex.lang") -- Compatibility layer
@@ -103,7 +103,9 @@ local function decimalFilter (input, _)
 end
 
 local function wrapLinkContent (options, content)
-  local passedOptions = pl.tablex.copy(options) -- shallow
+  -- shallow copy before removing internal options
+  -- (Content may be reused in pseudo-symbol macros or other means)
+  local passedOptions = pl.tablex.copy(options)
   -- We already took care of these.
   passedOptions.src = nil
   passedOptions.id = nil
@@ -247,9 +249,12 @@ function package:registerCommands ()
         -- We'll want the ID to apply to the captioning environment (to potentially
         -- use the caption numbering)
         local id = image.options.id
-        image.options.id = nil
+        local imgOptions = pl.tablex.copy(image.options)
+        -- Shallow copy before removing internal options
+        -- (Content may be reused in pseudo-symbol macros or other means)
+        imgOptions.id = nil
         -- We also propagate image options to the englobing environment
-        SILE.call("markdown:internal:captioned-figure", image.options, {
+        SILE.call("markdown:internal:captioned-figure", imgOptions, {
           image,
           createCommand("caption", {}, {
             createCommand("label", { marker = id }),
@@ -508,6 +513,9 @@ Please consider using a resilient-compatible class!]])
       if not (self.hasPackageSupport.piecharts or self.hasPackageSupport.piechart) then -- HACK Some early versions of piecharts have the wrong internal name
         SU.error("No piecharts package available to render CSV data ".. uri)
       end
+      -- Shallow copy before removing internal options
+      -- (Content may be reused in pseudo-symbol macros or other means)
+      options = pl.tablex.copy(options)
       options.src = nil
       options.csvfile = uri
       SILE.call("piechart", options)
@@ -848,6 +856,9 @@ Please consider using a resilient-compatible class!]])
       local text = ":" .. symbol .. ":"
       content = { text }
     end
+    -- Shallow copy before removing internal options
+    -- (Content may be reused in pseudo-symbol macros or other means)
+    options = pl.tablex.copy(options)
     options._symbol_ = nil
     options._standalone_ = nil
     if next(options) and not standalone then
