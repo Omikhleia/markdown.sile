@@ -325,8 +325,6 @@ Files in Graphviz DOT graph language (`.dot`) are supported and rendered as imag
 
 ![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
 
-This image is obtained with the following syntax.
-
 ::: {custom-style=CodeBlock}
 ```
 ![The **markdown.sile** ecosystem (simplified).](./markdown-sile-schema.dot){width="90%"}
@@ -921,7 +919,7 @@ This is obtained by indenting the content by at least four spaces...
 
 #### Lua code blocks
 
-Code blocks marked as being in the Lua language are rendered as verbatim text, with syntax highlighting.
+Code blocks are rendered as verbatim text, with syntax highlighting when possible.
 For instance, the following code block...
 
 ::: {custom-style=CodeBlock}
@@ -948,12 +946,12 @@ end
 ```
 :::
 
-This is a very naive approach to syntax-highlighting, until the converter possibly supports a more general solution.
+Syntax-highlighting is applied to languages recognized by Scintillua.
 
 #### Rendered code blocks
 
 If the converter knows how to render the content of a code block, it will do so by default.
-The `render` attribute can be set to `false` to prevent this behavior, and enforce the content to be rendered as raw verbatim text.
+The `render` attribute can be set to `false` to prevent this behavior, and enforce the content to be rendered as raw verbatim text (possibly with syntax highlighting).
 
 **Mardown and Djot code blocks**
 

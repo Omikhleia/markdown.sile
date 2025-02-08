@@ -147,7 +147,7 @@ This is but an overview. For more details, please refer to the provided example 
   - Definition lists
 - Horizontal dividers / thematic breaks (with provision for asterisms, dinkuses, pendants...)
 - Tables (and table captions)
-- Code blocks (with attributes)
+- Code blocks (with attributes, and syntax highlighting when supported)
 - Line blocks (with enhanced provision for poetry)
 - Raw inlines and raw blocks (escaping to SILE, in SIL language or Lua scripting)
 - Raw inline HTML convenience subset in Markdown

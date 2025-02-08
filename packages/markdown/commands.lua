@@ -78,16 +78,6 @@ local function implicitFigure (paracontent)
   return image, caption
 end
 
--- Default color theme for syntax highlighted Lua code blocks
--- Very loosely based on the 'earendel' vim style.
-local naiveLuaCodeTheme = {
-  comment = { color = "#558817", italic = true },
-  keyword = { color = "#2239a8", bold = true },
-  iden = { color = "#0e7c6b" },
-  number = { color = "#a8660d" },
-  string = { color = "#a8660d" },
-}
-
 -- Inputfilter callback for splitting strings at numbers and formatting
 -- them as decimal numbers.
 local function decimalFilter (input, _)
@@ -145,6 +135,7 @@ function package:_init (_)
   SILE.settings:set("bibtex.style", "csl") -- The future is CSL
   self:loadPackage("color")
   self:loadPackage("embedders")
+  self:loadPackage("highlighter")
   self:loadPackage("image")
   self:loadPackage("inputfilter")
   self:loadPackage("labelrefs")
@@ -682,55 +673,32 @@ Please consider using a resilient-compatible class!]])
 
   -- Code blocks
 
-  self:registerCommand("markdown:internal:lua-highlighter", function (options, content)
-    -- Naive syntax highlighting for Lua, until we have a more general solution
-    local tree = {}
-    if options.id then
-      tree[#tree+1] = createCommand("label", { marker = options.id })
-    end
-    local toks = pl.lexer.lua(content[1], {})
-    for tag, v in toks do
-      local out = tostring(v)
-      if tag == "string" then
-        -- rebuild string quoting...
-        out = out:match('"') and ("'"..out.."'") or ('"'..out..'"')
-      end
-      if naiveLuaCodeTheme[tag] then
-        local cascade = CommandCascade()
-        if naiveLuaCodeTheme[tag].color then
-          cascade:call("color", { color = naiveLuaCodeTheme[tag].color })
-        end
-        if naiveLuaCodeTheme[tag].bold then
-          cascade:call("strong", {})
-        end
-        if naiveLuaCodeTheme[tag].italic then
-          cascade:call("em", {})
-        end
-        tree[#tree+1] = cascade:tree({ out })
-      else
-        tree[#tree+1] = SU.utf8charfromcodepoint("U+200B")..out -- HACK with ZWSP to trick the typesetter respecting standalone linebreaks
-      end
-    end
-    SILE.call("verbatim", {}, tree)
-  end, "Lua code block naive syntax highlighting in Markdown or Djot (internal)")
-
   self:registerCommand("markdown:internal:codeblock", function (options, content)
     local render = SU.boolean(options.render, true)
     local processed = false
-    if hasClass(options, "lua") then
-      -- Comes first as we don't want SILE raw handler to take over here.
-      -- (There's no such raw handler in the standard SILE distribution currently,
-      -- but let's be cautious.)
-      SILE.call("markdown:internal:lua-highlighter", options, content)
-      processed = true
-    elseif render then
+    local render_exceptions = hasClass(options, "lua") or hasClass(options, "sil") or hasClass(options, "xml")
+    if render and not render_exceptions then
+      -- If render is true, we try to to render the code block "natively":
+      --  - With a raw handler if available
+      --  - Or with an embed handler if available
+      -- If none of those are available, the non-rendered logic is used.
+      -- Lua, XML, SIL are exceptions, the proper way to execute code blocks
+      -- is to use raw code blocks (=sile or sile-lua formats).
       local handler = utils.hasRawHandler(options)
       if handler then
+        if options.id then
+          -- This would introduce a line break in some case, so we don't do it.
+          SU.warn("Ignoring id attribute in code block with raw handler (".. options.id ..")")
+        end
         handler(options, content)
         processed = true
       else
         local format, embed = utils.hasEmbedHandler(options)
         if format then
+          if options.id then
+            -- Assuming embedders render an image, the label marker can be inlined with it.
+            SILE.call("label", { marker = options.id })
+          end
           options.format = format
           embed(options, content)
           processed = true
@@ -738,15 +706,18 @@ Please consider using a resilient-compatible class!]])
       end
     end
     if not processed then
-      -- Default case: just raw unstyled verbatim text
-      SILE.call("verbatim", {},
-        options.id and {
-          createCommand("label", { marker = options.id }),
-          subContent(content)
-        } or {
-          subContent(content)
-        }
-      )
+      -- Default case: just output the code block as verbatim,
+      -- We pass to the highlighter handler for potential syntax highlighting.
+      if options.id then
+        -- As above, but this would be doable here, either in the highlighter
+        -- or even in the verbatim environment.
+        -- But as long as we can support both the standard and the resilient verbatim
+        -- environments, we don't do it, the former wouldn't honor it...
+        -- (Neither the resilient verbatim at this point but that would be in our control.)
+        SU.warn("Ignoring id attribute in standard code block (".. options.id ..")")
+      end
+      local handler = SILE.rawHandlers.highlight
+      handler(options, content)
     end
     SILE.call("par")
   end, "(Fenced) code block in Markdown (internal)")

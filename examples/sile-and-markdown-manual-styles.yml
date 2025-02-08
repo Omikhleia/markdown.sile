@@ -369,6 +369,12 @@ figure-caption-ref-number:
       before:
         text: "fig. "
 
+folio-backmatter:
+  origin: "resilient.book"
+  style:
+    numbering:
+      display: "arabic"
+
 folio-base:
   origin: "resilient.book"
   style:
@@ -383,6 +389,18 @@ folio-even:
       align: "left"
       before:
         indent: false
+
+folio-frontmatter:
+  origin: "resilient.book"
+  style:
+    numbering:
+      display: "roman"
+
+folio-mainmatter:
+  origin: "resilient.book"
+  style:
+    numbering:
+      display: "arabic"
 
 folio-odd:
   inherit: "folio-base"
@@ -463,6 +481,207 @@ header-odd:
       style: "italic"
     paragraph:
       align: "right"
+
+highlight-addition:
+  origin: "resilient.book"
+  style:
+    color: "#7F6600"
+    decoration:
+      color: "#FFDE8A"
+      line: "mark"
+
+highlight-attribute:
+  origin: "resilient.book"
+  style:
+    color: "#0000C0"
+
+highlight-bold:
+  origin: "resilient.book"
+  style:
+    font:
+      weight: 400
+
+highlight-change:
+  origin: "resilient.book"
+  style:
+    color: "#0000C0"
+    decoration:
+      color: "#B2D8FF"
+      line: "mark"
+
+highlight-class:
+  origin: "resilient.book"
+  style:
+    color: "#C99000"
+
+highlight-command:
+  origin: "resilient.book"
+  style:
+    color: "#7F0055"
+
+highlight-command.section:
+  origin: "resilient.book"
+  style:
+    color: "#C99000"
+
+highlight-comment:
+  origin: "resilient.book"
+  style:
+    color: "#8E908C"
+    font:
+      style: "italic"
+
+highlight-constant:
+  origin: "resilient.book"
+  style:
+    color: "#116644"
+
+highlight-constant.builtin:
+  origin: "resilient.book"
+  style:
+    color: "#F5871F"
+
+highlight-deletion:
+  origin: "resilient.book"
+  style:
+    color: "#8B0000"
+    decoration:
+      color: "#F6B2B2"
+      line: "mark"
+
+highlight-embedded:
+  origin: "resilient.book"
+  style:
+    color: "#4271AE"
+
+highlight-environment:
+  origin: "resilient.book"
+  style:
+    color: "#C99000"
+
+highlight-environment.math:
+  origin: "resilient.book"
+  style:
+    color: "#116644"
+
+highlight-error:
+  origin: "resilient.book"
+  style:
+    color: "#8B0000"
+
+highlight-function:
+  origin: "resilient.book"
+  style:
+    color: "#4271AE"
+
+highlight-function.builtin:
+  origin: "resilient.book"
+  style:
+    color: "#4271AE"
+
+highlight-function.method:
+  origin: "resilient.book"
+  style:
+    color: "#4271AE"
+
+highlight-heading:
+  origin: "resilient.book"
+  style:
+    color: "#2A00FF"
+
+highlight-identifier:
+  origin: "resilient.book"
+  style:
+    color: "#3F009B"
+
+highlight-italic:
+  origin: "resilient.book"
+  style:
+    font:
+      style: "italic"
+
+highlight-keyword:
+  origin: "resilient.book"
+  style:
+    color: "#7F0055"
+
+highlight-label:
+  origin: "resilient.book"
+  style:
+    color: "#2A00FF"
+
+highlight-link:
+  origin: "resilient.book"
+  style:
+    decoration:
+      line: "underline"
+
+highlight-list:
+  origin: "resilient.book"
+  style:
+    color: "#116644"
+
+highlight-number:
+  origin: "resilient.book"
+  style:
+    color: "#116644"
+
+highlight-operator:
+  origin: "resilient.book"
+  style:
+    color: "#3E999F"
+
+highlight-preprocessor:
+  origin: "resilient.book"
+  style:
+    color: "#4D4D4C"
+
+highlight-property:
+  origin: "resilient.book"
+  style:
+    color: "#0000C0"
+
+highlight-reference:
+  origin: "resilient.book"
+  style:
+    decoration:
+      line: "underline"
+
+highlight-regex:
+  origin: "resilient.book"
+  style:
+    color: "#0000C0"
+
+highlight-string:
+  origin: "resilient.book"
+  style:
+    color: "#3F7F5F"
+
+highlight-tag:
+  origin: "resilient.book"
+  style:
+    color: "#7F0055"
+
+highlight-type:
+  origin: "resilient.book"
+  style:
+    color: "#C99000"
+
+highlight-underline:
+  origin: "resilient.book"
+  style:
+    decoration:
+      line: "underline"
+
+highlight-variable:
+  origin: "resilient.book"
+  style:
+    color: "#0000C0"
+
+highlight-variable.builtin:
+  origin: "resilient.book"
+  style:
+    color: "#C82829"
 
 listing:
   origin: "resilient.book"
@@ -742,6 +961,38 @@ prosody:
       align: "poetry"
       before:
         skip: "smallskip"
+
+sectioning-appendix:
+  inherit: "sectioning-chapter"
+  origin: "resilient.book"
+  style:
+    sectioning:
+      numberstyle:
+        header: "sectioning-appendix-head-number"
+        main: "sectioning-appendix-main-number"
+        reference: "sectioning-appendix-ref-number"
+
+sectioning-appendix-head-number:
+  inherit: "sectioning-chapter-head-number"
+  origin: "resilient.book"
+  style:
+
+sectioning-appendix-main-number:
+  inherit: "sectioning-chapter-main-number"
+  origin: "resilient.book"
+  style:
+    numbering:
+      before:
+        text: "Appendix "
+      display: "ALPHA"
+
+sectioning-appendix-ref-number:
+  inherit: "sectioning-chapter-ref-number"
+  origin: "resilient.book"
+  style:
+    numbering:
+      before:
+        text: "app. "
 
 sectioning-base:
   origin: "resilient.book"
