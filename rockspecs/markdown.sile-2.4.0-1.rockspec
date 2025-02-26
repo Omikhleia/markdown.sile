@@ -1,8 +1,9 @@
 rockspec_format = "3.0"
 package = "markdown.sile"
-version = "dev-1"
+version = "2.4.0-1"
 source = {
     url = "git+https://github.com/Omikhleia/markdown.sile.git",
+    tag = "v2.4.0",
 }
 description = {
   summary = "Native Markdown support for the SILE typesetting system.",
@@ -16,13 +17,13 @@ description = {
 }
 dependencies = {
    "lua >= 5.1",
-   "embedders.sile",
-   "highlighter.sile,
-   "labelrefs.sile",
-   "ptable.sile",
-   "smartquotes.sile",
-   "textsubsuper.sile",
-   "silex.sile",
+   "embedders.sile >= 0.2.0",
+   "highlighter.sile >= 0.2.0",
+   "labelrefs.sile >= 0.1.0",
+   "ptable.sile >= 3.1.0",
+   "smartquotes.sile >= 1.0.0",
+   "textsubsuper.sile >= 1.2.0",
+   "silex.sile >= 0.8.0, < 1.0",
    "lunajson",
 }
 
