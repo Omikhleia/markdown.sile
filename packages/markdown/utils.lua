@@ -133,7 +133,14 @@ local function naiveCitations (str, pos)
     end
     return createCommand("cite", { key = key }, nil, pos)
   end, refs)
-  return createStructuredCommand("markdown:internal:citations", {}, refs, pos)
+  if #refs == 0 then
+    SU.warn("No valid citation reference found in '" .. str .. "'")
+    return {}
+  end
+  if #refs == 1 then
+    return refs[1]
+  end
+  return createStructuredCommand("cites", {}, refs, pos)
 end
 
 --- @export

@@ -840,12 +840,6 @@ Please consider using a resilient-compatible class!]])
     end
   end, "Symbol in Djot (internal)")
 
-  self:registerCommand("markdown:internal:citations", function (_, content)
-    -- We cannot handle multiple citations yet in a single call.
-    -- See https://github.com/sile-typesetter/sile/issues/2196
-    SILE.process(content)
-  end, "Citations (internal)")
-
   -- B. Fallback commands
 
   self:registerCommand("markdown:fallback:blockquote", function (_, content)

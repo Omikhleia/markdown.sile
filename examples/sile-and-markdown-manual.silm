@@ -46,13 +46,16 @@ sile:
     - dropcaps
     - resilient.defn
     - resilient.poetry
-chapters:
-  - toc.dj
-  - extra-styles.dj
-  - introduction.dj
-  - lightweight-markup.dj
-  - sile-and-djot.dj
-  - sile-and-markdown.md
-  - sile-and-pandoc.dj
-  - pandoc-tables.pandoc
-  - final-notes.dj
+content:
+  chapters:
+    - toc.dj
+    - extra-styles.dj
+    - introduction.dj
+    - lightweight-markup.dj
+    - sile-and-djot.dj
+    - sile-and-markdown.md
+    - sile-and-pandoc.dj
+    - pandoc-tables.pandoc
+    - file: final-notes.dj
+      content:
+        - biblio.dj
