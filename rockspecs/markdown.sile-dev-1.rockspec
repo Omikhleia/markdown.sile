@@ -17,7 +17,7 @@ description = {
 dependencies = {
    "lua >= 5.1",
    "embedders.sile",
-   "highlighter.sile,
+   "highlighter.sile",
    "labelrefs.sile",
    "ptable.sile",
    "smartquotes.sile",
