@@ -28,7 +28,7 @@ Yet, these options remain available under the hood for those seeking a blend of 
 
 ### Standard installation
 
-This module collection requires SILE v0.14 or upper.
+This module collection requires SILE v0.14 (recommended: v0.15.10 or upper).
 
 Installation relies on the *luarocks* package manager.
 To install the latest version, you may use the provided “rockspec”:
@@ -148,7 +148,7 @@ Let's illustrate this for Djot, but the same applies to Markdown.
 
 {custom-style=CodeBlock}
 :::
-```
+```sil
 \use[module=packages.djot]
 \include[src=somefile.dj]
 ```
@@ -159,7 +159,7 @@ Again, the same applies to Markdown.
 
 {custom-style=CodeBlock}
 :::
-```
+```sil
 \begin[type=djot]{raw}
 Some *Djot* content
 \end{raw}

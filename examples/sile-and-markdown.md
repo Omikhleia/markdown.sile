@@ -512,16 +512,17 @@ This implementation recognizes a simplified subset of the Pandoc citation syntax
 ::: {custom-style=CodeBlock}
 ```
 I wrote a whole book on mathematics with SILE [@sile:willis2024].
+... also supported [@sile:willis2024; @sile:willis2022].
 ... a "master document" [@sile:willis2021, part 1].
-... _The SILE Book_ for more information [@sile, chapter 5].
 ```
 :::
 
 I wrote whole book on mathematics with SILE [@sile:willis2024].
+Note that multiple citations are also supported [@sile:willis2024; @sile:willis2022].
 
 How to load bibliographies and configure citation styles is beyond the scope of this manual.
-If you are using the resilient collection, the most natural way to do this is a "master document" [@sile:willis2021, part 1].
-Note that support for biblibraphies in SILE is an experimental feature, so you may also want to check _The SILE Book_ for more information [@sile, chapter 5].
+With the resilient collection, the most natural way to do this is a "master document" [@sile:willis2021, part 1].
+For more information, you may also want to check _The SILE Book_ [@sile, chapter 5].
 
 ### Symbols
 
@@ -895,15 +896,13 @@ In most cases, the content is rendered as verbatim text, with some exceptions de
 Erm... Markdown supports yet another syntax for loosely defined verbatim code blocks, which is the "indented code block" syntax.
 This author would rather not recommend using it, and frow upon the  indentation ambiguities it introduces in some cases.
 
-::: {custom-style=CodeBlock}
-    This is an indented code block.
-:::
+    This is a code block.
 
 This is obtained by indenting the content by at least four spaces...
 
 ::: {custom-style=CodeBlock}
 ```
-    This is an indented code block.
+    This is a code block.
 ```
 :::
 
@@ -1326,7 +1325,7 @@ In SIL documents, you can pass such options to the `\include` command or the `ra
 For instance, you can include a Markdown file with shifted headings like this:
 
 ::: {custom-style=CodeBlock}
-```
+```sil
 \include[src=somefile.md, shift_headings=1]
 ```
 :::
@@ -1334,7 +1333,7 @@ For instance, you can include a Markdown file with shifted headings like this:
 For document classes supporting it (in particular, the **resilient** book class), this feature also allows you to access levels above the default scheme, such as "parts".
 
 ::: {custom-style=CodeBlock}
-```
+```sil
 \include[src=somefile.md, shift_headings=-1]
 ```
 :::
@@ -1356,7 +1355,7 @@ Available options are: `smart`, `smart_primes`, `strikeout`, `mark`, `subscript`
 For instance, to disable the smart typography feature:
 
 ::: {custom-style=CodeBlock}
-```
+```sil
 \include[src=somefile.md, smart=false]
 ```
 :::

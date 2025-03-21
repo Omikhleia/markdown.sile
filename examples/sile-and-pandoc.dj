@@ -46,7 +46,7 @@ Once the package is loaded, the `\autodoc:command{\include[src=<file>]}`{=sile} 
 
 {custom-style=CodeBlock}
 :::
-```
+```sil
 \use[module=packages.pandocast]
 \include[src=somefile.pandoc]
 ```

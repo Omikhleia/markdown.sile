@@ -10,9 +10,9 @@ metadata:
     - Pandoc
   authors: Didier Willis
   publisher: Omikhleia
-  pubdate: 2024-03-01
+  pubdate: 2025-03-21
   url: https://github.com/Omikhleia/markdown.sile
-  copyright: © 2022–2024, Didier Willis.
+  copyright: © 2022–2025, Didier Willis.
   legal: |
     This material may be distributed only subject to the terms and conditions
     set forth in the  Creative Commons Attribution, Share-Alike License,
@@ -37,10 +37,10 @@ sile:
     layout: division 9
     resolution: 300
   settings:
-    textsubsuper.fake: false
+    textsubsuper.fake: true
     autodoc.highlighting: true
     document.baselineskip: 1.2em
-    # typesetter.italicCorrection: true # Not yet available in SILE 0.14.x
+    typesetter.italicCorrection: true
   packages:
     - autodoc-resilient # REQUIRED FOR RESILIENT, do not use regular autodoc
     - dropcaps
