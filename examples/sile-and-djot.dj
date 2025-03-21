@@ -524,16 +524,17 @@ This implementation, however, recognizes a simplified subset of the Pandoc citat
 :::
 ```
 I wrote a whole book on mathematics with SILE [@sile:willis2024].
+... also supported [@sile:willis2024; @sile:willis2022].
 ... a "master document" [@sile:willis2021, part 1].
-... _The SILE Book_ for more information [@sile, chapter 5].
 ```
 :::
 
 I wrote whole book on mathematics with SILE [@sile:willis2024].
+Note that multiple citations are also supported [@sile:willis2024; @sile:willis2022].
 
 How to load bibliographies and configure citation styles is beyond the scope of this manual.
-If you are using the resilient collection, the most natural way to do this is a "master document" [@sile:willis2021, part 1].
-Note that support for biblibraphies in SILE is an experimental feature, so you may also want to check _The SILE Book_ for more information [@sile, chapter 5].
+With the resilient collection, the most natural way to do this is a "master document" [@sile:willis2021, part 1].
+For more information, you may also want to check _The SILE Book_ [@sile, chapter 5].
 
 {#djot-symbols}
 ### Symbols
@@ -1422,7 +1423,7 @@ For instance, you can include a Djot file with shifted headings like this:
 
 {custom-style=CodeBlock}
 :::
-```
+```sil
 \include[src=somefile.dj, shift_headings=1]
 ```
 :::
@@ -1431,7 +1432,7 @@ For document classes supporting it (in particular, the *resilient* book class), 
 
 {custom-style=CodeBlock}
 :::
-```
+```sil
 \include[src=somefile.dj, shift_headings=-1]
 ```
 :::

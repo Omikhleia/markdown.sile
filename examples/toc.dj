@@ -1,6 +1,8 @@
 ```=sile-lua
 SILE.call("open-on-odd-page")
-SILE.call("noheaders")
 ```
+
+{.unnumbered .notoc}
+# Contents
 
 :_TOC_:
