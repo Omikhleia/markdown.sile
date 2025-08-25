@@ -261,6 +261,14 @@ local function insert_attribute(attr, key, val)
     else
       attr.class = val
     end
+  -- BEGIN EXTENSION DIDIER 20250825
+  elseif key == "index" then
+    if attr.index then
+      attr.index = attr.index .. " " .. val
+    else
+      attr.index = val
+    end
+  -- END EXTENSION DIDIER 20250825
   else
     attr[key] = val
   end
@@ -284,6 +292,19 @@ local function insert_attributes_from_nodes(targetnode, cs)
     local x, y = cs[i].t, cs[i].s
     if x == "id" or x == "class" then
       insert_attribute(targetnode.attr, x, y)
+    -- BEGIN EXTENSION DIDIER 20250825
+    elseif x == "index" then
+      local val = {}
+      while cs[i + 1] and cs[i + 1].t == "value" do
+        val[#val + 1] = cs[i + 1].s:gsub("\\(%p)", "%1")
+        -- resolve backslash escapes
+        i = i + 1
+      end
+      insert_attribute(targetnode.attr, "index", y)
+      if #val > 0 then
+        insert_attribute(targetnode.attr, "indexed-" .. y, table.concat(val,"\n"))
+      end
+    -- END EXTENSION DIDIER 20250825
     elseif x == "key" then
       local val = {}
       while cs[i + 1] and cs[i + 1].t == "value" do

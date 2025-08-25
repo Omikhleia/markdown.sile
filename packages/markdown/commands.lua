@@ -487,6 +487,24 @@ Please consider using a resilient-compatible class!]])
       cascade:call("hbox")
     end
     cascade:process(content)
+
+    -- If the class enabled the indexer package, and if the span has an index:
+    -- Call the indexentry command on the content.
+    -- Due to how the indexer package works, the indexed term is the text generated
+    -- from the content, loose most of the formatting and styling.
+    -- At best, the language of the span might impact the key formatting (?).
+    if options.index and self.hasPackageSupport.indexer then
+      local indexes = pl.stringx.split(options.index, " ")
+      for _, index in ipairs(indexes) do
+        local label = options["indexed-" .. index]
+        local indexing = CommandCascade()
+        if options.lang then
+          indexing:call("language", { main = options.lang })
+        end
+        indexing:call("indexentry", { index = index, label = label })
+        indexing:process(content)
+      end
+    end
   end, "Span in Markdown (internal)")
 
   self:registerCommand("markdown:internal:image", function (options, _)
