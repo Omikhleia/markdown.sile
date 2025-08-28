@@ -34,6 +34,9 @@ local START = 13
 -- BEGIN EXTENSION DIDIER 20230818
 local SCANNING_COND = 14
 -- END EXTENSION DIDIER 20230818
+-- BEGIN EXTENSION DIDIER 20250825
+local SCANNING_INDEX = 15
+-- END EXTENSION DIDIER 202508245
 
 local AttributeParser = {}
 
@@ -75,6 +78,11 @@ handlers[SCANNING] = function(self, pos)
     self.begin = pos
     return SCANNING_COND
   -- END EXTENSION DIDIER 20230818
+  -- BEGIN EXTENSION DIDIER 20250825
+  elseif c == ':' then
+    self.begin = pos
+    return SCANNING_INDEX
+  -- END EXTENSION DIDIER 20250825
   elseif find(c, "^[%a%d_:-]") then
     self.begin = pos
     return SCANNING_KEY
@@ -157,6 +165,32 @@ handlers[SCANNING_COND] = function(self, pos)
   end
 end
 -- END EXTENSION DIDIER 20230818
+
+-- BEGIN EXTENSION DIDIER 20250825
+handlers[SCANNING_INDEX] = function(self, pos)
+  local c = sub(self.subject, pos, pos)
+    if find(c, "^[^%s%p]") or c == "_" or c == "-" then
+    return SCANNING_INDEX
+  elseif c == '}' then
+    if self.lastpos > self.begin then
+      self:add_match(self.begin + 1, self.lastpos, "index")
+    end
+    self.begin = nil
+    return DONE
+  elseif c == '=' then
+    self:add_match(self.begin + 1, self.lastpos, "index")
+    return SCANNING_VALUE
+  elseif find(c, "^%s") then
+    if self.lastpos > self.begin then
+      self:add_match(self.begin + 1, self.lastpos, "index")
+    end
+    self.begin = nil
+    return SCANNING
+  else
+    return FAIL
+  end
+end
+-- END EXTENSION DIDIER 20250825
 
 handlers[SCANNING_KEY] = function(self, pos)
   local c = sub(self.subject, pos, pos)
