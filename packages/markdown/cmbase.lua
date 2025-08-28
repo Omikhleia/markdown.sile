@@ -1,12 +1,14 @@
 ---A base class for markdown command packages.
 --
+-- Derived from SILE's `packages.base`.
+--
 -- It abstracts the low-level details of feature detection and compatibility with resilient components.
 -- So the markdown.command packages can focus on their specific features and commands.
 --
--- @copyright License: MIT (c) 2024 Omikhleia, Didier Willis
--- @module packages.markdown.cmbase
 --
-
+-- @copyright License: MIT (c) 2024 Omikhleia, Didier Willis
+-- @classmod packages.markdown.cmbase
+--
 local base = require("packages.base")
 
 local package = pl.class(base)
@@ -16,9 +18,9 @@ package._name = "markdown.cmbase"
 -- NOTE: The previous implementation was clever;
 --   local ok, ResilientBase = pcall(require, 'classes.resilient.base')
 --   return ok and self.class:is_a(ResilientBase)
--- However this *loads* the class, which loads all the silex extensions, even if
+-- However this *loads* the class, which loads all the SILE redefinitions, even if
 -- the class is not actually used...
--- Enforcing the silex extensions is not what we wanted.
+-- Enforcing resilient's SILE overrides is not what we wanted (for now).
 -- So we are back to a more naive implementation, checking the class hierarchy
 -- by name. This is perhaps lame and knows too much about internals, but heh.
 local function isResilientClass (cl)
@@ -33,8 +35,10 @@ local function isResilientClass (cl)
 end
 
 --- Load a package with a resilient variant.
----@param resilientpack   string   The resilient package name.
----@param legacypack      string   The legacy package name.
+-- In a resilient context, the resilient variant is loaded.
+-- Otherwise, the legacy variant is loaded.
+-- @tparam string resilientpack The resilient package name.
+-- @tparam string legacypack The legacy package name.
 function package:loadAltPackage (resilientpack, legacypack)
   if not self.class.packages[resilientpack] then
     -- In resilient context, try enforcing the use of resilient variants,
@@ -48,17 +52,23 @@ function package:loadAltPackage (resilientpack, legacypack)
   end
 end
 
---- Load an optional package if present
----@param pack  string   The package name.
+--- Load an optional package, if available.
+-- @tparam string pack string The package name.
 function package:loadOptPackage (pack)
   local ok, _ = pcall(function () return self:loadPackage(pack) end)
   SU.debug("markdown.commands", "Optional package "..pack.. (ok and " loaded" or " not loaded"))
 end
 
---- Feature detection, so we can see e.g. with self.hasPackageSupport.xxx if
---- a package is supported or not.
----@param check function  The feature detection function.
----@return table          The proxy object.
+--- (Internal) Feature detection proxy creation.
+-- Such proxy objects are used to implement:
+--
+--  - self.hasPackageSupport.xxx
+--  - self.hasCommandSupport.yyy
+--  - self.hasStyleSupport.zzz
+--
+-- So as to check if a package, command or style is supported or not.
+---@tparam function check The feature detection function.
+---@treturn table The proxy object.
 function package:_createSupportProxy (check)
   return setmetatable({}, {
     __index = check,
@@ -68,7 +78,8 @@ function package:_createSupportProxy (check)
   })
 end
 
---- Package initialization.
+--- (Contructor) Package initialization.
+-- @tparam table _ Package options (not used here).
 function package:_init (_)
   base._init(self)
 
@@ -115,12 +126,16 @@ function package:_init (_)
   end)
 end
 
-function package:registerCommand(name, func, help, pack)
+--- (Override) Register a command.
+-- It overrides the default package command registration, and tweaks known options.
+-- Typically, width and height in percentage are replaced by line and frame relative
+-- units, respectively, for compatibility with SILE units.
+-- @tparam string name Name of the command to register
+-- @tparam function func Command implementation function
+-- @tparam[opt] string help Short help string
+function package:registerCommand(name, func, help)
   local tweakCommandWithKnownOptions = function (options, content)
     options = options or {}
-    -- Tweak known options to be compatible with SILE units.
-    -- width and height in percentage are replaced by line and frame relative
-    -- units, respectively.
     if options.width and type(options.width) == "string" then
       options.width = options.width:gsub("%%$", "%%lw")
     end
@@ -129,16 +144,22 @@ function package:registerCommand(name, func, help, pack)
     end
     return func(options, content)
   end
-  base.registerCommand(self, name, tweakCommandWithKnownOptions, help, pack)
+  base.registerCommand(self, name, tweakCommandWithKnownOptions, help)
 end
 
 --- Register a style (as in resilient packages).
+-- For subclasses defining custom styles, this method is supposed to be used
+-- in an overridden registerStyles() method, so that the style is registered
+-- only in the resilient context.
+-- @tparam string name Style name
+-- @tparam table opts Style options
+-- @tparam table styledef Style definition
 function package:registerStyle (name, opts, styledef)
   return self.styles:defineStyle(name, opts, styledef, self._name)
 end
 
---- Register styles (as in resilient packages)
---- For overriding in subclass
+--- (Abstract) Register styles (as in resilient packages).
+-- For overriding in subclasses.
 function package.registerStyles (_) end
 
 package.documentation = [[\begin{document}

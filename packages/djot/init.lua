@@ -1,7 +1,7 @@
 --- Djot native support for SILE
 --
 -- @copyright License: License: MIT (c) 2023 Omikhleia
--- @module packages.djot
+-- @classmod packages.djot
 --
 local base = require("packages.base")
 
