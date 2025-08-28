@@ -1409,6 +1409,64 @@ They only apply to user-defined symbols (defined as pseudo-footnotes) and contex
 We can't say if future versions of the Djot specification will make use of `?` and `!` in attributes or bracketed content.
 Therefore, we recommend that you call template files containing conditional content with the `.djt` extension, as a way to remember.
 
+
+### Index entries
+
+Djot does not yet provide a built-in syntax for marking index entries within the text.
+This converter supports two alternatives for that purpose: one following the standard attribute syntax, and another using a more compact shortcut syntax (offered as an experimental Djot extension).
+
+Generating the actual indexes lies outside the scope of this converter.
+It is the responsibility of the document class or supporting packages to provide the necessary commands and environments, as in the case of the *resilient* book class.
+
+{#djot-index-entries-attributes}
+#### Attributes for indexing entries
+
+With the standard key–value attribute syntax, a term can be marked as belonging to a named index by means of explicit attributes, with the option to specify replacement text.
+
+{custom-style=CodeBlock}
+:::
+```
+[Peter Smith]{index=main indexed-main="Smith, Peter"} and Plato{index=main}
+A deer{index=animals} and a hare{index=animals indexed-animals=rabbit}
+```
+:::
+
+The `index` attribute specifies the indexes to which the term is added; multiple indexes can be listed by separating them with spaces.
+Optionally, an `indexed-⟨index⟩` attribute may be provided to define the text that should appear in a given index, instead of the term itself.
+
+{custom-style=CodeBlock}
+:::
+```
+[Simon's Cat]{index="main animals genus" indexed-genus=Felis indexed-animals=cat}
+```
+:::
+
+#### Shortcut syntax for indexing entries
+
+The syntax above is fully valid Djot and thus portable to other converters.
+However, it tends to be somewhat verbose and less than _lightweight_ in practice.
+
+For convenience, our Djot implementation also supports a more compact, non-standard syntax that is easier to type.
+
+{custom-style=CodeBlock}
+:::
+```
+[John Doe]{:main="Doe, John"} and Aristote{:main}
+A fox{:animals} or an ox{:animals=cow}
+```
+:::
+
+As above, multiple indexes are possible too:
+
+{custom-style=CodeBlock}
+:::
+```
+[Simon's Cat]{index="main animals genus" indexed-genus=Felis indexed-animals=cat}
+[Nils Olav III]{:main :animals="penguin" :genus=Aptenodytes}
+```
+:::
+
+
 {#djot-configuration}
 ## Configuration
 
