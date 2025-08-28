@@ -6,8 +6,6 @@
 -- @copyright License: MIT (c) 2023-2024 Omikhleia, Didier Willis
 -- @module inputters.djot
 --
-require("silex.ast") -- Compatibility layer
-
 local utils = require("packages.markdown.utils")
 local createCommand, createStructuredCommand
         = SU.ast.createCommand, SU.ast.createStructuredCommand
@@ -149,7 +147,7 @@ function Renderer:render_children (node)
       error("Djot content too deeply nested", 2)
     elseif err:find("paperSize") then
        -- HACK
-       -- SILE 0.14.16 is still unimaginative how to avoid crashing the outputter
+       -- SILE 0.15.13 is still unimaginative how to avoid crashing the outputter
        -- and SU.error raises another error in the process.
       SILE.scratch.caughterror = true
       error("", 2)

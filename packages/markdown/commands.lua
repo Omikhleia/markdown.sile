@@ -1,16 +1,18 @@
---- Common commands for Markdown and Djot support in SILE, when there is no
--- direct mapping to existing commands or packages.
+--- Common commands for Markdown and Djot support in SILE, when there is no direct mapping
+-- to existing commands or packages.
+--
+-- Derived from `packages.markdown.cmbase`.
 --
 -- Split in a standalone package so that it can be reused and
 -- generalized somewhat independently from the underlying parsing code.
 --
--- @copyright License: MIT (c) 2022-2025 Omikhleia, Didier Willis
--- @module packages.markdown.commands
+-- It implements high-level commands that are used by the markdown, djot and pandocat inputters.
 --
-require("silex.lang") -- Compatibility layer
-require("silex.ast")  -- Compatibility layer
-require("silex.types") -- Compatibility layer
-
+-- It also exposes a method for classes or packages to register predefined Djot symbols.
+--
+-- @copyright License: MIT (c) 2022-2025 Omikhleia, Didier Willis
+-- @classmod packages.markdown.commands
+--
 local utils = require("packages.markdown.utils")
 local hasClass = utils.hasClass
 
@@ -111,13 +113,16 @@ local function wrapLinkContent (options, content)
   return content
 end
 
+--- (Contructor) Package initialization.
+-- @tparam table _ Package options (not used here).
 function package:_init (_)
   base._init(self)
   if not SILE.scratch._markdown_commands then
-    -- NOTE:
+    -- HACK NOTE:
     -- I don't like those scratch variables, but package reinstancing
-    -- may occur in SILE. I never liked it, but it still occurs in SILE 0.15.5
-    -- when silex-x is not present, so we have to deal with it.
+    -- may occur in SILE. I never liked it, but it still occurs in SILE 0.15.13.
+    -- Resilient classes override that behavior.
+    -- But when a resilient class is not used, so we have to deal with it.
     -- For putative readers:
     --    load the djot package, cause you want to use Djot.
     --    load the markdown package, cause you want to use Markdown too.
@@ -132,7 +137,7 @@ function package:_init (_)
   -- The class should be responsible for loading the appropriate higher-level
   -- constructs, see fallback commands further below for more details.
   self:loadPackage("bibtex")
-  SILE.settings:set("bibtex.style", "csl") -- The future is CSL (active by default with SILE 0.15.10)
+  SILE.settings:set("bibtex.style", "csl") -- The future is CSL (active by default since SILE 0.15.10)
   self:loadPackage("color")
   self:loadPackage("embedders")
   self:loadPackage("highlighter")
@@ -162,33 +167,29 @@ function package:_init (_)
   end
 
   -- Register some predefined symbols
-  -- Later we'll have packages or classes possibly register their own
-  -- predefined symbols.
   self:registerSymbol("_TOC_", true, function (options)
     return {
       createCommand("markdown:internal:toc", options),
     }
   end)
-  self:registerSymbol("_FANCYTOC_", true, function (options)
-    -- Of course, it requires having installed the fancytoc.sile module
-    -- We are not going to check that here, so I won't document it.
-    return {
-      createCommand("use", { module = "packages.fancytoc" }),
-      createCommand("fancytableofcontents", options),
-    }
-  end)
 end
 
--- Register a predefined symbol for use in Djot (as of now)
--- The symbol is a leaf inline command that will be expanded when encountered.
--- The symbol is registered with
---  - a name
---  - a boolean indicating if must be standalone (i.e. alone at block-level)
---  - a function that will be called to render the symbol
--- The function will receive as options the attributes set on the symbol,
--- and must return a table of AST elements.
+--- Register a predefined symbol for use in Djot (as of now).
+--
+-- A Djot symbol is a leaf inline node that will be expanded when encountered.
+-- Our implementation allows to register custom symbols, that can be used
+-- in Djot content, and expanded to something programmatic.
+--
+-- The rendering function takes the symbol options and content as arguments,
+-- and must return a SILE AST (table).
+--
 -- Note that a span will also be created around an inline symbol if it has
 -- attributes, so styling can be applied to the symbol.
+--
+-- @tparam string name Name of the symbol
+-- @tparam boolean standalone If true, the symbol must be used alone at block-level
+-- @tparam function render Function that will be called to render the symbo.
+--   an AST (table or string).
 function package:registerSymbol(name, standalone, render)
   -- Multiple package reinstancing is may occur in SILE, see comment above
   -- on scratch variables... So we do not warn if a symbol is already registered,
@@ -591,11 +592,6 @@ Please consider using a resilient-compatible class!]])
       SU.error("Raw inline content shall be a string, something bad occurred in markdown processing")
     end
     if format == "sile" then
-      -- https://github.com/Omikhleia/markdown.sile/issues/39
-      -- SILE 0.14.0..0.14.5 did not require the raw text to be wrapped in a
-      -- document tree. But SILE 0.14.6 now does, or it errors.
-      -- I checked that a least SILE 0.14.4 is ok too with that document
-      -- wrapping, so the workaround just below seems safe and compatible...
       rawtext = "\\document{"..rawtext.."}"
       SILE.processString(rawtext, "sil")
     elseif format == "sile-lua" then
@@ -636,19 +632,11 @@ Please consider using a resilient-compatible class!]])
   end, "Raw native block in Markdown (internal)")
 
   self:registerCommand("markdown:internal:blockquote", function (options, content)
-    -- NOTE: The comment below applies to SILE 0.14.x.
-    -- SILE's plain class only has a "quote" environment that doesn't really nest, and
-    -- hard-codes all its values, skips, etc.
-    -- So we might have a better version provided by a user-class or package.
-    -- Otherwise, use our own fallback (with hard-coded choices too, but a least
-    -- it does some proper nesting)
-    -- SILE 0.15.0 provides a blockquote environment, so eventually this fallback
-    -- will be removed when we officially drop support for SILE 0.14.x.
-    if not self.hasCommandSupport.blockquote then
-      SILE.call("markdown:fallback:blockquote", options, content)
-    else
-      SILE.call("blockquote", options, content)
-    end
+    -- SILE's plain class provides a "blockquote" since SILE 0.15.0.
+    -- Resilient document classes also provide a blockquote environment.
+    -- So we do not need to maintain our own fallback, and this is just
+    -- a simple wrapper.
+    SILE.call("blockquote", options, content)
   end, "Block quote in Markdown (internal)")
 
   self:registerCommand("markdown:internal:captioned-table", function (options, content)
@@ -860,22 +848,6 @@ Please consider using a resilient-compatible class!]])
 
   -- B. Fallback commands
 
-  self:registerCommand("markdown:fallback:blockquote", function (_, content)
-    SILE.call("smallskip")
-    SILE.typesetter:leaveHmode()
-    SILE.settings:temporarily(function ()
-      local indent = SILE.types.measurement("2em"):absolute()
-      local lskip = SILE.settings:get("document.lskip") or SILE.types.node.glue()
-      local rskip = SILE.settings:get("document.rskip") or SILE.types.node.glue()
-      SILE.settings:set("document.lskip", SILE.types.node.glue(lskip.width + indent))
-      SILE.settings:set("document.rskip", SILE.types.node.glue(rskip.width + indent))
-      SILE.settings:set("font.size", SILE.settings:get("font.size") * 0.95)
-      SILE.process(content)
-      SILE.typesetter:leaveHmode()
-    end)
-    SILE.call("smallskip")
-  end, "A fallback blockquote environment if 'blockquote' does not exist")
-
   self:registerCommand("markdown:fallback:header", function (_, content)
     SILE.typesetter:leaveHmode(1)
     SILE.call("goodbreak")
@@ -947,43 +919,18 @@ Please consider using a resilient-compatible class!]])
   self:registerCommand("markdown:fallback:mark", function (_, content)
     local leading = SILE.types.measurement("1bs"):tonumber()
     local bsratio = utils.computeBaselineRatio()
-    if SILE.typesetter.liner then
-      SILE.typesetter:liner("markdown:fallback:mark", content,
-        function (box, typesetter, line)
-          local outputWidth = SU.rationWidth(box.width, box.width, line.ratio)
-          local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
-          local D = SU.max(box.depth:tonumber(), bsratio * leading)
-          local X = typesetter.frame.state.cursorX
-          SILE.outputter:pushColor(SILE.types.color("yellow"))
-          SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
-          SILE.outputter:popColor()
-          box:outputContent(typesetter, line)
-        end
-      )
-    else
-      SU.debug("markdown.commands", "Feature detection: no liner, using a simpler fallback for mark")
-      -- Liners are introduced in SILE 0.15.
-      -- Resilient (with the silex compatibility layer) has them too for SILE 0.14.
-      -- For now, also support older versions of SILE when used in a non-resilient context.
-      -- This is not as good, since an hbox can't be broken across lines.
-      local hbox, hlist = SILE.typesetter:makeHbox(content)
-      SILE.typesetter:pushHbox({
-        width = hbox.width,
-        height = hbox.height,
-        depth = hbox.depth,
-        outputYourself = function (box, typesetter, line)
-          local outputWidth = SU.rationWidth(box.width, box.width, line.ratio)
-          local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
-          local D = SU.max(box.depth:tonumber(), bsratio * leading)
-          local X = typesetter.frame.state.cursorX
-          SILE.outputter:pushColor(SILE.types.color("yellow"))
-          SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
-          SILE.outputter:popColor()
-          hbox:outputYourself(typesetter, line)
-        end
-      })
-      SILE.typesetter:pushHlist(hlist)
-    end
+    SILE.typesetter:liner("markdown:fallback:mark", content,
+      function (box, typesetter, line)
+        local outputWidth = SU.rationWidth(box.width, box.width, line.ratio)
+        local H = SU.max(box.height:tonumber(), (1 - bsratio) * leading)
+        local D = SU.max(box.depth:tonumber(), bsratio * leading)
+        local X = typesetter.frame.state.cursorX
+        SILE.outputter:pushColor(SILE.types.color("yellow"))
+        SILE.outputter:drawRule(X, typesetter.frame.state.cursorY - H, outputWidth, H + D)
+        SILE.outputter:popColor()
+        box:outputContent(typesetter, line)
+      end
+    )
   end)
 
   -- C. Customizable hooks

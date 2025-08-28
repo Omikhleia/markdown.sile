@@ -12,8 +12,6 @@
 -- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
 -- @module inputters.pandocast
 --
-require("silex.ast") -- Compatibility layer
-
 local utils = require("packages.markdown.utils")
 local createCommand, createStructuredCommand
         = SU.ast.createCommand, SU.ast.createStructuredCommand

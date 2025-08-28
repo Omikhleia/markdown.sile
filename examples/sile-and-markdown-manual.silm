@@ -10,7 +10,7 @@ metadata:
     - Pandoc
   authors: Didier Willis
   publisher: Omikhleia
-  pubdate: 2025-03-21
+  pubdate: 2025-08-29
   url: https://github.com/Omikhleia/markdown.sile
   copyright: © 2022–2025, Didier Willis.
   legal: |
@@ -44,7 +44,6 @@ sile:
   packages:
     - autodoc-resilient # REQUIRED FOR RESILIENT, do not use regular autodoc
     - dropcaps
-    - resilient.defn
     - resilient.poetry
 content:
   chapters:

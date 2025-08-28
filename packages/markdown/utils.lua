@@ -1,25 +1,24 @@
 --- A few utilities for the markdown / pandocast inputters
 --
+-- @copyright License: MIT (c) 2022 Omikhleia
+-- @module packages.markdown.utils
 --
-require("silex.ast") -- Compatibility layer
 local createCommand = SU.ast.createCommand
 local createStructuredCommand = SU.ast.createStructuredCommand
 
---- Some utility functions.
--- @section utils
-
---- Extract the extension from a file name
+--- Extract the extension from a file name.
 -- Assumes a POSIX-compliant name (with a slash as path separators).
---
--- tparam  string fname file name
--- treturn string file extension
+-- @tparam string fname File name
+-- @treturn string File extension
 local function getFileExtension (fname)
   return fname:match("[^/]+$"):match("[^.]+$")
 end
 
+--- Non-breakable space extraction from a string.
+-- It replaces them with an appropriate non-breakable inter-word space command.
+-- @tparam string str Input string
+-- @treturn string|table Filtered string or SILE AST table
 local function nbspFilter (str)
-  -- Non-breakable space extraction from a string, replacing them with an
-  -- appropriate non-breakable inter-word space.
   local t = {}
   for token in SU.gtoke(str, " ") do -- Warning, U+00A0 here.
     if(token.string) then
@@ -34,9 +33,9 @@ local function nbspFilter (str)
 end
 
 --- Check if a given class is present in the options.
----@param options table    Command options
----@param classname string Pseudo-class specifier
----@return boolean
+-- @tparam table options Command options
+-- @tparam string classname Pseudo-class specifier
+-- @treturn boolean
 local function hasClass (options, classname)
   -- N.B. we want a true boolean here
   if options.class and string.match(' ' .. options.class .. ' ',' '..classname..' ') then
@@ -46,8 +45,8 @@ local function hasClass (options, classname)
 end
 
 --- Find the first raw handler suitable for the given pseudo-class attributes.
----@param options table  Command options
----@return function|nil  Handler function (if found)
+-- @tparam table options Command options
+-- @treturn function|nil Handler function (if found)
 local function hasRawHandler (options)
   for name, handler in pairs(SILE.rawHandlers) do
     if hasClass(options, name) then
@@ -59,8 +58,9 @@ local function hasRawHandler (options)
 end
 
 --- Find the first embedder suitable for the given pseudo-class attributes.
----@param options table           Command options with class attribute (nil or list of comma-separated classes)
----@return string|nil, function   Embedder name and handler function (if found)
+-- @tparam table options Command options with class attribute (nil or list of comma-separated classes)
+-- @treturn string|nil Embedder name (if found)
+-- @treturn function|nil Embedder handler function (if applicable)
 local function hasEmbedHandler (options)
   if not options.class then
     return nil
@@ -96,7 +96,7 @@ local bsratiocache = {}
 
 --- Compute the baseline ratio for the current font.
 --- This is a ratio of the descender to the theoretical height of the font.
----@return number Descender ratio
+---@treturn number Descender ratio
 local function computeBaselineRatio ()
   local fontoptions = SILE.font.loadDefaults({})
   local bsratio = bsratiocache[SILE.font._key(fontoptions)]
@@ -110,11 +110,11 @@ local function computeBaselineRatio ()
 end
 
 --- Naive citation reference parser.
---- We only support a very simple syntax for now: "@key[, ]+[locator]"
---- Where the unique locator consists of a name and a value separated by spaces.
----@param str    string Citation string
----@param pos    table  Position object
----@return table  AST command
+-- We only support a very simple syntax for now: `@key[, ]+[locator]`,
+-- where the unique locator consists of a name and a value separated by spaces.
+-- @tparam string str Citation string
+-- @tparam[opt] table pos Position in the source (for error reporting)
+-- @treturn table AST for the citation command
 local function naiveCitations (str, pos)
   local refs = pl.stringx.split(str, ";")
   pl.tablex.transform(function (ref)

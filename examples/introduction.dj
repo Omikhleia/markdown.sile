@@ -28,7 +28,7 @@ Yet, these options remain available under the hood for those seeking a blend of 
 
 ### Standard installation
 
-This module collection requires SILE v0.14 (recommended: v0.15.10 or upper).
+This module collection requires SILE v0.15 (recommended: v0.15.13).
 
 Installation relies on the *luarocks* package manager.
 To install the latest version, you may use the provided “rockspec”:

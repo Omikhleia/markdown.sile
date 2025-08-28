@@ -1,7 +1,7 @@
 --- Pandoc JSON AST native support for SILE
 --
 -- @copyright License: MIT (c) 2022-2023 Omikhleia
--- @module packages.pandocast
+-- @classmod packages.pandocast
 --
 local base = require("packages.base")
 

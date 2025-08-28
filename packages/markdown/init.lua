@@ -1,7 +1,7 @@
 --- Markdown native support for SILE
 --
 -- @copyright License: MIT (c) 2022 Omikhleia
--- @module packages.markdown
+-- @classmod packages.markdown
 --
 local base = require("packages.base")
 

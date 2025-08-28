@@ -42,9 +42,19 @@ luac.out
 # SILE artifacts
 *.toc
 *.ref
-tests/*.pdf
-tests/*.debug
+*.pdf
+*.idx
+*.debug
+**/converted/*
+**/embedded/*
 
 # I often have crappy test files here
 temp/*
 
+# LDoc if ran locally
+doc/*
+ldoc/*
+
+# Stuff copied or linked from lua_libraries/ to sile/
+# for hacking (as those files from lua_libraries/ are not in the sile namespace)
+sile/*

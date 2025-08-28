@@ -5,8 +5,6 @@
 -- @copyright License: MIT (c) 2022-2024 Omikhleia, Didier Willis
 -- @module inputters.markdown
 --
-require("silex.ast")
-
 local utils = require("packages.markdown.utils")
 local createCommand, createStructuredCommand
         = SU.ast.createCommand, SU.ast.createStructuredCommand

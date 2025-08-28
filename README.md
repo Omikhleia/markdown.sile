@@ -15,7 +15,7 @@ For casual readers, this collection notably aims at easily converting Djot or Ma
 
 ## Installation
 
-This module collection requires SILE v0.14 or upper (recommended: v0.15.10).
+This module collection requires SILE v0.15 (recommended: v0.15.13).
 
 Installation relies on the **luarocks** package manager.
 
