@@ -3,7 +3,7 @@
 -- Using the djot Lua library for parsing.
 -- Reusing the common commands initially made for the "markdown" inputter/package.
 --
--- @copyright License: MIT (c) 2023-2024 Omikhleia, Didier Willis
+-- @copyright License: MIT (c) 2023-2025 Omikhleia, Didier Willis
 -- @module inputters.djot
 --
 local utils = require("packages.markdown.utils")
@@ -775,6 +775,25 @@ function inputter.appropriate (round, filename, _)
   return false
 end
 
+function inputter:_loadFilter (name, env)
+  -- Resolve the Lua file name in the same way as SILE for documents in the user tree.
+  local qname = name:match("%.lua$") and name or (name .. ".lua")
+  local filename = SILE.resolveFile(qname)
+  if filename then
+    local filter, err = utils.sandboxedLoadfile(filename, env)
+    if not filter then
+      SU.error("Failure loading filter '".. name .. "': " .. err)
+    end
+    if #filter == 0 then
+      -- Just a single filter.
+      -- (The Djot filter logic expects a list of filters applied in sequence.)
+      filter = { filter }
+    end
+    return filter
+  end
+  SU.error("Cannot find filter '" .. name .. "'")
+end
+
 function inputter:parse (doc)
   local djot = require("djot")
   local djast = djot.parse(doc, true, function (warning)
@@ -791,6 +810,28 @@ function inputter:parse (doc)
     local snippet = luautf8.sub(doc, sp + 1, ep)
     SU.warn(warning.message .. " near [[…" .. snippet .. "]]")
   end)
+
+  local fname = self.options.filter
+  if fname then
+    if type(fname) ~= "string" then
+      SU.error("The 'filter' option to the Djot inputter must be a string")
+    end
+    local filter = self:_loadFilter(fname, {
+      -- Allow Djot AST manipulations in the filter environment.
+      djot = {
+        ast = {
+          insert_attribute = djot.ast.insert_attribute,
+          copy_attributes = djot.ast.copy_attributes,
+          new_attributes = djot.ast.new_attributes,
+          new_node = djot.ast.new_node,
+          add_child = djot.ast.add_child,
+          has_children = djot.ast.has_children,
+        }
+      }
+    })
+    djot.filter.apply_filter(djast, filter)
+  end
+
   local renderer = Renderer(self.options, doc)
   local tree = renderer:render(djast)
 
