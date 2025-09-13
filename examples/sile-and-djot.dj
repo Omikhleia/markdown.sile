@@ -2,7 +2,7 @@
 
 > "Djot (/dʒɑt/) is a light markup syntax.
 > It derives most of its features from commonmark, but it fixes a few things
-> that make ommonmark's syntax complex and difficult to parse efficiently.
+> that make commonmark's syntax complex and difficult to parse efficiently.
 > It is also much fuller-featured (...)"
 ^ From the [Djot website](https://djot.net/).
 
@@ -36,7 +36,7 @@ The core concepts in Djot mirror those of Markdown, featuring inline and block e
 
   All ASCII punctuation characters (even those that have no special meaning in Djot) may be "backslash-escaped."
   Thus, `\*` is parsed and rendered as a literal \* character.
-  Backslashes before characters other than ASCII punctuation characters are just treated as literal backslashes, except before a newline, and a space (or a tab) character.
+  Backslashes before other characters are treated as literal backslashes, except before a newline, and a space (or a tab) character.
   We will get back to this later.
 
 : Inline elements
@@ -61,13 +61,13 @@ The core concepts in Djot mirror those of Markdown, featuring inline and block e
 
 ## Attributes
 
-Actually, let's start with attributes, as they have the same general syntax for both inline and block elements.
+Let's start with attributes, as they have the same general syntax for both inline and block elements.
 
 Attributes are put inside curly braces.
-On inline elements, attributes are placed immediately after the element they are attached to, with no intervening whitespace.
+On inline elements, they are placed immediately after the element they are attached to, with no intervening whitespace.
 They may contain line breaks, and may be "stacked," in which case they are combined.
 
-To attach attributes to a block-level element, put the attributes on the line immediately before the block.
+To attach attributes to a block-level element, put them on the line immediately before the block.
 Block attributes have the same syntax as inline attributes, but they must fit on one line.
 Repeated attribute specifiers can also be used, and the attributes accumulate.
 
@@ -76,6 +76,7 @@ Inside the curly braces, the following syntax is possible:
  - `#foo` specifies an identifier, for referencing purposes.
 
    An element may have only one identifier; if multiple identifiers are given, the last one is used.
+   Identifiers shall be unique.
 
  - `.foo` specifies a class, for styling purposes.
 
@@ -83,11 +84,15 @@ Inside the curly braces, the following syntax is possible:
 
  - `key="value"` or `key=value` specifies a key-value attribute.
 
-   Quotes are not needed when the value consists entirely of ASCII alphanumeric characters or `_` or `:` or `-`. Backslash escapes may be used inside quoted values.
+   Quotes are not needed when the value consists of ASCII alphanumeric characters or `_` or `:` or `-`. Backslash escapes may be used inside quoted values.
 
  - `?foo` and `!foo` specify a condition.
 
     This is an extension specific to this converter, see §[](#djot-conditional-attributes).
+
+- `:foo` and `:foo=value` specify an index entry.
+
+   This is an extension specific to this converter, see §[](#djot-index-entries-custom).
 
 ## Inline elements
 
@@ -226,7 +231,7 @@ You might notice a small difference between 2^10^{fake=false} and 2^10^{fake=tru
 ```
 :::
 
-There is another, likely more important, implication.
+There is another, more important, implication.
 This converter assumes that the content of a superscript or subscript consists of text, as it tries to use font features or text scaling techniques to render it.
 
 [^djot-textsubsuper]: Refer to the *textsubsuper* package for details.
@@ -414,7 +419,6 @@ Another link to [the SILE website][sile].
 [sile]: https://sile-typesetter.org/
 
 The reference label should be defined somewhere in the document.
-If the label is empty, then the link text is taken to be the reference label as well as the link text.
 
 {#djot-cross-references}
 #### Cross-references
@@ -1314,7 +1318,7 @@ This is SILE and Djot at their best{custom-style="strong"}!
 That's a fairly contrived way to obtain a bold text, but you get the underlying general idea.
 This is one of the ways to use SILE commands in Djot.
 While you could invoke _any_ SILE command with this feature, we recommend, though, to restrict it to styling.
-Another more powerful way to leverage Djot with SILE’s full processing capabilities, and benefit from the best of both worlds, is to use the "raw" annotations, described in §[](#djot-raw-inlines) and §[](#djot-raw-blocks).
+Another more powerful way to leverage Djot with SILE’s full processing capabilities, and benefit from the best of both worlds, is to use the "raw" annotations, described in §[](#djot-raw-inlines) and §[](#djot-raw-blocks); or filters, discussed in §[](#djot-configuration).
 
 
 ### Templates and variable substitution
@@ -1322,23 +1326,27 @@ Another more powerful way to leverage Djot with SILE’s full processing capabil
 [^:pumpernickel:]: Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
 
 Let's now pretend that you are writing an essay about some fictitious :pumpernickel:.
+At this point, you know how to typeset that name in Djot syntax:
 
-From the previous sections, you know how to typeset that name in Djot syntax:
-`Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}`.
+{custom-style=CodeBlock}
+:::
+```
+Herbert _"Froggie"_ Pumpernickel{.smallcaps .nobreak}
+```
+:::
 
 So far, so good...
 But your problem is that this long name will appear a lot of times.
 Repeating it is tedious and error-prone.
 Would you appreciate defining it as a replaceable variable going by a much simpler name?
 
-Well, Djot has the notion of a "symbol", a keyword surrounded by colon signs (§[](#djot-symbols)).
-Although it was initially provisioned for "emojis", the default interpretation is now left to the rendering engine.
+Djot has the notion of a "symbol", a keyword surrounded by colon signs (§[](#djot-symbols)).
+The interpretation of such symbols is left to the rendering engine.
+This converter uses them in non-conventional ways.
 
-This converter for SILE is focussed on producing print-quality books, where so-called emojis play little part.
-We are therefore going to use those symbols in a non-conventional way.
 Back to our initial question, what if you could just type `:pumpernickel:` and have it automatically expanded?
 
-Since it's possible to have unused footnote definitions, let's craft one as shown hereafter, with its reference identifier being the same as our targeted variable.
+It’s possible to define footnotes without ever using them, so let's first craft one here, with same reference identifier as our target variable.
 
 {custom-style=CodeBlock}
 :::
@@ -1347,7 +1355,8 @@ Since it's possible to have unused footnote definitions, let's craft one as show
 ```
 :::
 
-When encountering a symbol, this converter looks for such a footnote and expands its content.
+When encountering a symbol, the converter looks for such a footnote and expands its content.
+
 It works with inline elements as shown above, but also with full blocks, provided the symbol is the only element in a paragraph of its own.
 Of course, these pseudo-footnotes[^djot-pseudo-footnotes] can in turn contain symbols, which get replaced too.
 
@@ -1441,11 +1450,11 @@ Optionally, an `indexed-⟨index⟩` attribute may be provided to define the tex
 ```
 :::
 
+{#djot-index-entries-custom}
 #### Shortcut syntax for indexing entries
 
 The syntax above is fully valid Djot and thus portable to other converters.
 However, it tends to be somewhat verbose and less than _lightweight_ in practice.
-
 For convenience, our Djot implementation also supports a more compact, non-standard syntax that is easier to type.
 
 {custom-style=CodeBlock}
@@ -1494,3 +1503,11 @@ For document classes supporting it (in particular, the *resilient* book class), 
 \include[src=somefile.dj, shift_headings=-1]
 ```
 :::
+
+For developers, the converter also accepts a `filter` option, whose value is the name of a Lua script (with or without the `.lua` extension).
+This script is loaded in a sandboxed environment and must return a table of filters in the form expected by the **djot.lua** library.
+
+Filters traverse the Djot AST and rewrite it, following the transformation rules you define.
+They can be useful to customize the conversion process in arbitrary ways --- adding features, modifying formatting, or transforming content structure in ways this converter doesn't provide out of the box.
+
+In other terms, in addition to raw annotations, custom styles and programmatic symbols, filters are another way to adapt this converter to your specific needs.
