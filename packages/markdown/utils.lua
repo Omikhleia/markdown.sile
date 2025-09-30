@@ -1,13 +1,15 @@
 --- A few utilities for the markdown / pandocast inputters
 --
--- @copyright License: MIT (c) 2022 Omikhleia
+-- @copyright License: MIT (c) 2022-2025 Omikhleia
 -- @module packages.markdown.utils
 --
 local createCommand = SU.ast.createCommand
 local createStructuredCommand = SU.ast.createStructuredCommand
 
 --- Extract the extension from a file name.
+--
 -- Assumes a POSIX-compliant name (with a slash as path separators).
+--
 -- @tparam string fname File name
 -- @treturn string File extension
 local function getFileExtension (fname)
@@ -15,7 +17,9 @@ local function getFileExtension (fname)
 end
 
 --- Non-breakable space extraction from a string.
+--
 -- It replaces them with an appropriate non-breakable inter-word space command.
+--
 -- @tparam string str Input string
 -- @treturn string|table Filtered string or SILE AST table
 local function nbspFilter (str)
@@ -33,6 +37,7 @@ local function nbspFilter (str)
 end
 
 --- Check if a given class is present in the options.
+--
 -- @tparam table options Command options
 -- @tparam string classname Pseudo-class specifier
 -- @treturn boolean
@@ -45,6 +50,7 @@ local function hasClass (options, classname)
 end
 
 --- Find the first raw handler suitable for the given pseudo-class attributes.
+--
 -- @tparam table options Command options
 -- @treturn function|nil Handler function (if found)
 local function hasRawHandler (options)
@@ -58,6 +64,7 @@ local function hasRawHandler (options)
 end
 
 --- Find the first embedder suitable for the given pseudo-class attributes.
+--
 -- @tparam table options Command options with class attribute (nil or list of comma-separated classes)
 -- @treturn string|nil Embedder name (if found)
 -- @treturn function|nil Embedder handler function (if applicable)
@@ -95,8 +102,10 @@ local metrics = require("fontmetrics")
 local bsratiocache = {}
 
 --- Compute the baseline ratio for the current font.
---- This is a ratio of the descender to the theoretical height of the font.
----@treturn number Descender ratio
+--
+-- This is a ratio of the descender to the theoretical height of the font.
+--
+-- @treturn number Descender ratio
 local function computeBaselineRatio ()
   local fontoptions = SILE.font.loadDefaults({})
   local bsratio = bsratiocache[SILE.font._key(fontoptions)]
@@ -110,8 +119,10 @@ local function computeBaselineRatio ()
 end
 
 --- Naive citation reference parser.
+--
 -- We only support a very simple syntax for now: `@key[, ]+[locator]`,
 -- where the unique locator consists of a name and a value separated by spaces.
+--
 -- @tparam string str Citation string
 -- @tparam[opt] table pos Position in the source (for error reporting)
 -- @treturn table AST for the citation command
@@ -143,6 +154,72 @@ local function naiveCitations (str, pos)
   return createStructuredCommand("cites", {}, refs, pos)
 end
 
+--- A sandboxed loadfile implementation.
+--
+-- Load and run a Lua file in a restricted environment.
+--
+-- @tparam string filename File name
+-- @tparam[opt] table env Additional environment entries
+-- @treturn unknown|nil Loaded chunk
+-- @treturn string|nil Error message
+local function sandboxedLoadfile(filename, env)
+  local envbase = {
+    -- Handy for debugging: print, SU logging functions, pl.pretty.dump.
+    -- Handy for table and string manipulations: table, pl.tablex, string, pl.stringx, pl.List, pl.Map, pl.Set.
+    print = print,
+    SU = {
+      debug = SU.debug,
+      error = SU.error,
+      warn = SU.warn,
+    },
+    pl = {
+      pretty = {
+        dump = function (data) pl.pretty.dump(data) end -- To avoid the second unsafe argument
+      },
+      tablex = pl.tablex,
+      stringx = pl.stringx,
+      List = pl.List,
+      Map = pl.Map,
+      Set = pl.Set,
+    },
+    table = table,
+    string = string,
+    -- And a few basic safe functions...
+    math = math,
+    ipairs = ipairs,
+    pairs = pairs,
+    type = type,
+    tostring = tostring,
+    tonumber = tonumber,
+    next = next,
+    error = error,
+    pcall = pcall,
+  }
+  env = pl.tablex.union(envbase, env or {}, true)
+  local f, err
+  -- Load in a sandboxed environment:
+  -- Strategies differ between Lua 5.1 and later versions.
+  if _VERSION == "Lua 5.1" then
+    f, err = loadfile(filename)
+    if not f then
+      return nil, err
+    end
+    -- luacheck: push globals setfenv
+    setfenv(f, env)
+    -- luacheck: pop
+  else
+    f, err = loadfile(filename, "t", env)
+    if not f then
+      return nil, err
+    end
+  end
+  -- Run the chunk in protected mode
+  local ok, res = pcall(f)
+  if not ok then
+    return nil, res end
+  return res
+end
+
 --- @export
 return {
   getFileExtension = getFileExtension,
@@ -152,4 +229,5 @@ return {
   hasEmbedHandler = hasEmbedHandler,
   computeBaselineRatio = computeBaselineRatio,
   naiveCitations = naiveCitations,
+  sandboxedLoadfile = sandboxedLoadfile,
 }

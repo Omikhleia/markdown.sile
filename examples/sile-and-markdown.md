@@ -1311,6 +1311,14 @@ This is one of the ways to use SILE commands in Djot.
 While you could invoke _any_ SILE command with this feature, we recommend, though, to restrict it to styling.
 Another more powerful way to leverage Djot with SILE’s full processing capabilities, and benefit from the best of both worlds, is to use the "raw" annotations, described in §[](#markdown-raw-inlines) and §[](#markdown-raw-blocks).
 
+::: {custom-style=Difference}
+![](./examples/manicule.svg){height=1.3ex} **Main differences with Djot**
+
+ - Only works on divs and spans (versus almost any element in Djot).
+
+:::
+
+
 ### Index entries
 
 Markdown does not provide a built-in syntax for marking index entries within the text.
