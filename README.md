@@ -3,7 +3,11 @@
 
 [![license](https://img.shields.io/github/license/Omikhleia/markdown.sile?label=License)](LICENSE)
 [![Luacheck](https://img.shields.io/github/actions/workflow/status/Omikhleia/markdown.sile/luacheck.yml?branch=main&label=Luacheck&logo=Lua)](https://github.com/Omikhleia/markdown.sile/actions?workflow=Luacheck)
-[![Luarocks](https://img.shields.io/luarocks/v/Omikhleia/markdown.sile?label=Luarocks&logo=Lua)](https://luarocks.org/modules/Omikhleia/markdown.sile)
+
+> [!IMPORTANT]
+> This module is now provided as an integral part of the [resilient.sile](https://github.com/Omikhleia/resilient.sile) collection (release v4).
+>
+> This repository is no longer maintained separately and will be archived. 
 
 This collection of modules for the [SILE](https://github.com/sile-typesetter/sile) typesetting system provides a complete redesign of its former native Markdown support, with a great set of Pandoc-like extensions and plenty of extra goodies.
 
