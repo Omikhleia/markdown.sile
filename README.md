@@ -1,5 +1,4 @@
 # markdown.sile
-<img align="right" width="40%" src="examples/markdown-sile-logo.png">
 
 [![license](https://img.shields.io/github/license/Omikhleia/markdown.sile?label=License)](LICENSE)
 [![Luacheck](https://img.shields.io/github/actions/workflow/status/Omikhleia/markdown.sile/luacheck.yml?branch=main&label=Luacheck&logo=Lua)](https://github.com/Omikhleia/markdown.sile/actions?workflow=Luacheck)
